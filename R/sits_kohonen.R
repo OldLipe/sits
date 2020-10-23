@@ -82,6 +82,8 @@ sits_cluster_som <- function(data,
 #' @param distance       The type of similarity measure (distance).
 #' @param iterations     The number of time to run the SOM cluster.
 #' @param rlen           Number of iterations to produce the SOM.
+#' @param mode           type of learning algorithm.
+#' @param ...            Other params to be passed.
 #' @return               list of sits tibbles containing statistics
 #'                       about the samples and the neuron in each iteration.
 
@@ -103,7 +105,9 @@ sits_som_map <- function(data,
                          alpha = 1.0,
                          rlen = 100,
                          distance = "euclidean",
-                         iterations = 1)
+                         iterations = 1,
+                         mode = "online",
+                         ...)
 {
 
     # verifies if kohonen package is installed
@@ -148,11 +152,12 @@ sits_som_map <- function(data,
                 grid = kohonen::somgrid(grid_xdim, grid_ydim ,
                                         "rectangular", "gaussian",
                                         toroidal = FALSE),
-                rlen = 100,
+                rlen = rlen,
                 alpha = alpha,
                 dist.fcts = distance,
                 normalizeDataLayers = TRUE,
-                mode = "online"
+                mode = mode,
+                ...
             )
 
         #put id in samples here, because the label needs

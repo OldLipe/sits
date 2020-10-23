@@ -11,7 +11,9 @@ sits_som_map(
   alpha = 1,
   rlen = 100,
   distance = "euclidean",
-  iterations = 1
+  iterations = 1,
+  mode = "online",
+  ...
 )
 }
 \arguments{
@@ -28,6 +30,10 @@ sits_som_map(
 \item{distance}{The type of similarity measure (distance).}
 
 \item{iterations}{The number of time to run the SOM cluster.}
+
+\item{mode}{type of learning algorithm.}
+
+\item{...}{Other params to be passed.}
 }
 \value{
 list of sits tibbles containing statistics
