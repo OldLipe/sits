@@ -1013,7 +1013,7 @@ plot.keras_model <- function(x, y, ...) {
 #' @param  whatmap    What data layer will be plotted.
 #' @param ...         Other parameters in plot function
 #' @param legend      A \code{logical} corresponding to adding legend on plot.
-.sits_plot_som_map <- function(koh, type = "codes", whatmap = 1, ..., legend = TRUE)
+.sits_plot_som_map <- function(koh, type = "codes", whatmap = 1, legend = TRUE, ...)
 {
 	# Sanity check
 	if (!("som_map" %in% class(koh))) {
