@@ -1011,7 +1011,9 @@ plot.keras_model <- function(x, y, ...) {
 #' @param  koh        SOM map produced by "sits_som_map" function
 #' @param  type       Type of plot ("codes" or "mapping")
 #' @param  whatmap    What data layer will be plotted.
-.sits_plot_som_map <- function(koh, type = "codes", whatmap = 1)
+#' @param ...         Other parameters in plot function
+#' @param legend      A \code{logical} corresponding to adding legend on plot.
+.sits_plot_som_map <- function(koh, type = "codes", whatmap = 1, ..., legend = TRUE)
 {
 	# Sanity check
 	if (!("som_map" %in% class(koh))) {
@@ -1021,29 +1023,31 @@ plot.keras_model <- function(x, y, ...) {
     if (type == "mapping") {
         p <- graphics::plot(koh$som_properties,
                        bgcol = koh$som_properties$paint_map ,
-                       "mapping", whatmap = whatmap)
+                       "mapping", whatmap = whatmap, ...)
     }
     else if (type == "codes" ) {
         p <- graphics::plot(koh$som_properties,
                        bgcol = koh$som_properties$paint_map ,
-                       "codes", whatmap = whatmap)
+                       "codes", whatmap = whatmap, ...)
     }
 
     #create a legend
-    leg <- cbind(koh$som_properties$neuron_label, koh$som_properties$paint_map)
-    graphics::legend(
-        "bottomright",
-        legend = unique(leg[, 1]),
-        col = unique(leg[, 2]),
-        pch = 15,
-        pt.cex = 2,
-        cex = 1,
-        text.col = "black",
-        #horiz = T ,
-        inset = c(0.0095, 0.05),
-        xpd = TRUE,
-        ncol = 1)
+    if (legend) {
+        leg <- cbind(koh$som_properties$neuron_label, koh$som_properties$paint_map)
+        graphics::legend(
+            "bottomright",
+            legend = unique(leg[, 1]),
+            col = unique(leg[, 2]),
+            pch = 15,
+            pt.cex = 2,
+            cex = 1,
+            text.col = "black",
+            #horiz = T ,
+            inset = c(0.0095, 0.05),
+            xpd = TRUE,
+            ncol = 1)
 
+    }
 }
 
 #' @title  Plot information about confusion between clusters
