@@ -5,6 +5,46 @@ apply_transition_matrix <- function(data_before, data, transition_matrix) {
     .Call(`_sits_apply_transition_matrix`, data_before, data, transition_matrix)
 }
 
+min_ts_2 <- function(x) {
+    .Call(`_sits_min_ts_2`, x)
+}
+
+max_mat <- function(mtx) {
+    .Call(`_sits_max_mat`, mtx)
+}
+
+min_mat <- function(mtx) {
+    .Call(`_sits_min_mat`, mtx)
+}
+
+mean_mat <- function(mtx) {
+    .Call(`_sits_mean_mat`, mtx)
+}
+
+std_mat <- function(mtx) {
+    .Call(`_sits_std_mat`, mtx)
+}
+
+amplitude_ts <- function(mtx) {
+    .Call(`_sits_amplitude_ts`, mtx)
+}
+
+fslope_ts <- function(mtx) {
+    .Call(`_sits_fslope_ts`, mtx)
+}
+
+abs_sum_ts <- function(mtx) {
+    .Call(`_sits_abs_sum_ts`, mtx)
+}
+
+amd_ts <- function(mtx) {
+    .Call(`_sits_amd_ts`, mtx)
+}
+
+max_ts_2 <- function(x) {
+    .Call(`_sits_max_ts_2`, x)
+}
+
 build_neigh <- function(data, window, i, j) {
     .Call(`_sits_build_neigh`, data, window, i, j)
 }
