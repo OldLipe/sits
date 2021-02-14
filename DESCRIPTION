@@ -97,13 +97,7 @@ Suggests:
     xml2,
     zoo
 VignetteBuilder: knitr
-LinkingTo:
-<<<<<<< HEAD
-    Rcpp, RcppArmadillo
-=======
-    Rcpp,
-    RcppArmadillo
->>>>>>> 785f787dede79d1f79dc43594645fdf6555ecb6d
+LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.1.1
 Collate: 
     'RcppExports.R'
