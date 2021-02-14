@@ -125,7 +125,8 @@
 
         mtz <- cbind(max_ts, min_ts, mean_ts, std_ts, amp_ts, fs_ts,
                      abst_ts, amd_ts)
-        names(mtz) <- c("max", "min", "std", "amp", "fs", "abst", "amd")
+        names(mtz) <
+
         return(mtz)
     }
 

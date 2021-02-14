@@ -5,24 +5,20 @@ apply_transition_matrix <- function(data_before, data, transition_matrix) {
     .Call(`_sits_apply_transition_matrix`, data_before, data, transition_matrix)
 }
 
-min_ts_2 <- function(x) {
-    .Call(`_sits_min_ts_2`, x)
+max_ts <- function(mtx) {
+    .Call(`_sits_max_ts`, mtx)
 }
 
-max_mat <- function(mtx) {
-    .Call(`_sits_max_mat`, mtx)
+min_ts <- function(mtx) {
+    .Call(`_sits_min_ts`, mtx)
 }
 
-min_mat <- function(mtx) {
-    .Call(`_sits_min_mat`, mtx)
+mean_ts <- function(mtx) {
+    .Call(`_sits_mean_ts`, mtx)
 }
 
-mean_mat <- function(mtx) {
-    .Call(`_sits_mean_mat`, mtx)
-}
-
-std_mat <- function(mtx) {
-    .Call(`_sits_std_mat`, mtx)
+std_ts <- function(mtx) {
+    .Call(`_sits_std_ts`, mtx)
 }
 
 amplitude_ts <- function(mtx) {
@@ -41,8 +37,28 @@ amd_ts <- function(mtx) {
     .Call(`_sits_amd_ts`, mtx)
 }
 
-max_ts_2 <- function(x) {
-    .Call(`_sits_max_ts_2`, x)
+mse_ts <- function(mtx) {
+    .Call(`_sits_mse_ts`, mtx)
+}
+
+fqr_ts <- function(mtx) {
+    .Call(`_sits_fqr_ts`, mtx)
+}
+
+tqr_ts <- function(mtx) {
+    .Call(`_sits_tqr_ts`, mtx)
+}
+
+sqr_ts <- function(mtx) {
+    .Call(`_sits_sqr_ts`, mtx)
+}
+
+iqr_ts <- function(mtx) {
+    .Call(`_sits_iqr_ts`, mtx)
+}
+
+row_wide_loop <- function(x) {
+    .Call(`_sits_row_wide_loop`, x)
 }
 
 build_neigh <- function(data, window, i, j) {
