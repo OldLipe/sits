@@ -69,6 +69,10 @@ bayes_estimator <- function(data, window, smoothness, max_prob) {
     .Call(`_sits_bayes_estimator`, data, window, smoothness, max_prob)
 }
 
+bayes_multiv_smooth <- function(m, m_nrow, m_ncol, w, sigma, covar) {
+    .Call(`_sits_bayes_multiv_smooth`, m, m_nrow, m_ncol, w, sigma, covar)
+}
+
 median_neigh <- function(data, nrows_window, ncols_window) {
     .Call(`_sits_median_neigh`, data, nrows_window, ncols_window)
 }
