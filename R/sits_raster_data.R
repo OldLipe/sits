@@ -364,6 +364,7 @@
                         # select the valid dates in the timeline
                         t_row <- timeline[t_idx["start_idx"]:t_idx["end_idx"]]
                         # get only valid values for the timeline
+                        #browser()
                         values <- as.numeric(
                           values_band[i, t_idx["start_idx"]:t_idx["end_idx"]]
                         )
