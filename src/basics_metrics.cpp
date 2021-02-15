@@ -10,49 +10,49 @@ arma::vec P_075 = {0.75};
 // [[Rcpp::export]]
 arma::vec max_ts(const arma::mat& mtx) {
 
-    return  arma::max(mtx, 1);
+    return arma::max(mtx, 1);
 }
 
 // [[Rcpp::export]]
 arma::vec min_ts(const arma::mat& mtx) {
 
-    return  arma::min(mtx, 1);
+    return arma::min(mtx, 1);
 }
 
 // [[Rcpp::export]]
 arma::vec mean_ts(const arma::mat& mtx) {
 
-    return  arma::mean(mtx, 1);
+    return arma::mean(mtx, 1);
 }
 
 // [[Rcpp::export]]
 arma::vec std_ts(const arma::mat& mtx) {
 
-    return  arma::stddev(mtx, 0, 1);
+    return arma::stddev(mtx, 0, 1);
 }
 
 // [[Rcpp::export]]
 arma::vec amplitude_ts(const arma::mat& mtx) {
 
-    return  arma::max(mtx, 1) - arma::min(mtx, 1);
+    return arma::max(mtx, 1) - arma::min(mtx, 1);
 }
 
 // [[Rcpp::export]]
 arma::vec fslope_ts(const arma::mat& mtx) {
 
-    return  arma::max(arma::abs(arma::diff(mtx, 1, 1)), 1);
+    return arma::max(arma::abs(arma::diff(mtx, 1, 1)), 1);
 }
 
 // [[Rcpp::export]]
 arma::vec abs_sum_ts(const arma::mat& mtx) {
 
-    return  arma::sum(arma::abs(mtx), 1);
+    return arma::sum(arma::abs(mtx), 1);
 }
 
 // [[Rcpp::export]]
 arma::vec amd_ts(const arma::mat& mtx) {
 
-    return  arma::mean(arma::abs(arma::diff(mtx, 1, 1)), 1);
+    return arma::mean(arma::abs(arma::diff(mtx, 1, 1)), 1);
 }
 
 // [[Rcpp::export]]
@@ -79,11 +79,13 @@ arma::vec sqr_ts(const arma::mat& mtx) {
     return arma::quantile(mtx, P_050, 1);
 }
 
-// [[Rcpp::export]]
-arma::vec iqr_ts(const arma::mat& mtx) {
-
-    return arma::quantile(mtx, P_075) - arma::quantile(mtx, P_025);
-}
+// // [[Rcpp::export]]
+// arma::vec iqr_ts(const arma::mat& mtx) {
+//
+//     arma::vec res = arma::quantile(mtx, P_075) - arma::quantile(mtx, P_025);
+//
+//     return (res);
+// }
 
 // [[Rcpp::export]]
 arma::mat row_wide_loop(arma::mat& x) {

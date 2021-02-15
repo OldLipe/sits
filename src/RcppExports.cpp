@@ -19,7 +19,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-<<<<<<< HEAD
 // max_ts
 arma::vec max_ts(const arma::mat& mtx);
 RcppExport SEXP _sits_max_ts(SEXP mtxSEXP) {
@@ -152,17 +151,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// iqr_ts
-arma::vec iqr_ts(const arma::mat& mtx);
-RcppExport SEXP _sits_iqr_ts(SEXP mtxSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
-    rcpp_result_gen = Rcpp::wrap(iqr_ts(mtx));
-    return rcpp_result_gen;
-END_RCPP
-}
 // row_wide_loop
 arma::mat row_wide_loop(arma::mat& x);
 RcppExport SEXP _sits_row_wide_loop(SEXP xSEXP) {
@@ -174,14 +162,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// build_neigh
-NumericVector build_neigh(const NumericMatrix& data, const NumericMatrix& window, const int& i, const int& j);
-RcppExport SEXP _sits_build_neigh(SEXP dataSEXP, SEXP windowSEXP, SEXP iSEXP, SEXP jSEXP) {
-=======
 // bayes_multiv_smooth
 arma::mat bayes_multiv_smooth(const arma::mat& m, const arma::uword m_nrow, const arma::uword m_ncol, const arma::imat& w, const arma::mat& sigma, bool covar);
 RcppExport SEXP _sits_bayes_multiv_smooth(SEXP mSEXP, SEXP m_nrowSEXP, SEXP m_ncolSEXP, SEXP wSEXP, SEXP sigmaSEXP, SEXP covarSEXP) {
->>>>>>> 785f787dede79d1f79dc43594645fdf6555ecb6d
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -329,10 +312,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// normalize_scale_data
+arma::mat normalize_scale_data(const arma::mat& data);
+RcppExport SEXP _sits_normalize_scale_data(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(normalize_scale_data(data));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_sits_apply_transition_matrix", (DL_FUNC) &_sits_apply_transition_matrix, 3},
-<<<<<<< HEAD
     {"_sits_max_ts", (DL_FUNC) &_sits_max_ts, 1},
     {"_sits_min_ts", (DL_FUNC) &_sits_min_ts, 1},
     {"_sits_mean_ts", (DL_FUNC) &_sits_mean_ts, 1},
@@ -345,13 +338,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_sits_fqr_ts", (DL_FUNC) &_sits_fqr_ts, 1},
     {"_sits_tqr_ts", (DL_FUNC) &_sits_tqr_ts, 1},
     {"_sits_sqr_ts", (DL_FUNC) &_sits_sqr_ts, 1},
-    {"_sits_iqr_ts", (DL_FUNC) &_sits_iqr_ts, 1},
     {"_sits_row_wide_loop", (DL_FUNC) &_sits_row_wide_loop, 1},
-    {"_sits_build_neigh", (DL_FUNC) &_sits_build_neigh, 4},
-    {"_sits_bayes_estimator", (DL_FUNC) &_sits_bayes_estimator, 4},
-=======
     {"_sits_bayes_multiv_smooth", (DL_FUNC) &_sits_bayes_multiv_smooth, 6},
->>>>>>> 785f787dede79d1f79dc43594645fdf6555ecb6d
     {"_sits_median_neigh", (DL_FUNC) &_sits_median_neigh, 3},
     {"_sits_cbers4_cld_detect", (DL_FUNC) &_sits_cbers4_cld_detect, 11},
     {"_sits_cbers4_cld_values", (DL_FUNC) &_sits_cbers4_cld_values, 4},
@@ -362,6 +350,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_sits_normalize_data", (DL_FUNC) &_sits_normalize_data, 3},
     {"_sits_scale_data", (DL_FUNC) &_sits_scale_data, 3},
     {"_sits_scale_matrix_integer", (DL_FUNC) &_sits_scale_matrix_integer, 2},
+    {"_sits_normalize_scale_data", (DL_FUNC) &_sits_normalize_scale_data, 1},
     {NULL, NULL, 0}
 };
 
