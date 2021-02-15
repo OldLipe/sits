@@ -53,20 +53,8 @@ sqr_ts <- function(mtx) {
     .Call(`_sits_sqr_ts`, mtx)
 }
 
-iqr_ts <- function(mtx) {
-    .Call(`_sits_iqr_ts`, mtx)
-}
-
 row_wide_loop <- function(x) {
     .Call(`_sits_row_wide_loop`, x)
-}
-
-build_neigh <- function(data, window, i, j) {
-    .Call(`_sits_build_neigh`, data, window, i, j)
-}
-
-bayes_estimator <- function(data, window, smoothness, max_prob) {
-    .Call(`_sits_bayes_estimator`, data, window, smoothness, max_prob)
 }
 
 bayes_multiv_smooth <- function(m, m_nrow, m_ncol, w, sigma, covar) {
@@ -111,5 +99,9 @@ scale_data <- function(data, scale_factor, adj_val = 0.0) {
 
 scale_matrix_integer <- function(data, scale_factor) {
     .Call(`_sits_scale_matrix_integer`, data, scale_factor)
+}
+
+normalize_scale_data <- function(data) {
+    .Call(`_sits_normalize_scale_data`, data)
 }
 

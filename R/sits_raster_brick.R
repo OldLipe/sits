@@ -73,7 +73,6 @@
 
     # transform the timeline to date format
     timeline <- lubridate::as_date(timeline)
-
     # set the labels
     labels <- c("NoClass")
 

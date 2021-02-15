@@ -65,6 +65,7 @@ sits_metrics_generate <- function(cube,
         cube = cube,
         data_dir = data_dir,
         blocks = blocks,
+        n_metrics = n_metrics,
         impute_fn = impute_fn,
         multicores = multicores
     )
@@ -94,6 +95,7 @@ sits_metrics_generate <- function(cube,
 #' @param cube        input data cube
 #' @param data_dir    directory where data is to be stored
 #' @param blocks      block information
+#' @param n_metrics   ...
 #' @param impute_fn   imputation function to remove NA
 #' @param multicores  number of cores to use
 #'
@@ -101,6 +103,7 @@ sits_metrics_generate <- function(cube,
 .sits_create_metrics_bands <- function(cube,
                                        data_dir,
                                        blocks,
+                                       n_metrics,
                                        impute_fn,
                                        multicores) {
 
@@ -142,7 +145,7 @@ sits_metrics_generate <- function(cube,
             cube$satellite, "_",
             cube$sensor, "_",
             start_date, "_", end_date, "_",
-            bnd, "MAX_METRIC", ".tif"
+            bnd, "_", "METRIC", ".tif"
         )
 
         # create a raster object
@@ -150,7 +153,7 @@ sits_metrics_generate <- function(cube,
             terra::rast(
                 nrows = params$nrows,
                 ncols = params$ncols,
-                nlyrs = 8,
+                nlyrs = n_metrics,
                 xmin = params$xmin,
                 xmax = params$xmax,
                 ymin = params$ymin,
@@ -195,7 +198,6 @@ sits_metrics_generate <- function(cube,
                 impute_fn = impute_fn,
                 multicores = multicores
             )
-            #browser()
             # rescale the data
             mult_factor <- 1/as.numeric(cube$scale_factors[[1]][bnd])
             values_block <- mult_factor * values_block
