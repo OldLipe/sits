@@ -114,24 +114,24 @@
     #auxiliary function to scale a block of data
     metrics <- function(chunk) {
 
-        max_ts <- max_ts(chunk)
+        #max_ts <- max_ts(chunk)
         min_ts <- min_ts(chunk)
         # mean_ts <- mean_ts(chunk)
-        # std_ts <- std_ts(chunk)
-        # amp_ts <- amplitude_ts(chunk)
+        std_ts <- std_ts(chunk)
+        amp_ts <- amplitude_ts(chunk)
         # fs_ts <- fslope_ts(chunk)
         # abst_ts <- abs_sum_ts(chunk)
-        # amd_ts <- amd_ts(chunk)
-        # mse_ts <- mse_ts(chunk)
+        amd_ts <- amd_ts(chunk)
+        #mse_ts <- mse_ts(chunk)
         # fqr_ts <- fqr_ts(chunk)
         # tqr_ts <- tqr_ts(chunk)
         # sqr_ts <- sqr_ts(chunk)
 
         # mtz <- cbind(max_ts, min_ts, mean_ts, std_ts, amp_ts, fs_ts,
         #              abst_ts, amd_ts, mse_ts, fqr_ts, tqr_ts, sqr_ts)
-        mtz <- cbind(max_ts, min_ts)
+        mtz <- cbind(min_ts, std_ts, amp_ts, amd_ts)
 
-        names(mtz) <- c("max", "min")
+        names(mtz) <- c("min", "std_ts", "amp", "amd")
 
         return(mtz)
     }

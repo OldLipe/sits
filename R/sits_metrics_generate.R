@@ -55,7 +55,7 @@ sits_metrics_generate <- function(cube,
 
     # estimate the blocks to be read
     blocks <- .metrics_blocks_estimate(
-        cube = cube,
+        cube = cube[1,],
         n_metrics = n_metrics,
         memsize = memsize
     )
@@ -73,6 +73,11 @@ sits_metrics_generate <- function(cube,
     # find out what are the bands of the cube
     bands <- sits_bands(cube)
     bands <- bands[bands != cloud_band]
+
+    # transform bands name
+    bands <- .sits_config_bands_convert(satellite = cube[1,]$satellite,
+                                        sensor = cube[1,]$sensor,
+                                        bands_files = bands)
 
     # create the output cube
     cube_new <- .sits_raster_brick_cube(
