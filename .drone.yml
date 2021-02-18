@@ -2,12 +2,6 @@ kind: pipeline
 name: default
 
 steps:
-- name: test
-  image: brazildatacube/sits-r:latest
-  commands:
-  - R CMD build .
-  - set -e; R CMD check *.tar.gz --as-cran >&1 | tee stdfile && cat stdfile | (grep -E "(WARNING)" > /dev/null) && exit 1 || exit 0
-
 - name: coverage
   image: brazildatacube/sits-r:latest
   environment:
@@ -16,6 +10,3 @@ steps:
   commands:
   - R -e 'Sys.setenv("NOT_CRAN" = "true")'
   - R -e 'library(covr); codecov(quiet = FALSE)'
-  when:
-    event:
-    - push
