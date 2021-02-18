@@ -62,6 +62,7 @@
 #' @param  bands                 Vector of bands contained in the Raster Brick
 #'                               set (in the same order as the files).
 #' @param  files                 Vector with the file paths of the raster files.
+#' @param cube                   A sits cube
 #' @return A tibble with metadata information about a raster data set.
 #'
 .sits_raster_brick_cube <- function(satellite,
@@ -69,7 +70,8 @@
                                     name,
                                     timeline,
                                     bands,
-                                    files) {
+                                    files,
+                                    cube = NULL) {
 
     # transform the timeline to date format
     timeline <- lubridate::as_date(timeline)
@@ -98,6 +100,12 @@
 
     times_brick <- rep(timeline[1], time = length(files))
 
+    # get tile and cube names
+    cube_info <- list(tile = NA, cube = NA)
+    if (!is.null(cube))
+        cube_info[c("tile", "cube")] <- c(cube$tile, cube$cube)
+
+
     # get the file information
     file_info <- .sits_raster_api_file_info(bands, times_brick, files)
 
@@ -106,6 +114,8 @@
         type = "BRICK",
         satellite = satellite,
         sensor = sensor,
+        tile = cube_info$tile,
+        cube = cube_info$cube,
         name = name,
         bands = bands,
         labels = labels,

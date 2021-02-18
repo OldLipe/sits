@@ -50,48 +50,55 @@ sits_metrics_generate <- function(cube,
                             msg = "invalid data directory"
     )
 
-    # total number of instances
-    n_instances <- length(sits_timeline(cube))
 
-    # estimate the blocks to be read
-    blocks <- .metrics_blocks_estimate(
-        cube = cube[1,],
-        n_metrics = n_metrics,
-        memsize = memsize
-    )
+    cube_metrics <- purrr::map(seq_len(nrow(cube)), function(row) {
+        # total number of instances
+        n_instances <- length(sits_timeline(cube[row,]))
 
-    # interpolate the cloud bricks
-    files <- .sits_create_metrics_bands(
-        cube = cube,
-        data_dir = data_dir,
-        blocks = blocks,
-        n_metrics = n_metrics,
-        impute_fn = impute_fn,
-        multicores = multicores
-    )
+        # estimate the blocks to be read
+        blocks <- .metrics_blocks_estimate(
+            cube = cube[row,],
+            n_metrics = n_metrics,
+            memsize = memsize
+        )
 
-    # find out what are the bands of the cube
-    bands <- sits_bands(cube)
-    bands <- bands[bands != cloud_band]
+        # interpolate the cloud bricks
+        files <- .sits_create_metrics_bands(
+            cube = cube[row,],
+            data_dir = data_dir,
+            blocks = blocks,
+            n_metrics = n_metrics,
+            impute_fn = impute_fn,
+            multicores = multicores
+        )
 
-    # transform bands name
-    bands <- .sits_config_bands_convert(satellite = cube[1,]$satellite,
-                                        sensor = cube[1,]$sensor,
-                                        bands_files = bands)
+        # find out what are the bands of the cube
+        bands <- sits_bands(cube[row,])
+        bands <- bands[bands != cloud_band]
 
-    # create the output cube
-    cube_new <- .sits_raster_brick_cube(
-        satellite = cube$satellite,
-        sensor = cube$sensor,
-        name = name,
-        timeline = sits_timeline(cube),
-        bands = bands,
-        files = files
-    )
+        # transform bands name
+        bands <- .sits_config_bands_convert(satellite = cube[row,]$satellite,
+                                            sensor = cube[row,]$sensor,
+                                            bands_files = bands)
 
-    class(cube_new) <- c("brick_cube", "raster_class", class(cube_new))
+        # create the output cube
+        cube_new <- .sits_raster_brick_cube(
+            satellite = cube[row,]$satellite,
+            sensor = cube[row,]$sensor,
+            name = name,
+            timeline = sits_timeline(cube[row,]),
+            bands = bands,
+            files = files,
+            cube = cube[row,])
 
-    return(cube_new)
+        cube_new
+    })
+
+    cube_metrics <- dplyr::bind_rows(cube_metrics)
+
+    class(cube_metrics) <- c("brick_cube", "raster_cube", class(cube_metrics))
+
+    return(cube_metrics)
 }
 #' @title Create the output of the cloud estimation procedure
 #' @name .sits_create_metrics_bands
@@ -149,6 +156,7 @@ sits_metrics_generate <- function(cube,
             data_dir, "/",
             cube$satellite, "_",
             cube$sensor, "_",
+            cube$tile, "_",
             start_date, "_", end_date, "_",
             bnd, "_", "METRIC", ".tif"
         )
