@@ -8,5 +8,4 @@ steps:
     CODECOV_TOKEN:
       from_secret: codecov_token
   commands:
-  - R -e 'Sys.setenv("NOT_CRAN" = "true")'
-  - R -e 'library(covr); codecov(quiet = FALSE)'
+  - R -e 'Sys.setenv("NOT_CRAN" = "true"); library(covr); codecov(quiet = FALSE)'
