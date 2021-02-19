@@ -13,12 +13,24 @@ min_ts <- function(mtx) {
     .Call(`_sits_min_ts`, mtx)
 }
 
+sum_ts <- function(mtx) {
+    .Call(`_sits_sum_ts`, mtx)
+}
+
 mean_ts <- function(mtx) {
     .Call(`_sits_mean_ts`, mtx)
 }
 
 std_ts <- function(mtx) {
     .Call(`_sits_std_ts`, mtx)
+}
+
+skew_ts <- function(mtx) {
+    .Call(`_sits_skew_ts`, mtx)
+}
+
+kurt_ts <- function(mtx) {
+    .Call(`_sits_kurt_ts`, mtx)
 }
 
 amplitude_ts <- function(mtx) {
@@ -51,6 +63,10 @@ tqr_ts <- function(mtx) {
 
 sqr_ts <- function(mtx) {
     .Call(`_sits_sqr_ts`, mtx)
+}
+
+iqr_ts <- function(mtx) {
+    .Call(`_sits_iqr_ts`, mtx)
 }
 
 row_wide_loop <- function(x) {
