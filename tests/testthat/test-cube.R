@@ -1,4 +1,14 @@
 context("Cube")
+test_that("Creating a SATVEG data cube", {
+  testthat::skip_on_cran()
+  cube_satveg <- sits_cube(type = "SATVEG", name = "terra")
+
+  if (purrr::is_null(cube_satveg)) {
+    skip("SATVEG is not accessible")
+  }
+
+  expect_true(length(cube_satveg$timeline[[1]][[1]]) > 1)
+})
 test_that("Reading a raster cube", {
     file <- c(system.file("extdata/raster/mod13q1/sinop-crop-ndvi.tif",
         package = "sits"
@@ -59,39 +69,75 @@ test_that("Creating, merging cubes from BDC", {
 
     if (nchar(bdc_access_key) > 0) {
       # create a raster cube file based on the information about the files
-      cbers_022024_ndvi <- sits_cube(
+      cbers_cube <- sits_cube(
         type = "BDC",
         name = "cbers_022024_ndvi",
-        bands = "NDVI",
-        tiles = "022024",
+        bands = c("NDVI", "EVI"),
+        tiles = c("022024","022023"),
         url = "http://brazildatacube.dpi.inpe.br/stac/",
         collection = "CB4_64_16D_STK-1",
         start_date = "2018-09-01",
         end_date = "2019-08-28"
       )
 
-      if (purrr::is_null(cbers_022024_ndvi)) {
+      if (purrr::is_null(cbers_cube)) {
         skip("BDC is not accessible")
       }
+      expect_true(all(sits_bands(cbers_cube) %in% c("NDVI", "EVI")))
+      bbox <- sits_bbox(cbers_cube)
+      int_bbox <- sits:::.sits_bbox_intersect(bbox, cbers_cube[1,])
+      expect_true(all(int_bbox == sits_bbox(cbers_cube[1,])))
 
-      cbers_022024_evi <- sits_cube(
-        type = "BDC",
-        name = "cbers_022024_evi",
-        bands = "EVI",
-        tiles = "022024",
-        url = "http://brazildatacube.dpi.inpe.br/stac/",
-        collection = "CB4_64_16D_STK-1",
-        start_date = "2018-09-01",
-        end_date = "2019-08-28"
-      )
+      timeline <- sits_timeline(cbers_cube)
+      expect_true(timeline[1] <= as.Date("2018-09-01"))
+      expect_true(timeline[length(timeline)] <= as.Date("2019-08-28"))
 
-      cbers_merge <- sits_merge(cbers_022024_ndvi, cbers_022024_evi)
-      expect_true(all(sits_bands(cbers_merge) %in% c("NDVI", "EVI")))
-      expect_true(all(sits_timeline(cbers_merge) ==
-                        sits_timeline(cbers_022024_ndvi)))
+      gdal_info <- suppressWarnings(
+        rgdal::GDALinfo(cbers_cube[1,]$file_info[[1]]$path[1]))
+      expect_true(gdal_info["rows"] == cbers_cube[1,]$nrows)
+
+      gdal_info2 <- suppressWarnings(
+        rgdal::GDALinfo(cbers_cube[2,]$file_info[[1]]$path[1]))
+      expect_true(gdal_info2["rows"] == cbers_cube[2,]$nrows)
     }
 
+})
+test_that("Creating, merging cubes from BDC", {
 
+    ndvi_file <- c(system.file("extdata/raster/mod13q1/sinop-evi-2014.tif",
+                               package = "sits"
+    ))
+
+    evi_file <- c(system.file("extdata/raster/mod13q1/sinop-evi-2014.tif",
+                              package = "sits"
+    ))
+
+    data("timeline_2013_2014")
+
+    sinop_ndvi <- sits_cube(
+        type = "BRICK",
+        name = "sinop-2014_ndvi",
+        timeline = timeline_2013_2014,
+        satellite = "TERRA",
+        sensor = "MODIS",
+        bands = c("NDVI"),
+        files = ndvi_file
+    )
+
+    sinop_evi <- sits_cube(
+        type = "BRICK",
+        name = "sinop-2014_evi",
+        timeline = timeline_2013_2014,
+        satellite = "TERRA",
+        sensor = "MODIS",
+        bands = c("EVI"),
+        files = evi_file
+    )
+    cube_merge <- sits_merge(sinop_ndvi, sinop_evi)
+
+    expect_true(all(sits_bands(cube_merge) %in% c("NDVI", "EVI")))
+    expect_true(cube_merge$xmin == sinop_ndvi$xmin)
+    expect_true(cube_merge$xmax == sinop_evi$xmax)
 })
 
 test_that("Creating cubes from AWS", {
@@ -133,6 +179,7 @@ test_that("Creating cubes from AWS", {
 
     gc_cube <- sits_cube(type        = "GDALCUBES",
                          cube        = s2_cube,
+                         name        = "T20LKP_2018_2019_P5D",
                          path_db     = paste0(tempdir(), "/cube.db"),
                          path_images = path_images,
                          period      = "P5D",
@@ -149,6 +196,34 @@ test_that("Creating cubes from AWS", {
     expect_equal(nrow(file_info), nrow(file_info2))
 
 })
+test_that("Creating cubes from classified images", {
+    # Create a raster cube based on bricks
+    # inform the files that make up a raster probs brick with 23 time instances
+    probs_file <- c(system.file("extdata/raster/mod13q1/sinop-2014_probs_2013_9_2014_8_v1.tif",
+                          package = "sits"
+    ))
+
+    # inform the labels
+    labels <- c("Cerrado", "Fallow_Cotton", "Forest", "Pasture", "Soy_Corn",
+                "Soy_Cotton", "Soy_Fallow", "Soy_Millet", "Soy_Sunflower")
+
+
+    # create a raster cube file based on the information about the files
+    probs_cube <- sits_cube(
+        type = "PROBS",
+        name = "Sinop-crop-probs",
+        satellite = "TERRA",
+        sensor  = "MODIS",
+        timeline = timeline_2013_2014,
+        labels = labels,
+        files = probs_file
+    )
+    expect_equal(probs_cube$ncols, 50)
+    expect_equal(sits_bands(probs_cube), "probs")
+    file_info <- probs_cube$file_info[[1]]
+    expect_equal(file_info$band, "probs")
+    expect_equal(file_info$path, probs_file)
+})
 
 test_that("Cube copy", {
     data_dir <- system.file("extdata/raster/cbers", package = "sits")
@@ -163,15 +238,43 @@ test_that("Cube copy", {
         parse_info = c("X1", "X2", "band", "date")
     )
 
+    bbox <- sits_bbox(cbers_022024)
+    x_size <- bbox["xmax"] - bbox["xmin"]
+    bbox["xmax"] <- bbox["xmin"] + x_size/2
+
     cbers_022024_copy <- sits_cube_copy(cbers_022024,
         name = "cb_022024_cp",
         dest_dir = tempdir(),
         bands = "B13",
-        srcwin = c(0, 0, 25, 25)
+        roi = bbox
     )
     expect_true(sits_bands(cbers_022024_copy) == "B13")
-    expect_true(cbers_022024_copy$ncols == 25)
+    expect_true(cbers_022024_copy$ncols == 26)
     expect_true(cbers_022024_copy$xmin == cbers_022024$xmin)
     expect_true(all(sits_timeline(cbers_022024_copy) ==
                       sits_timeline(cbers_022024)))
 })
+
+test_that("Creating a raster stack cube and renaming bands", {
+    # Create a raster cube based on CBERS data
+    data_dir <- system.file("extdata/raster/cbers", package = "sits")
+
+    # create a raster cube file based on the information about the files
+    cbers_cube2 <- sits_cube(
+        type = "STACK",
+        name = "022024",
+        satellite = "CBERS-4",
+        sensor = "AWFI",
+        resolution = "64m",
+        data_dir = data_dir,
+        delim = "_",
+        parse_info = c("X1", "X2", "band", "date")
+    )
+    expect_true(all(sits_bands(cbers_cube2) %in%
+                        c("B13", "B14", "B15", "B16", "CMASK")))
+    sits_bands(cbers_cube2) <- c("BAND13", "BAND14", "BAND15", "BAND16", "CLOUD")
+    expect_true(all(sits_bands(cbers_cube2) %in%
+                        c("BAND13", "BAND14", "BAND15", "BAND16", "CLOUD")))
+
+})
+
