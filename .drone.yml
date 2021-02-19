@@ -7,5 +7,7 @@ steps:
   environment:
     CODECOV_TOKEN:
       from_secret: codecov_token
+    BDC_ACCESS_KEY:
+      from_secret: bdc_token
   commands:
   - R -e ' withr::with_envvar(c(NOT_CRAN="true"), covr::codecov(quiet = FALSE))'
