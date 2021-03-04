@@ -141,12 +141,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // mse_ts
-arma::vec mse_ts(const arma::mat& mtx);
+arma::vec mse_ts(arma::mat& mtx);
 RcppExport SEXP _sits_mse_ts(SEXP mtxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type mtx(mtxSEXP);
     rcpp_result_gen = Rcpp::wrap(mse_ts(mtx));
     return rcpp_result_gen;
 END_RCPP

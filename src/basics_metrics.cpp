@@ -91,14 +91,9 @@ arma::vec amd_ts(const arma::mat& mtx) {
 // [[Rcpp::export]]
 arma::vec mse_ts(const arma::mat& mtx) {
 
-    int nrows = mtx.n_rows;
-    arma::vec metrics(nrows, arma::fill::zeros);
+    arma::mat metrics = mtx.t();
 
-    for (int i = 0; i < nrows; ++i) {
-        //double v =
-        metrics[i] = arma::mean(arma::pow(arma::abs(arma::fft(mtx.row(i))), 2));
-    }
-    return metrics;
+    return arma::mean(arma::pow(arma::abs(arma::trans(arma::fft(metrics))), 2), 1);
 }
 
 // [[Rcpp::export]]
