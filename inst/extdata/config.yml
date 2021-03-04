@@ -173,12 +173,16 @@ default:
 
     AWFI                    :
         bands               :
-            SITS            : &awfi_bands_sits ["B13", "B14", "B15", "B16", "NDVI", "EVI", "CMASK"]
-            BDC             : ["BAND13", "BAND14", "BAND15", "BAND16", "NDVI", "EVI", "CMASK"]
+            SITS            : &awfi_bands_sits ["B13", "B14", "B15", "B16", "NDVI", "EVI", "GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
+            BDC             : ["BAND13", "BAND14", "BAND15", "BAND16", "NDVI", "EVI", "GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
             RASTER          : *awfi_bands_sits
             cloud_band      : "CMASK"
 
         missing_value       :
+            GEMI            : -9999
+            GNDVI           : -9999
+            NDWI2           : -9999
+            PVR             : -9999
             NDVI            : -9999
             EVI             : -9999
             B13             : -9999
@@ -188,6 +192,10 @@ default:
             CMASK           : 255
 
         minimum_value       :
+            GEMI            : -10000
+            GNDVI           : -10000
+            NDWI2           : -10000
+            PVR             : -10000
             NDVI            : -10000
             EVI             : -10000
             B13             : 1
@@ -197,6 +205,10 @@ default:
             CMASK           : 0
 
         maximum_value       :
+            GEMI            : 10000
+            GNDVI           : 10000
+            NDWI2           : 10000
+            PVR             : 10000
             NDVI            : 10000
             EVI             : 10000
             B13             : 10000
@@ -205,7 +217,11 @@ default:
             B16             : 10000
             CMASK           : 4
 
-        scale_factor:
+        scale_factor        :
+            GEMI            : 0.0001
+            GNDVI           : 0.0001
+            NDWI2           : 0.0001
+            PVR             : 0.0001
             NDVI            : 0.0001
             EVI             : 0.0001
             B13             : 0.0001
