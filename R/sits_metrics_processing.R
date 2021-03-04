@@ -5,6 +5,7 @@
 #'
 #' @param  cube             data cube being processed
 #' @param  band_cube        band to be processed
+#' @param  metric           metric to be process
 #' @param  extent           extent to be read
 #' @param  filter           smoothing filter to be applied.
 #' @param  stats            normalization parameters.
@@ -14,6 +15,7 @@
 #' @return Matrix with pre-processed values.
 .sits_raster_metrics_data_preprocess <- function(cube,
                                                  band_cube,
+                                                 metric,
                                                  extent,
                                                  filter = NULL,
                                                  stats = NULL,
@@ -84,7 +86,7 @@
     scale_factor <- cube$scale_factors[[1]][band_cube]
     values <- scale_factor * values
 
-    values <- .sits_raster_metrics(values, multicores)
+    values <- .sits_raster_metrics(values, metric, multicores)
 
 
     # filter the data
@@ -107,46 +109,57 @@
 #' @description This function filters a matrix.
 #'
 #' @param  values         matrix of values.
+#' @param  metric         metric to be process
 #' @param  multicores     Number of cores.
 #' @return Filtered matrix.
-.sits_raster_metrics <- function(values, multicores) {
+.sits_raster_metrics <- function(values, metric, multicores) {
+    if ("min_ts" %in% metric)
+        metric_function <- min_ts
+    if ("max_ts" %in% metric)
+        metric_function <- max_ts
+    if ("amd_ts" %in% metric)
+        metric_function <- amd_ts
 
     #auxiliary function to scale a block of data
-    metrics <- function(chunk) {
+    metrics <- function(chunk , f) {
 
-        #max_ts <- max_ts(chunk)
-        min_v <- min_ts(chunk)
-        # mean_ts <- mean_ts(chunk)
-        # std_ts <- std_ts(chunk)
-        # amp_ts <- amplitude_ts(chunk)
-        # fs_ts <- fslope_ts(chunk)
-        # abst_ts <- abs_sum_ts(chunk)
-        amd_v <- amd_ts(chunk)
-        mse_v <- mse_ts(chunk)
-        #fqr_v <- fqr_ts(chunk)
-        iqr_v <- iqr_ts(chunk)
-        # tqr_ts <- tqr_ts(chunk)
-        # sqr_ts <- sqr_ts(chunk)
+        values <- f(chunk)
+
+        # #max_ts <- max_ts(chunk)
+        # min_v <- min_ts(chunk)
+        # # mean_ts <- mean_ts(chunk)
+        # # std_ts <- std_ts(chunk)
+        # # amp_ts <- amplitude_ts(chunk)
+        # # fs_ts <- fslope_ts(chunk)
+        # # abst_ts <- abs_sum_ts(chunk)
+        # amd_v <- amd_ts(chunk)
+        # mse_v <- mse_ts(chunk)
+        # #fqr_v <- fqr_ts(chunk)
+        # iqr_v <- iqr_ts(chunk)
+        # # tqr_ts <- tqr_ts(chunk)
+        # # sqr_ts <- sqr_ts(chunk)
 
         # mtz <- cbind(max_ts, min_ts, mean_ts, std_ts, amp_ts, fs_ts,
         #              abst_ts, amd_ts, mse_ts, fqr_ts, tqr_ts, sqr_ts)
-        mtz <- cbind(min_v, amd_v, mse_v, iqr_v)
+        #mtz <- cbind(min_v, amd_v, mse_v, iqr_v)
 
-        names(mtz) <- c("min", "amd", "mse", "iqr")
+        #names(mtz) <- c("min", "amd", "mse", "iqr")
+        names(values) <- metric
 
-        return(mtz)
+        return(values)
     }
 
     if (multicores > 1) {
         chunks <- .sits_raster_data_split(values, multicores)
         rows <- parallel::mclapply(chunks,
                                    metrics,
+                                   metric_function,
                                    mc.cores = multicores
         )
         values <- do.call(rbind, rows)
     }
     else {
-        values <- metrics(values)
+        values <- metrics(values, metric_function)
     }
 
     return(values)

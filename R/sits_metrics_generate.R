@@ -5,7 +5,7 @@
 #' @param cube       input data cube
 #' @param data_dir   data directory where output data is written
 #' @param name       name of the output data cube
-#' @param n_metrics  number of metrics to be generate
+#' @param list_metrics  number of metrics to be generate
 #' @param impute_fn  imputing function to be applied to replace NA
 #' @param memsize    size of memory
 #' @param multicores number of cores
@@ -35,7 +35,8 @@
 sits_metrics_generate <- function(cube,
                                   data_dir,
                                   name,
-                                  n_metrics = 8,
+                                  list_metrics = list("BAND13" = c("max_ts"),
+                                                      "NDVI" = c("std_ts")),
                                   impute_fn = sits_impute_linear(),
                                   memsize = 8,
                                   multicores = 2) {
@@ -67,7 +68,7 @@ sits_metrics_generate <- function(cube,
             cube = cube[row,],
             data_dir = data_dir,
             blocks = blocks,
-            n_metrics = n_metrics,
+            list_metrics = list_metrics,
             impute_fn = impute_fn,
             multicores = multicores
         )
@@ -107,7 +108,7 @@ sits_metrics_generate <- function(cube,
 #' @param cube        input data cube
 #' @param data_dir    directory where data is to be stored
 #' @param blocks      block information
-#' @param n_metrics   ...
+#' @param list_metrics   ...
 #' @param impute_fn   imputation function to remove NA
 #' @param multicores  number of cores to use
 #'
@@ -115,7 +116,7 @@ sits_metrics_generate <- function(cube,
 .sits_create_metrics_bands <- function(cube,
                                        data_dir,
                                        blocks,
-                                       n_metrics,
+                                       list_metrics,
                                        impute_fn,
                                        multicores) {
 
@@ -133,105 +134,111 @@ sits_metrics_generate <- function(cube,
     # define the bands that are not associated to clouds
     bands_no_cloud <- bands[bands != cloud_band]
 
+    # get the subset of bands selected
+    bands_metrics <- bands_no_cloud[bands_no_cloud %in% names(list_metrics)]
+
     # get the file information from the cube
     file_info <- cube$file_info[[1]]
 
     # define the parameters for the output files
     params = .sits_raster_api_params_cube(cube)
+
     # process the bands
-    file_list <- purrr::map(bands_no_cloud, function(bnd) {
+    file_list <- purrr::map(bands_metrics, function(bnd) {
         message(paste0("Creating metrics from band: ", bnd))
-        start_task_time <- lubridate::now()
-        # find out the information about the band
-        info_band <- dplyr::filter(file_info, band == bnd)
-        # what is the number of layers?
-        num_layers <- nrow(info_band)
+        for (metric in list_metrics[[bnd]]) {
+            start_task_time <- lubridate::now()
+            # find out the information about the band
+            info_band <- dplyr::filter(file_info, band == bnd)
+            # what is the number of layers?
+            num_layers <- nrow(info_band)
 
-        # what are the start and end date?
-        start_date <- info_band[1, ]$date
-        end_date <- info_band[num_layers, ]$date
+            # what are the start and end date?
+            start_date <- info_band[1, ]$date
+            end_date <- info_band[num_layers, ]$date
 
-        # define the output filename
-        filename <- paste0(
-            data_dir, "/",
-            cube$satellite, "_",
-            cube$sensor, "_",
-            cube$tile, "_",
-            start_date, "_", end_date, "_",
-            bnd, "_", "METRIC", ".tif"
-        )
-
-        # create a raster object
-        r_obj <- suppressWarnings(
-            terra::rast(
-                nrows = params$nrows,
-                ncols = params$ncols,
-                nlyrs = n_metrics,
-                xmin = params$xmin,
-                xmax = params$xmax,
-                ymin = params$ymin,
-                ymax = params$ymax,
-                crs = params$crs
+            # define the output filename
+            filename <- paste0(
+                data_dir, "/",
+                cube$satellite, "_",
+                cube$sensor, "_",
+                cube$tile, "_",
+                start_date, "_", end_date, "_",
+                bnd, "_", "METRIC", "_", metric, ".tif"
             )
-        )
 
-        assertthat::assert_that(terra::nrow(r_obj) == params$nrows,
-                                msg = ".sits_raster_api_write: unable to create raster object"
-        )
-        # open the file with writeStart
-        suppressWarnings(terra::writeStart(
-            r_obj,
-            filename = filename,
-            overwrite = TRUE,
-            wopt = list(
-                gdal = c("COMPRESS = LZW"),
-                filetype = "GTiff",
-                datatype = "INT2U"
+            # create a raster object
+            r_obj <- suppressWarnings(
+                terra::rast(
+                    nrows = params$nrows,
+                    ncols = params$ncols,
+                    nlyrs = 1,
+                    xmin = params$xmin,
+                    xmax = params$xmax,
+                    ymin = params$ymin,
+                    ymax = params$ymax,
+                    crs = params$crs
+                )
             )
-        ))
 
-        # read the blocks
-        bs <- purrr::map(c(1:blocks$n), function(b) {
-
-            # measure performance
-            start_block_time <- lubridate::now()
-            # define the extent
-            extent <- c(
-                blocks$row[b], blocks$nrows[b],
-                blocks$col, blocks$ncols
+            assertthat::assert_that(terra::nrow(r_obj) == params$nrows,
+                                    msg = ".sits_raster_api_write: unable to create raster object"
             )
-            names(extent) <- (c("row", "nrows", "col", "ncols"))
+            # open the file with writeStart
+            suppressWarnings(terra::writeStart(
+                r_obj,
+                filename = filename,
+                overwrite = TRUE,
+                wopt = list(
+                    gdal = c("COMPRESS = LZW"),
+                    filetype = "GTiff",
+                    datatype = "INT2U"
+                )
+            ))
 
-            # preprocess the input data
-            # produce a matrix
-            values_block <- .sits_raster_metrics_data_preprocess(
-                cube = cube,
-                band_cube = bnd,
-                extent = extent,
-                impute_fn = impute_fn,
-                multicores = multicores
-            )
-            # rescale the data
-            mult_factor <- 1/as.numeric(cube$scale_factors[[1]][bnd])
-            values_block <- mult_factor * values_block
-            # write a block of values
+            # read the blocks
+            bs <- purrr::map(c(1:blocks$n), function(b) {
+                # measure performance
+                start_block_time <- lubridate::now()
+                # define the extent
+                extent <- c(
+                    blocks$row[b], blocks$nrows[b],
+                    blocks$col, blocks$ncols
+                )
+                names(extent) <- (c("row", "nrows", "col", "ncols"))
 
-            terra::writeValues(r_obj,
-                               as.matrix(values_block),
-                               start = blocks$row[b],
-                               nrows = blocks$nrows[b])
+                # preprocess the input data
+                # produce a matrix
+                values_block <- .sits_raster_metrics_data_preprocess(
+                    cube = cube,
+                    band_cube = bnd,
+                    metric = metric,
+                    extent = extent,
+                    impute_fn = impute_fn,
+                    multicores = multicores
+                )
+                # rescale the data
+                mult_factor <- 1/as.numeric(cube$scale_factors[[1]][bnd])
+                values_block <- mult_factor * values_block
+                # write a block of values
 
-            task <- paste0("process block ", b, " of band ", bnd)
-            .sits_processing_task_time(task, start_block_time)
+                terra::writeValues(r_obj,
+                                   as.matrix(values_block),
+                                   start = blocks$row[b],
+                                   nrows = blocks$nrows[b])
 
-            return(b)
-        })
-        # close the file
-        terra::writeStop(r_obj)
+                task <- paste0("process block ", b, " of band ", bnd)
+                .sits_processing_task_time(task, start_block_time)
 
-        task <- paste0("Removed clouds from band ", bnd)
-        .sits_processing_task_time(task, start_task_time)
-        return(filename)
+                return(b)
+            })
+            # close the file
+            terra::writeStop(r_obj)
+
+            task <- paste0("Removed clouds from band ", bnd)
+            .sits_processing_task_time(task, start_task_time)
+            return(filename)
+        }
     })
 
     # report on time used for processing

@@ -4,7 +4,14 @@
 \alias{.sits_create_metrics_bands}
 \title{Create the output of the cloud estimation procedure}
 \usage{
-.sits_create_metrics_bands(cube, data_dir, blocks, impute_fn, multicores)
+.sits_create_metrics_bands(
+  cube,
+  data_dir,
+  blocks,
+  list_metrics,
+  impute_fn,
+  multicores
+)
 }
 \arguments{
 \item{cube}{input data cube}
@@ -12,6 +19,8 @@
 \item{data_dir}{directory where data is to be stored}
 
 \item{blocks}{block information}
+
+\item{list_metrics}{...}
 
 \item{impute_fn}{imputation function to remove NA}
 

@@ -4,7 +4,15 @@
 \alias{.sits_raster_brick_cube}
 \title{Create a raster brick data cube}
 \usage{
-.sits_raster_brick_cube(satellite, sensor, name, timeline, bands, files)
+.sits_raster_brick_cube(
+  satellite,
+  sensor,
+  name,
+  timeline,
+  bands,
+  files,
+  cube = NULL
+)
 }
 \arguments{
 \item{satellite}{Name of satellite}
@@ -19,6 +27,8 @@
 set (in the same order as the files).}
 
 \item{files}{Vector with the file paths of the raster files.}
+
+\item{cube}{A sits cube}
 }
 \value{
 A tibble with metadata information about a raster data set.

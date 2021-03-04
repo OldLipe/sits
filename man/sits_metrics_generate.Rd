@@ -8,7 +8,7 @@ sits_metrics_generate(
   cube,
   data_dir,
   name,
-  n_metrics = 8,
+  list_metrics = list(BAND13 = c("max_ts"), NDVI = c("std_ts")),
   impute_fn = sits_impute_linear(),
   memsize = 8,
   multicores = 2
@@ -21,7 +21,7 @@ sits_metrics_generate(
 
 \item{name}{name of the output data cube}
 
-\item{n_metrics}{number of metrics to be generate}
+\item{list_metrics}{number of metrics to be generate}
 
 \item{impute_fn}{imputing function to be applied to replace NA}
 

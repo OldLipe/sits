@@ -7,6 +7,7 @@
 .sits_raster_metrics_data_preprocess(
   cube,
   band_cube,
+  metric,
   extent,
   filter = NULL,
   stats = NULL,
@@ -19,6 +20,8 @@
 \item{cube}{data cube being processed}
 
 \item{band_cube}{band to be processed}
+
+\item{metric}{metric to be process}
 
 \item{extent}{extent to be read}
 
