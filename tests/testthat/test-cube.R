@@ -61,8 +61,11 @@ test_that("Creating a raster stack cube and selecting bands", {
     expect_true(all(sits_bands(cbers_cube_b13) == c("B13")))
 })
 
-test_that("Creating, merging cubes from BDC", {
+test_that("Creating cubes from BDC", {
     testthat::skip_on_cran()
+
+    if (!sits:::.sits_config_bdc_stac_access())
+        skip("BDC is not accessible")
 
     # Try to find the access key as an environment variable
     bdc_access_key <- Sys.getenv("BDC_ACCESS_KEY")
@@ -74,15 +77,10 @@ test_that("Creating, merging cubes from BDC", {
         name = "cbers_022024_ndvi",
         bands = c("NDVI", "EVI"),
         tiles = c("022024","022023"),
-        url = "http://brazildatacube.dpi.inpe.br/stac/",
         collection = "CB4_64_16D_STK-1",
         start_date = "2018-09-01",
         end_date = "2019-08-28"
       )
-
-      if (purrr::is_null(cbers_cube)) {
-        skip("BDC is not accessible")
-      }
       expect_true(all(sits_bands(cbers_cube) %in% c("NDVI", "EVI")))
       bbox <- sits_bbox(cbers_cube)
       int_bbox <- sits:::.sits_bbox_intersect(bbox, cbers_cube[1,])
@@ -102,7 +100,49 @@ test_that("Creating, merging cubes from BDC", {
     }
 
 })
-test_that("Creating, merging cubes from BDC", {
+
+test_that("Creating cubes from DEA", {
+  testthat::skip_on_cran()
+
+  testthat::skip_on_cran()
+  # check "AWS_ACCESS_KEY_ID" - mandatory one per user
+  aws_access_key_id <- Sys.getenv("AWS_ACCESS_KEY_ID")
+  # check "AWS_SECRET_ACCESS_KEY" - mandatory one per user
+  aws_secret_access_key <- Sys.getenv("AWS_SECRET_ACCESS_KEY")
+
+  testthat::skip_if(nchar(aws_access_key_id) == 0,
+                    message = "No AWS_ACCESS_KEY_ID defined in environment.")
+
+  testthat::skip_if(nchar(aws_secret_access_key) == 0,
+                    message = "No AWS_SECRET_ACCESS_KEY defined in environment.")
+
+  Sys.unsetenv("AWS_DEFAULT_REGION")
+  Sys.unsetenv("AWS_ENDPOINT")
+  Sys.unsetenv("AWS_REQUEST_PAYER")
+
+  dea_cube <- sits_cube(type = "DEAFRICA",
+                        name = "deafrica_cube",
+                        collection = "ga_s2_gm",
+                        bands = c("B04", "B08"),
+                        roi = c("xmin" = 17.379,
+                                "ymin" = 1.1573,
+                                "xmax" = 17.410,
+                                "ymax" = 1.1910),
+                        start_date = "2019-01-01",
+                        end_date = "2019-10-28")
+
+  expect_true(all(sits_bands(dea_cube) %in% c("B04", "B08")))
+
+  file_info <- dea_cube$file_info[[1]]
+  r <- terra::rast(file_info[1,]$path)
+
+  expect_equal(dea_cube$nrows, terra::nrow(r))
+  expect_equal(dea_cube$ncols, terra::ncol(r))
+  expect_equal(dea_cube$xmax[[1]], terra::xmax(r))
+  expect_equal(dea_cube$xmin[[1]], terra::xmin(r))
+})
+
+test_that("Merging cubes", {
 
     ndvi_file <- c(system.file("extdata/raster/mod13q1/sinop-evi-2014.tif",
                                package = "sits"
@@ -153,15 +193,18 @@ test_that("Creating cubes from AWS", {
     testthat::skip_if(nchar(aws_secret_access_key) == 0,
                       message = "No AWS_SECRET_ACCESS_KEY defined in environment.")
 
+    Sys.unsetenv("AWS_DEFAULT_REGION")
+    Sys.unsetenv("AWS_ENDPOINT")
+    Sys.unsetenv("AWS_REQUEST_PAYER")
+
     s2_cube <- sits_cube(type = "S2_L2A_AWS",
                          name = "T20LKP_2018_2019",
-                         satellite = "SENTINEL-2",
-                         sensor = "MSI",
+                         collection = "sentinel-s2-l2a",
+                         s2_resolution = "60m",
                          tiles = "20LKP",
                          bands = c("B08", "SCL"),
-                         s2_aws_resolution = "60m",
-                         start_date = as.Date("2018-07-18"),
-                         end_date = as.Date("2018-07-23")
+                         start_date = "2018-07-18",
+                         end_date = "2018-07-23"
     )
 
     expect_true(all(sits_bands(s2_cube) %in% c("B08", "SCL")))
@@ -275,6 +318,25 @@ test_that("Creating a raster stack cube and renaming bands", {
     sits_bands(cbers_cube2) <- c("BAND13", "BAND14", "BAND15", "BAND16", "CLOUD")
     expect_true(all(sits_bands(cbers_cube2) %in%
                         c("BAND13", "BAND14", "BAND15", "BAND16", "CLOUD")))
+
+})
+
+test_that("Creating a raster stack cube with BDC band names", {
+  # Create a raster cube based on CBERS data
+  data_dir <- system.file("extdata/raster/bdc", package = "sits")
+
+  # create a raster cube file based on the information about the files
+  cbers_cube_bdc <- sits_cube(
+    type = "STACK",
+    name = "022024",
+    satellite = "CBERS-4",
+    sensor = "AWFI",
+    resolution = "64m",
+    data_dir = data_dir,
+    parse_info = c("X1", "X2", "X3", "X4", "X5", "X6", "date", "X7", "band")
+  )
+  expect_true(all(sits_bands(cbers_cube_bdc) %in%
+                    c("B13", "B14", "B15", "B16", "CMASK")))
 
 })
 

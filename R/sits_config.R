@@ -8,8 +8,9 @@
 #' By default, the sits configuration file "config.yml" is located at
 #' the directory "extdata" of the package.
 #'
-#' The user can provide her additional configuration on an additional
-#' configuration file, which is located by default on ~/.sits/config.yml.
+#' Users can provide additional configuration files, by specifying the
+#' location of their file in the environmental variable
+#' SITS_USER_CONFIG_FILE
 #'
 #' To see the contents of the configuration file,
 #' please use \code{\link[sits]{sits_config_show}}.
@@ -35,7 +36,7 @@ sits_config <- function() {
     sits_env$config <- config::get(file = yml_file)
 
     # try to find a valid user configuration file
-    user_yml_file <- "~/.sits/config.yml"
+    user_yml_file <- Sys.getenv("SITS_USER_CONFIG_FILE")
 
     if (file.exists(user_yml_file)) {
         config_user <- config::get(file = user_yml_file)
@@ -66,7 +67,7 @@ sits_config_info <- function() {
     message(paste0("Using configuration file: ", yml_file))
 
     # try to find a valid user configuration file
-    user_yml_file <- "~/.sits/config.yml"
+    user_yml_file <- Sys.getenv("SITS_USER_CONFIG_FILE")
     if (file.exists(user_yml_file)) {
           message(
             paste0(
@@ -75,11 +76,7 @@ sits_config_info <- function() {
               )
             )
       } else {
-          message(
-              paste0(
-                  "Users can provide additional configurations in ",
-                  user_yml_file
-              )
+          message("To provide additional configurations, create an yml file and set environment variable SITS_USER_CONFIG_FILE to point to it"
           )
       }
 
@@ -108,18 +105,14 @@ sits_config_show <- function() {
     )
 
     # try to find a valid user configuration file
-    if (file.exists("~/.sits/config.yml")) {
-          yml_user_file <- c("~/.sits/config.yml")
-      } else {
-          yml_user_file <- NULL
-      }
+    user_yml_file <- Sys.getenv("SITS_USER_CONFIG_FILE")
 
     # read the configuration parameters
     message("Default system configuration file")
     cat(readLines(yml_file), sep = "\n")
-    if (!purrr::is_null(yml_user_file)) {
+    if (file.exists(user_yml_file)) {
         message("User configuration file - overrides default config")
-        cat(readLines(yml_user_file), sep = "\n")
+        cat(readLines(user_yml_file), sep = "\n")
     }
 
     return(invisible(TRUE))
@@ -154,6 +147,33 @@ sits_config_show <- function() {
 .sits_config_aws_request_payer <- function(type) {
     return(sits_env$config[["AWS_REQUEST_PAYER"]][[type]])
 }
+#' @title Directory to read the DEAFRICA STAC catalogue
+#' @name .sits_config_deafrica_stac
+#' @keywords internal
+#'
+#' @return directory where DEAFRICA is accessible on the web
+.sits_config_deafrica_stac <- function() {
+  return(sits_env$config$deafrica_stac)
+}
+#' @title Directory to read the AWS STAC catalogue
+#' @name .sits_config_aws_stac
+#' @keywords internal
+#'
+#' @return directory where DEAFRICA is accessible on the web
+.sits_config_aws_stac <- function() {
+  return(sits_env$config$aws_stac)
+}
+#' @title Retrieve the bands associated to DEAfrica STAC
+#' @name sits_config_satveg_bands
+#' @param sensor Type of sensor of cube
+#' @param cube   Cube in which bands will be searched
+#' @keywords internal
+#' @description Retrieve the cubes associated to the STAC service from DEAfrica
+#'
+#' @return         Names of DEAfrica available bands
+.sits_config_sensor_bands <- function(sensor, cube) {
+  return(sits_env$config[[sensor]][["bands"]][[cube]])
+}
 #' @title Convert bands names from cube to SITS
 #' @name .sits_config_bands_convert
 #' @keywords internal
@@ -166,6 +186,7 @@ sits_config_show <- function() {
 #' @param sensor         Name of sensor
 #' @param bands_files    Bands available in the files
 #' @return               Name of the bands used in SITS (named vector)
+#'
 #'
 .sits_config_bands_convert <- function(satellite, sensor, bands_files) {
     # Precondition
@@ -236,7 +257,7 @@ sits_config_show <- function() {
 #' @param url  URL for access to the BDC STAC
 #'
 #' @return directory where BDC is accessible on the web
-.sits_config_bdc_stac_access <- function(url) {
+.sits_config_bdc_stac_access <- function(url = NULL) {
     if (purrr::is_null(url)) {
           url <- .sits_config_bdc_stac()
       }

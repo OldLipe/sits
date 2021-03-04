@@ -6,31 +6,44 @@
 \usage{
 \method{sits_cube}{s2_l2a_aws_cube}(
   type = "S2_L2A_AWS",
-  name = NULL,
   ...,
-  bands = NULL,
+  name = NULL,
+  url = NULL,
+  collection = NULL,
   tiles = NULL,
+  bands = NULL,
+  s2_resolution = NULL,
+  roi = NULL,
   start_date = NULL,
-  end_date = NULL,
-  s2_aws_resolution = NULL
+  end_date = NULL
 )
 }
 \arguments{
 \item{type}{type of cube}
 
-\item{name}{output data cube.}
-
 \item{...}{other parameters to be passed for specific types}
 
-\item{bands}{vector of bands.}
+\item{name}{output data cube.}
 
-\item{tiles}{vector of tiles}
+\item{url}{URL for the STAC AWS catalog (optional). By default,
+'https://earth-search.aws.element84.com/v0/' will be used.}
 
-\item{start_date}{starting date of the cube}
+\item{collection}{AWS collection to be searched (mandatory).}
 
-\item{end_date}{ending date of the cube}
+\item{tiles}{Tile names to be searched (optional).}
 
-\item{s2_aws_resolution}{resolution of S2 images ("10m", "20m" or "60m")}
+\item{bands}{Bands names to be filtered (optional).}
+
+\item{s2_resolution}{resolution of S2 images ("10m", "20m" or "60m");}
+
+\item{roi}{selects images (tiles) that intersect according to the
+region of interest provided. Expressed either as an \code{sfc} or \code{sf}
+object from sf package, or a \code{vector} with bounding box named XY values
+in WGS 84 ("xmin", "xmax", "ymin", "ymax").}
+
+\item{start_date}{Initial date for the cube files (optional).}
+
+\item{end_date}{Final date for the cube files (optional).}
 }
 \value{
 data cube
@@ -59,8 +72,6 @@ Sys.setenv(\cr
 # this example requires access to an external service, so should not be run
 # by CRAN
 
-# s3://sentinel-cogs/sentinel-s2-l2a-cogs/2017/S2A_35MNR_20171025_0_L2A/
-
 # Provide your AWS credentials here
 # Sys.setenv(
 # "AWS_ACCESS_KEY_ID"     = <your_access_key>,
@@ -70,16 +81,18 @@ Sys.setenv(\cr
 # "AWS_REQUEST_PAYER"     = "requester"
 # )
 
-s2_cube <- sits_cube(
-    type = "S2_L2A_AWS",
-    name = "T20LKP_2018_2019",
-    satellite = "SENTINEL-2",
-    sensor = "MSI",
-    tiles = "20LKP",
-    s2_aws_resolution = "20m",
-    start_date = as.Date("2018-07-18"),
-    end_date = as.Date("2018-07-23")
-)
+cube_s2 <- sits::sits_cube(type = "S2_L2A_AWS",
+                           name = "s2_cube",
+                           collection = "sentinel-s2-l2a",
+                           bands = c("B04", "B08"),
+                           s2_resolution = "20m",
+                           roi = c("xmin" = 17.379,
+                                   "ymin" = 1.1573,
+                                   "xmax" = 17.410,
+                                   "ymax" = 1.1910),
+                           start_date = "2019-01-01",
+                           end_date = "2019-10-28")
+
 }
 
 }
