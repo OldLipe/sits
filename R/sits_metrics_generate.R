@@ -82,6 +82,8 @@ sits_metrics_generate <- function(cube,
                                             sensor = cube[row,]$sensor,
                                             bands_files = bands)
 
+        bands <- as.vector(.transform_bands_to_metrics(bands, list_metrics))
+
         # create the output cube
         cube_new <- .sits_raster_brick_cube(
             satellite = cube[row,]$satellite,
@@ -101,6 +103,27 @@ sits_metrics_generate <- function(cube,
 
     return(cube_metrics)
 }
+
+#' @title Create the output of the cloud estimation procedure
+#' @name .transform_bands_to_metrics
+#' @keywords internal
+#'
+#' @param bands ...
+#' @param list_metrics ...
+#'
+#' @return ....
+.transform_bands_to_metrics <- function(bands, list_metrics) {
+
+    if (!all(bands %in% names(list_metrics)))
+        stop("The provided bands doenst exists... melhorar erro")
+
+    bands <- sapply(seq_len(length(list_metrics)), function(i) {
+        paste0(names(list_metrics[i]), ".", list_metrics[[i]])
+    }) %>% unlist()
+
+    bands
+}
+
 #' @title Create the output of the cloud estimation procedure
 #' @name .sits_create_metrics_bands
 #' @keywords internal
@@ -146,7 +169,7 @@ sits_metrics_generate <- function(cube,
     # process the bands
     file_list <- purrr::map(bands_metrics, function(bnd) {
         message(paste0("Creating metrics from band: ", bnd))
-        for (metric in list_metrics[[bnd]]) {
+        files <- purrr::map_chr(list_metrics[[bnd]], function(metric) {
             start_task_time <- lubridate::now()
             # find out the information about the band
             info_band <- dplyr::filter(file_info, band == bnd)
@@ -164,7 +187,7 @@ sits_metrics_generate <- function(cube,
                 cube$sensor, "_",
                 cube$tile, "_",
                 start_date, "_", end_date, "_",
-                bnd, "_", "METRIC", "_", metric, ".tif"
+                bnd, ".", metric, ".tif"
             )
 
             # create a raster object
@@ -238,9 +261,8 @@ sits_metrics_generate <- function(cube,
             task <- paste0("Removed clouds from band ", bnd)
             .sits_processing_task_time(task, start_task_time)
             return(filename)
-        }
+        })
     })
-
     # report on time used for processing
     task <- paste0("Removed clouds from all bands")
     .sits_processing_task_time(task, start_time)
