@@ -59,7 +59,7 @@ sits_metrics_generate <- function(cube,
         # estimate the blocks to be read
         blocks <- .metrics_blocks_estimate(
             cube = cube[row,],
-            n_metrics = n_metrics,
+            n_metrics = 1,
             memsize = memsize
         )
 
@@ -104,7 +104,7 @@ sits_metrics_generate <- function(cube,
     return(cube_metrics)
 }
 
-#' @title Create the output of the cloud estimation procedure
+#' @title Compare bands with metrics bands
 #' @name .transform_bands_to_metrics
 #' @keywords internal
 #'
@@ -118,13 +118,13 @@ sits_metrics_generate <- function(cube,
         stop("The provided bands doenst exists... melhorar erro")
 
     bands <- sapply(seq_len(length(list_metrics)), function(i) {
-        paste0(names(list_metrics[i]), ".", list_metrics[[i]])
+        paste0(names(list_metrics[i]), list_metrics[[i]])
     }) %>% unlist()
 
     bands
 }
 
-#' @title Create the output of the cloud estimation procedure
+#' @title Create the images metrics
 #' @name .sits_create_metrics_bands
 #' @keywords internal
 #'
@@ -187,7 +187,7 @@ sits_metrics_generate <- function(cube,
                 cube$sensor, "_",
                 cube$tile, "_",
                 start_date, "_", end_date, "_",
-                bnd, ".", metric, ".tif"
+                bnd, metric, ".tif"
             )
 
             # create a raster object

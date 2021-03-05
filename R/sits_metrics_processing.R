@@ -23,7 +23,6 @@
                                                  multicores,
                                                  .verbose = FALSE) {
 
-    #browser()
     # get the file information for the cube
     file_info <- cube$file_info[[1]]
 
@@ -113,12 +112,39 @@
 #' @param  multicores     Number of cores.
 #' @return Filtered matrix.
 .sits_raster_metrics <- function(values, metric, multicores) {
-    if ("min_ts" %in% metric)
+    # TODO: criar lista de função
+    if ("mints" %in% metric)
         metric_function <- min_ts
-    if ("max_ts" %in% metric)
+    if ("maxts" %in% metric)
         metric_function <- max_ts
-    if ("amd_ts" %in% metric)
+    if ("sumts" %in% metric)
+        metric_function <- sum_ts
+    if ("meants" %in% metric)
+        metric_function <- mean_ts
+    if ("stdts" %in% metric)
+        metric_function <- std_ts
+    if ("skewts" %in% metric)
+        metric_function <- skew_ts
+    if ("kurtts" %in% metric)
+        metric_function <- kurt_ts
+    if ("amplitudets" %in% metric)
+        metric_function <- amplitude_ts
+    if ("fslopets" %in% metric)
+        metric_function <- fslope_ts
+    if ("abssumts" %in% metric)
+        metric_function <- abs_sum_ts
+    if ("amdts" %in% metric)
         metric_function <- amd_ts
+    if ("msets" %in% metric)
+        metric_function <- mse_ts
+    if ("fqrts" %in% metric)
+        metric_function <- fqr_ts
+    if ("sqrts" %in% metric)
+        metric_function <- sqr_ts
+    if ("tqr_ts" %in% metric)
+        metric_function <- tqr_ts
+    if ("iqrts" %in% metric)
+        metric_function <- iqr_ts
 
     #auxiliary function to scale a block of data
     metrics <- function(chunk , f) {

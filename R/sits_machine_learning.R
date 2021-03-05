@@ -433,7 +433,6 @@ sits_ranger <- function(data = NULL,
 #' class.tb <- sits_classify(point_ndvi, rfor_model)
 #' @export
 sits_rfor <- function(data = NULL, num_trees = 2000, nodesize = 1, ...) {
-
     # verifies if ranger package is installed
     if (!requireNamespace("randomForest", quietly = TRUE)) {
         stop("randomForest required for this function to work.

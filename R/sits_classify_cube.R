@@ -55,7 +55,6 @@
 
     # retrieve the normalization stats from the model
     stats <- environment(ml_model)$stats
-
     # get the attribute names
     attr_names <- names(.sits_distances(environment(ml_model)$data[1, ]))
     assertthat::assert_that(length(attr_names) > 0,

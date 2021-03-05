@@ -259,7 +259,6 @@
                                   ncols  = extent["ncols"])
             ), nrow = extent["nrows"], byrow = TRUE
         )
-
     } else {
         values <- terra::readValues(x      = t_obj,
                                     row    = extent["row"],
@@ -318,7 +317,6 @@
     assertthat::assert_that(terra::nrow(r_obj) == params$nrows,
             msg = ".sits_raster_api_write: unable to create raster object"
     )
-
     # include the values in the raster object
     terra::values(r_obj) <- as.matrix(values)
 

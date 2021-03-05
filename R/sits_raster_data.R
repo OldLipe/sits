@@ -20,7 +20,6 @@
                                    impute_fn,
                                    multicores,
                                    .verbose) {
-
     # get the bands in the same order as the samples
     bands <- sits_bands(samples)
 
@@ -40,6 +39,7 @@
         )
         return(values)
     })
+
     # create a data.table joining the values
     data <- do.call(cbind, values_bands)
 
@@ -76,7 +76,6 @@
                                          impute_fn,
                                          multicores,
                                          .verbose = FALSE) {
-
     # get the file information for the cube
     file_info <- cube$file_info[[1]]
 
@@ -88,10 +87,8 @@
         msg = paste0(".sits_raster_data_preprocess:
                                          no files for band ", band_cube)
     )
-
     # read the values
     values <- .sits_raster_api_read_extent(bnd_files, extent)
-
     # get the missing values, minimum values and scale factors
     missing_value <- unname(cube$missing_values[[1]][band_cube])
     minimum_value <- unname(cube$minimum_values[[1]][band_cube])
@@ -118,7 +115,6 @@
         cld_index <- .sits_config_cloud_values(cube)
         values[clouds %in% cld_index] <- NA
     }
-
     # remove NA pixels
     if (any(is.na(values))) {
         if (.verbose) task_start_time <- lubridate::now()
@@ -147,6 +143,12 @@
     # normalize the data
     if (!purrr::is_null(stats)) {
         values <- .sits_normalize_matrix(values, stats, band_cube, multicores)
+    }
+
+    if (dim(values)[[1]] != extent["nrows"]*extent["ncols"]) {
+      #dim(values) <- c(prod(dim(values)), 1)
+      values <- c(t(values))
+      dim(values) <- c(length(values), 1)
     }
 
     values_dt <- data.table::as.data.table(values)
@@ -364,7 +366,6 @@
                         # select the valid dates in the timeline
                         t_row <- timeline[t_idx["start_idx"]:t_idx["end_idx"]]
                         # get only valid values for the timeline
-                        #browser()
                         values <- as.numeric(
                           values_band[i, t_idx["start_idx"]:t_idx["end_idx"]]
                         )
