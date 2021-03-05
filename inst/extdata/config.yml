@@ -180,8 +180,8 @@ default:
 
     AWFI                    :
         bands               :
-            SITS            : &awfi_bands_sits ["B13", "B14", "B15", "B16", "NDVI", "NDVI.min_ts","NDVI.amd_ts", "EVI", "GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
-            BDC             : ["BAND13", "BAND14", "BAND15", "BAND16", "NDVI", "NDVI.MIN_TS","NDVI.AMD_TS", "EVI", "GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
+            SITS            : &awfi_bands_sits ["B13", "B14", "B15", "B16", "NDVI", "NDVIMINTS","NDVIAMDTS", "NDVIMAXTS", "EVI", "GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
+            BDC             : ["BAND13", "BAND14", "BAND15", "BAND16", "NDVI", "NDVIMINTS","NDVIAMDTS", "NDVIMAXTS", "EVI", "GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
             RASTER          : *awfi_bands_sits
             cloud_band      : "CMASK"
 
@@ -191,8 +191,9 @@ default:
             NDWI2           : -9999
             PVR             : -9999
             NDVI            : -9999
-            NDVI.MIN_TS     : -9999
-            NDVI.AMD_TS     : -9999
+            NDVIMINTS       : -9999
+            NDVIAMDTS       : -9999
+            NDVIMAXTS       : -9999
             EVI             : -9999
             B13             : -9999
             B14             : -9999
@@ -206,8 +207,9 @@ default:
             NDWI2           : -10000
             PVR             : -10000
             NDVI            : -10000
-            NDVI.MIN_TS      : -10000
-            NDVI.AMD_TS     : -10000
+            NDVIMINTS       : -10000
+            NDVIAMDTS       : -10000
+            NDVIMAXTS       : -10000
             EVI             : -10000
             B13             : 1
             B14             : 1
@@ -221,8 +223,9 @@ default:
             NDWI2           : 10000
             PVR             : 10000
             NDVI            : 10000
-            NDVI.MIN_TS     : 10000
-            NDVI.AMD_TS     : 10000
+            NDVIMINTS       : 10000
+            NDVIAMDTS       : 10000
+            NDVIMAXTS       : 10000
             EVI             : 10000
             B13             : 10000
             B14             : 10000
@@ -236,8 +239,9 @@ default:
             NDWI2           : 0.0001
             PVR             : 0.0001
             NDVI            : 0.0001
-            NDVI.MIN_TS     : 0.0001
-            NDVI.AMD_TS     : 0.0001
+            NDVIMINTS       : 0.0001
+            NDVIAMDTS       : 0.0001
+            NDVIMAXTS       : 0.0001
             EVI             : 0.0001
             B13             : 0.0001
             B14             : 0.0001
