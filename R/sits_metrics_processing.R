@@ -112,64 +112,44 @@
 #' @param  multicores     Number of cores.
 #' @return Filtered matrix.
 .sits_raster_metrics <- function(values, metric, multicores) {
-    # TODO: criar lista de função
-    if ("mints" %in% metric)
+    # TODO: criar uma lista de função
+    if ("min" %in% metric)
         metric_function <- min_ts
-    if ("maxts" %in% metric)
+    if ("max" %in% metric)
         metric_function <- max_ts
-    if ("sumts" %in% metric)
+    if ("sum" %in% metric)
         metric_function <- sum_ts
-    if ("meants" %in% metric)
+    if ("mean" %in% metric)
         metric_function <- mean_ts
-    if ("stdts" %in% metric)
+    if ("std" %in% metric)
         metric_function <- std_ts
-    if ("skewts" %in% metric)
+    if ("skew" %in% metric)
         metric_function <- skew_ts
-    if ("kurtts" %in% metric)
+    if ("kurt" %in% metric)
         metric_function <- kurt_ts
-    if ("amplitudets" %in% metric)
+    if ("amplitude" %in% metric)
         metric_function <- amplitude_ts
-    if ("fslopets" %in% metric)
+    if ("fslope" %in% metric)
         metric_function <- fslope_ts
-    if ("abssumts" %in% metric)
+    if ("abs_sum" %in% metric)
         metric_function <- abs_sum_ts
-    if ("amdts" %in% metric)
+    if ("amd" %in% metric)
         metric_function <- amd_ts
-    if ("msets" %in% metric)
+    if ("mse" %in% metric)
         metric_function <- mse_ts
-    if ("fqrts" %in% metric)
+    if ("fqr" %in% metric)
         metric_function <- fqr_ts
-    if ("sqrts" %in% metric)
+    if ("sqr" %in% metric)
         metric_function <- sqr_ts
-    if ("tqr_ts" %in% metric)
+    if ("tqr" %in% metric)
         metric_function <- tqr_ts
-    if ("iqrts" %in% metric)
+    if ("iqr" %in% metric)
         metric_function <- iqr_ts
 
     #auxiliary function to scale a block of data
     metrics <- function(chunk , f) {
 
         values <- f(chunk)
-
-        # #max_ts <- max_ts(chunk)
-        # min_v <- min_ts(chunk)
-        # # mean_ts <- mean_ts(chunk)
-        # # std_ts <- std_ts(chunk)
-        # # amp_ts <- amplitude_ts(chunk)
-        # # fs_ts <- fslope_ts(chunk)
-        # # abst_ts <- abs_sum_ts(chunk)
-        # amd_v <- amd_ts(chunk)
-        # mse_v <- mse_ts(chunk)
-        # #fqr_v <- fqr_ts(chunk)
-        # iqr_v <- iqr_ts(chunk)
-        # # tqr_ts <- tqr_ts(chunk)
-        # # sqr_ts <- sqr_ts(chunk)
-
-        # mtz <- cbind(max_ts, min_ts, mean_ts, std_ts, amp_ts, fs_ts,
-        #              abst_ts, amd_ts, mse_ts, fqr_ts, tqr_ts, sqr_ts)
-        #mtz <- cbind(min_v, amd_v, mse_v, iqr_v)
-
-        #names(mtz) <- c("min", "amd", "mse", "iqr")
         names(values) <- metric
 
         return(values)

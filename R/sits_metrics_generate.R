@@ -1,16 +1,16 @@
-#' @title Clean data cube to improve quality
+#' @title Generate bands metrics from cube images
 #' @name  sits_metrics_generate
-#' @description Interpolate data over time to fill cloud pixels.
+#' @description Generate a set of metrics by band
 #'
-#' @param cube       input data cube
-#' @param data_dir   data directory where output data is written
-#' @param name       name of the output data cube
+#' @param cube          input data cube
+#' @param data_dir      data directory where output data is written
+#' @param name          name of the output data cube
 #' @param list_metrics  number of metrics to be generate
-#' @param impute_fn  imputing function to be applied to replace NA
-#' @param memsize    size of memory
-#' @param multicores number of cores
+#' @param impute_fn     imputing function to be applied to replace NA
+#' @param memsize       size of memory
+#' @param multicores    number of cores
 #'
-#' @return           new data cube with interpolated cloud data
+#' @return              new data cube of metrics
 #'
 #' @examples
 #' # define a data cube of CBERS-4 AWFI data
@@ -26,17 +26,22 @@
 #'     parse_info = c("X1", "X2", "band", "date")
 #' )
 #'
-#' cbers_022024_no_clds <- sits_cloud_remove(
+#' cbers_022024_no_clds <- sits_metrics_generate(
 #'     cube = cbers_022024,
 #'     data_dir = tempdir(),
-#'     name = "cbers_022024_no_cld"
+#'     name = "cbers_022024_no_cld",
+#'     list_metrics = list("B13" = c("max", "min"),
+#'                         "NDVI" = "std"),
+#'    impute_fn = sits_impute_linear(),
+#'    memsize = 8,
+#'    multicores = 2
 #' )
 #' @export
 sits_metrics_generate <- function(cube,
                                   data_dir,
                                   name,
-                                  list_metrics = list("BAND13" = c("max_ts"),
-                                                      "NDVI" = c("std_ts")),
+                                  list_metrics = list("B13" = c("max"),
+                                                      "NDVI" = "std"),
                                   impute_fn = sits_impute_linear(),
                                   memsize = 8,
                                   multicores = 2) {
@@ -103,19 +108,19 @@ sits_metrics_generate <- function(cube,
 
     return(cube_metrics)
 }
-
-#' @title Compare bands with metrics bands
+#' @title Compare sits bands with metrics bands
 #' @name .transform_bands_to_metrics
 #' @keywords internal
 #'
-#' @param bands ...
-#' @param list_metrics ...
+#' @param bands a \code{character} with bands name supported by sits
+#' @param list_metrics a named \code{list} with bands name and metrics to be
+#' generated
 #'
-#' @return ....
+#' @return a \code{character} vector with  merged bands name and metrics.
 .transform_bands_to_metrics <- function(bands, list_metrics) {
 
-    if (!all(bands %in% names(list_metrics)))
-        stop("The provided bands doenst exists... melhorar erro")
+    if (!all(names(list_metrics) %in% bands))
+        stop("The provided bands doesnt match with supported bands in SITS.")
 
     bands <- sapply(seq_len(length(list_metrics)), function(i) {
         paste0(names(list_metrics[i]), list_metrics[[i]])
@@ -123,19 +128,19 @@ sits_metrics_generate <- function(cube,
 
     bands
 }
-
 #' @title Create the images metrics
 #' @name .sits_create_metrics_bands
 #' @keywords internal
 #'
-#' @param cube        input data cube
-#' @param data_dir    directory where data is to be stored
-#' @param blocks      block information
-#' @param list_metrics   ...
-#' @param impute_fn   imputation function to remove NA
-#' @param multicores  number of cores to use
+#' @param cube         input data cube
+#' @param data_dir     directory where data is to be stored
+#' @param blocks       block information
+#' @param list_metrics a named \code{list} with bands name and metrics to be
+#' generated
+#' @param impute_fn    imputation function to remove NA
+#' @param multicores   number of cores to use
 #'
-#' @return            a tibble with date, band and path information.
+#' @return             a tibble with date, band and path information.
 .sits_create_metrics_bands <- function(cube,
                                        data_dir,
                                        blocks,
@@ -187,7 +192,7 @@ sits_metrics_generate <- function(cube,
                 cube$sensor, "_",
                 cube$tile, "_",
                 start_date, "_", end_date, "_",
-                bnd, metric, ".tif"
+                bnd, toupper(metric), ".tif"
             )
 
             # create a raster object
