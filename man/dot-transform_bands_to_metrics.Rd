@@ -2,19 +2,20 @@
 % Please edit documentation in R/sits_metrics_generate.R
 \name{.transform_bands_to_metrics}
 \alias{.transform_bands_to_metrics}
-\title{Create the output of the cloud estimation procedure}
+\title{Compare sits bands with metrics bands}
 \usage{
 .transform_bands_to_metrics(bands, list_metrics)
 }
 \arguments{
-\item{bands}{...}
+\item{bands}{a \code{character} with bands name supported by sits}
 
-\item{list_metrics}{...}
+\item{list_metrics}{a named \code{list} with bands name and metrics to be
+generated}
 }
 \value{
-....
+a \code{character} vector with  merged bands name and metrics.
 }
 \description{
-Create the output of the cloud estimation procedure
+Compare sits bands with metrics bands
 }
 \keyword{internal}

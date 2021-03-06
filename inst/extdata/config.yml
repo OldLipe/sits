@@ -180,9 +180,9 @@ default:
 
     AWFI                    :
         bands               :
-            SITS            : &awfi_bands_sits ["B13", "B14", "B15", "B16", "NDVI", "NDVIMINTS","NDVIAMDTS", "NDVIMAXTS", "EVI", "GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
-            BDC             : ["BAND13", "BAND14", "BAND15", "BAND16", "NDVI", "NDVIMINTS","NDVIAMDTS", "NDVIMAXTS", "EVI", "GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
-            RASTER          : *awfi_bands_sits
+            SITS            : &awfi_bands_sits ["B13", "B13MIN", "B13MAX", "B14", "B15", "B16", "NDVI", "NDVIMIN", "NDVIMSE", "NDVIAMD", "NDVIMAX", "EVI", "EVIIQR","EVIAMD","GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
+            BDC             : ["BAND13", "BAND13MIN", "BAND13MAX", "BAND14", "BAND15", "BAND16", "NDVI", "NDVIMIN","NDVIMSE", "NDVIAMD", "NDVIMAX", "EVI", "EVIIQR","EVIAMD","GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
+            RASTER          :  *awfi_bands_sits
             cloud_band      : "CMASK"
 
         missing_value       :
@@ -191,11 +191,15 @@ default:
             NDWI2           : -9999
             PVR             : -9999
             NDVI            : -9999
-            NDVIMINTS       : -9999
-            NDVIAMDTS       : -9999
-            NDVIMAXTS       : -9999
+            NDVIMIN         : -9999
+            NDVIMSE         : -9999
+            NDVIAMD         : -9999
+            NDVIMAX         : -9999
             EVI             : -9999
+            EVIIQR          : -9999
+            EVIAMD          : -9999
             B13             : -9999
+            B13MIN          : -9999
             B14             : -9999
             B15             : -9999
             B16             : -9999
@@ -207,11 +211,15 @@ default:
             NDWI2           : -10000
             PVR             : -10000
             NDVI            : -10000
-            NDVIMINTS       : -10000
-            NDVIAMDTS       : -10000
-            NDVIMAXTS       : -10000
+            NDVIMIN         : -10000
+            NDVIMSE         : -10000
+            NDVIAMD         : -10000
+            NDVIMAX         : -10000
             EVI             : -10000
+            EVIIQR          : -10000
+            EVIAMD          : -10000
             B13             : 1
+            B13MIN          : 1
             B14             : 1
             B15             : 1
             B16             : 1
@@ -223,11 +231,15 @@ default:
             NDWI2           : 10000
             PVR             : 10000
             NDVI            : 10000
-            NDVIMINTS       : 10000
-            NDVIAMDTS       : 10000
-            NDVIMAXTS       : 10000
+            NDVIMIN         : 10000
+            NDVIMSE         : 10000
+            NDVIAMD         : 10000
+            NDVIMAX         : 10000
             EVI             : 10000
+            EVIIQR          : 10000
+            EVIAMD          : 10000
             B13             : 10000
+            B13MIN          : 10000
             B14             : 10000
             B15             : 10000
             B16             : 10000
@@ -239,11 +251,15 @@ default:
             NDWI2           : 0.0001
             PVR             : 0.0001
             NDVI            : 0.0001
-            NDVIMINTS       : 0.0001
-            NDVIAMDTS       : 0.0001
-            NDVIMAXTS       : 0.0001
+            NDVIMIN         : 0.0001
+            NDVIMSE         : 0.0001
+            NDVIAMD         : 0.0001
+            NDVIMAX         : 0.0001
             EVI             : 0.0001
+            EVIIQR          : 0.0001
+            EVIAMD          : 0.0001
             B13             : 0.0001
+            B13MIN          : 0.0001
             B14             : 0.0001
             B15             : 0.0001
             B16             : 0.0001

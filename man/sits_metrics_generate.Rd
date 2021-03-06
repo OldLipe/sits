@@ -2,13 +2,13 @@
 % Please edit documentation in R/sits_metrics_generate.R
 \name{sits_metrics_generate}
 \alias{sits_metrics_generate}
-\title{Clean data cube to improve quality}
+\title{Generate bands metrics from cube images}
 \usage{
 sits_metrics_generate(
   cube,
   data_dir,
   name,
-  list_metrics = list(BAND13 = c("max_ts"), NDVI = c("std_ts")),
+  list_metrics = list(B13 = c("max"), NDVI = "std"),
   impute_fn = sits_impute_linear(),
   memsize = 8,
   multicores = 2
@@ -30,10 +30,10 @@ sits_metrics_generate(
 \item{multicores}{number of cores}
 }
 \value{
-new data cube with interpolated cloud data
+new data cube of metrics
 }
 \description{
-Interpolate data over time to fill cloud pixels.
+Generate a set of metrics by band
 }
 \examples{
 # define a data cube of CBERS-4 AWFI data
@@ -49,9 +49,14 @@ cbers_022024 <- sits_cube(
     parse_info = c("X1", "X2", "band", "date")
 )
 
-cbers_022024_no_clds <- sits_cloud_remove(
+cbers_022024_no_clds <- sits_metrics_generate(
     cube = cbers_022024,
     data_dir = tempdir(),
-    name = "cbers_022024_no_cld"
+    name = "cbers_022024_no_cld",
+    list_metrics = list("B13" = c("max", "min"),
+                        "NDVI" = "std"),
+   impute_fn = sits_impute_linear(),
+   memsize = 8,
+   multicores = 2
 )
 }

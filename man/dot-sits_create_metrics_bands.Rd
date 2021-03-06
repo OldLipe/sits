@@ -2,7 +2,7 @@
 % Please edit documentation in R/sits_metrics_generate.R
 \name{.sits_create_metrics_bands}
 \alias{.sits_create_metrics_bands}
-\title{Create the output of the cloud estimation procedure}
+\title{Create the images metrics}
 \usage{
 .sits_create_metrics_bands(
   cube,
@@ -20,7 +20,8 @@
 
 \item{blocks}{block information}
 
-\item{list_metrics}{...}
+\item{list_metrics}{a named \code{list} with bands name and metrics to be
+generated}
 
 \item{impute_fn}{imputation function to remove NA}
 
@@ -30,6 +31,6 @@
 a tibble with date, band and path information.
 }
 \description{
-Create the output of the cloud estimation procedure
+Create the images metrics
 }
 \keyword{internal}
