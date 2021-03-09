@@ -81,12 +81,13 @@
             )
         }
     }
+
     # scale the data set
     scale_factor <- cube$scale_factors[[1]][band_cube]
     values <- scale_factor * values
 
+    # generates metrics bands
     values <- .sits_raster_metrics(values, metric, multicores)
-
 
     # filter the data
     if (!(purrr::is_null(filter))) {

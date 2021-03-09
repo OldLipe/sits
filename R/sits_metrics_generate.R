@@ -40,8 +40,8 @@
 sits_metrics_generate <- function(cube,
                                   data_dir,
                                   name,
-                                  list_metrics = list("B13" = c("max"),
-                                                      "NDVI" = "std"),
+                                  list_metrics = list("EVI" = c("min"),
+                                                      "NDVI" = "min"),
                                   impute_fn = sits_impute_linear(),
                                   memsize = 8,
                                   multicores = 2) {
@@ -220,7 +220,7 @@ sits_metrics_generate <- function(cube,
                 wopt = list(
                     gdal = c("COMPRESS = LZW"),
                     filetype = "GTiff",
-                    datatype = "INT2U"
+                    datatype = "INT2S"
                 )
             ))
 
