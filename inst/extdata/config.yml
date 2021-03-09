@@ -117,55 +117,83 @@ default:
 
     OLI                     : &landsat
         bands               :
-            SITS            : &oli_bands_sits ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "NDVI", "EVI", "FMASK4"]
-            BDC             : ["BAND1", "BAND2", "BAND3", "BAND4", "BAND5", "BAND6", "BAND7", "NDVI", "EVI", "FMASK4"]
+            SITS            : &oli_bands_sits ["B1", "B2", "B3", "B4", "B5", "B5MIN", "B6", "B7", "NDVI", "NDVIMIN", "NDVISTD", "NDVIAMD", "EVI", "EVISTD", "EVIMIN", "EVIAMD","FMASK4"]
+            BDC             : ["BAND1", "BAND2", "BAND3", "BAND4", "BAND5", "BAND5MIN" , "BAND6", "BAND7", "NDVI", "NDVIMIN", "NDVISTD", "NDVIAMD", "EVI", "EVISTD", "EVIMIN", "EVIAMD","FMASK4"]
             RASTER          : *oli_bands_sits
             cloud_band      : "FMASK4"
 
         missing_value       :
             NDVI            : -9999
+            NDVIMIN         : -9999
+            NDVISTD         : -9999
+            NDVIAMD         : -9999
             EVI             : -9999
+            EVIMIN          : -9999
+            EVISTD          : -9999
+            EVIAMD          : -9999
             B1              : -9999
             B2              : -9999
             B3              : -9999
             B4              : -9999
             B5              : -9999
+            B5MIN           : -9999
             B6              : -9999
             B7              : -9999
             FMASK           : 255
 
         minimum_value       :
-            NDVI            : -3000
-            EVI             : -3000
+            NDVI            : -10000
+            NDVIMIN         : -10000
+            NDVISTD         : -10000
+            NDVIAMD         : -10000
+            EVI             : -10000
+            EVIMIN          : -10000
+            EVISTD          : -10000
+            EVIAMD          : -10000
             B1              : 0
             B2              : 0
             B3              : 0
             B4              : 0
             B5              : 0
+            B5MIN           : 0
             B6              : 0
             B7              : 0
             FMASK           : 0
 
         maximum_value       :
             NDVI            : 10000
+            NDVIMIN         : 10000
+            NDVISTD         : 10000
+            NDVIAMD         : 10000
             EVI             : 10000
+            EVIMIN          : 10000
+            EVISTD          : 10000
+            EVIAMD          : 10000
             B1              : 10000
             B2              : 10000
             B3              : 10000
             B4              : 10000
             B5              : 10000
+            B5MIN           : 10000
             B6              : 10000
             B7              : 10000
             FMASK           : 255
 
         scale_factor:
             NDVI            : 0.0001
+            NDVIMIN         : 0.0001
+            NDVISTD         : 0.0001
+            NDVIAMD         : 0.0001
             EVI             : 0.0001
+            EVIMIN          : 0.0001
+            EVISTD          : 0.0001
+            EVIAMD          : 0.0001
             B1              : 0.0001
             B2              : 0.0001
             B3              : 0.0001
             B4              : 0.0001
             B5              : 0.0001
+            B5MIN           : 0.0001
             B6              : 0.0001
             B7              : 0.0001
             FMASK           : 1
@@ -180,8 +208,8 @@ default:
 
     AWFI                    :
         bands               :
-            SITS            : &awfi_bands_sits ["B13", "B13MIN", "B13SQR", "B13MAX", "B14", "B15", "B15IQR", "B15MIN", "B16", "B16AMD", "NDVI", "NDVIMIN", "NDVIMSE", "NDVIAMD", "NDVIMAX", "NDVIAMPLITUDE", "EVI", "EVISUM", "EVIIQR","EVIAMD","GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
-            BDC             : ["BAND13", "BAND13MIN", "BAND13SQR", "BAND13MAX", "BAND14", "BAND15", "BAND15IQR", "BAND15MIN", "BAND16","BAND16AMD", "NDVI", "NDVIMIN","NDVIMSE", "NDVIAMD", "NDVIMAX", "NDVIAMPLITUDE", "EVI", "EVISUM","EVIIQR","EVIAMD","GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
+            SITS            : &awfi_bands_sits ["B13", "B13MIN", "B13SQR", "B13MAX", "B14", "B15", "B15IQR", "B15MIN", "B16", "B16AMD", "NDVI", "NDVIMIN", "NDVIMSE", "NDVIAMD", "NDVISQR", "NDVIMAX", "NDVIAMPLITUDE", "EVI", "EVISUM", "EVIIQR","EVIAMD","GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
+            BDC             : ["BAND13", "BAND13MIN", "BAND13SQR", "BAND13MAX", "BAND14", "BAND15", "BAND15IQR", "BAND15MIN", "BAND16","BAND16AMD", "NDVI", "NDVIMIN","NDVIMSE", "NDVIAMD","NDVISQR", "NDVIMAX", "NDVIAMPLITUDE", "EVI", "EVISUM","EVIIQR","EVIAMD","GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
             RASTER          :  *awfi_bands_sits
             cloud_band      : "CMASK"
 
@@ -196,6 +224,7 @@ default:
             NDVIAMD         : -9999
             NDVIMAX         : -9999
             NDVIAMPLITUDE   : -9999
+            NDVISQR         : -9999
             EVI             : -9999
             EVIIQR          : -9999
             EVIAMD          : -9999
@@ -222,6 +251,7 @@ default:
             NDVIAMD         : -10000
             NDVIMAX         : -10000
             NDVIAMPLITUDE   : -10000
+            NDVISQR         : -10000
             EVI             : -10000
             EVIIQR          : -10000
             EVIAMD          : -10000
@@ -248,6 +278,7 @@ default:
             NDVIAMD         : 10000
             NDVIMAX         : 10000
             NDVIAMPLITUDE   : 10000
+            NDVISQR         : 10000
             EVI             : 10000
             EVIIQR          : 10000
             EVIAMD          : 10000
@@ -274,6 +305,7 @@ default:
             NDVIAMD         : 0.0001
             NDVIMAX         : 0.0001
             NDVIAMPLITUDE   : 0.0001
+            NDVISQR         : 0.0001
             EVI             : 0.0001
             EVIIQR          : 0.0001
             EVIAMD          : 0.0001
@@ -450,6 +482,9 @@ default:
 
             MODIS_CLD_BAND  : "pixel reliability"
             MODIS_cld_vls   : [2,3]
+
+            OLI_CLD_BAND    : "FMASK4"
+            OLI_cld_vls     : [2, 3, 4, 255]
 
         BRICK               : *raster_clouds
 
