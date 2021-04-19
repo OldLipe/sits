@@ -5,6 +5,70 @@ apply_transition_matrix <- function(data_before, data, transition_matrix) {
     .Call(`_sits_apply_transition_matrix`, data_before, data, transition_matrix)
 }
 
+max_ts <- function(mtx) {
+    .Call(`_sits_max_ts`, mtx)
+}
+
+min_ts <- function(mtx) {
+    .Call(`_sits_min_ts`, mtx)
+}
+
+sum_ts <- function(mtx) {
+    .Call(`_sits_sum_ts`, mtx)
+}
+
+mean_ts <- function(mtx) {
+    .Call(`_sits_mean_ts`, mtx)
+}
+
+std_ts <- function(mtx) {
+    .Call(`_sits_std_ts`, mtx)
+}
+
+skew_ts <- function(mtx) {
+    .Call(`_sits_skew_ts`, mtx)
+}
+
+kurt_ts <- function(mtx) {
+    .Call(`_sits_kurt_ts`, mtx)
+}
+
+amplitude_ts <- function(mtx) {
+    .Call(`_sits_amplitude_ts`, mtx)
+}
+
+fslope_ts <- function(mtx) {
+    .Call(`_sits_fslope_ts`, mtx)
+}
+
+abs_sum_ts <- function(mtx) {
+    .Call(`_sits_abs_sum_ts`, mtx)
+}
+
+amd_ts <- function(mtx) {
+    .Call(`_sits_amd_ts`, mtx)
+}
+
+mse_ts <- function(mtx) {
+    .Call(`_sits_mse_ts`, mtx)
+}
+
+fqr_ts <- function(mtx) {
+    .Call(`_sits_fqr_ts`, mtx)
+}
+
+tqr_ts <- function(mtx) {
+    .Call(`_sits_tqr_ts`, mtx)
+}
+
+sqr_ts <- function(mtx) {
+    .Call(`_sits_sqr_ts`, mtx)
+}
+
+iqr_ts <- function(mtx) {
+    .Call(`_sits_iqr_ts`, mtx)
+}
+
 bayes_smoother <- function(m, m_nrow, m_ncol, w, sigma, covar_sigma0) {
     .Call(`_sits_bayes_smoother`, m, m_nrow, m_ncol, w, sigma, covar_sigma0)
 }

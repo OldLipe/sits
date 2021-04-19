@@ -19,6 +19,182 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// max_ts
+arma::vec max_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_max_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(max_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// min_ts
+arma::vec min_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_min_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(min_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sum_ts
+arma::vec sum_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_sum_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(sum_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mean_ts
+arma::vec mean_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_mean_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(mean_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// std_ts
+arma::vec std_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_std_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(std_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// skew_ts
+arma::vec skew_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_skew_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(skew_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// kurt_ts
+arma::vec kurt_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_kurt_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(kurt_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// amplitude_ts
+arma::vec amplitude_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_amplitude_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(amplitude_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fslope_ts
+arma::vec fslope_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_fslope_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(fslope_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// abs_sum_ts
+arma::vec abs_sum_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_abs_sum_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(abs_sum_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// amd_ts
+arma::vec amd_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_amd_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(amd_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mse_ts
+arma::vec mse_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_mse_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(mse_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fqr_ts
+arma::vec fqr_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_fqr_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(fqr_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// tqr_ts
+arma::vec tqr_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_tqr_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(tqr_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sqr_ts
+arma::vec sqr_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_sqr_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(sqr_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// iqr_ts
+arma::vec iqr_ts(const arma::mat& mtx);
+RcppExport SEXP _sits_iqr_ts(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(iqr_ts(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
 // bayes_smoother
 arma::mat bayes_smoother(const arma::mat& m, const arma::uword m_nrow, const arma::uword m_ncol, const arma::mat& w, const arma::mat& sigma, bool covar_sigma0);
 RcppExport SEXP _sits_bayes_smoother(SEXP mSEXP, SEXP m_nrowSEXP, SEXP m_ncolSEXP, SEXP wSEXP, SEXP sigmaSEXP, SEXP covar_sigma0SEXP) {
@@ -103,6 +279,22 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_sits_apply_transition_matrix", (DL_FUNC) &_sits_apply_transition_matrix, 3},
+    {"_sits_max_ts", (DL_FUNC) &_sits_max_ts, 1},
+    {"_sits_min_ts", (DL_FUNC) &_sits_min_ts, 1},
+    {"_sits_sum_ts", (DL_FUNC) &_sits_sum_ts, 1},
+    {"_sits_mean_ts", (DL_FUNC) &_sits_mean_ts, 1},
+    {"_sits_std_ts", (DL_FUNC) &_sits_std_ts, 1},
+    {"_sits_skew_ts", (DL_FUNC) &_sits_skew_ts, 1},
+    {"_sits_kurt_ts", (DL_FUNC) &_sits_kurt_ts, 1},
+    {"_sits_amplitude_ts", (DL_FUNC) &_sits_amplitude_ts, 1},
+    {"_sits_fslope_ts", (DL_FUNC) &_sits_fslope_ts, 1},
+    {"_sits_abs_sum_ts", (DL_FUNC) &_sits_abs_sum_ts, 1},
+    {"_sits_amd_ts", (DL_FUNC) &_sits_amd_ts, 1},
+    {"_sits_mse_ts", (DL_FUNC) &_sits_mse_ts, 1},
+    {"_sits_fqr_ts", (DL_FUNC) &_sits_fqr_ts, 1},
+    {"_sits_tqr_ts", (DL_FUNC) &_sits_tqr_ts, 1},
+    {"_sits_sqr_ts", (DL_FUNC) &_sits_sqr_ts, 1},
+    {"_sits_iqr_ts", (DL_FUNC) &_sits_iqr_ts, 1},
     {"_sits_bayes_smoother", (DL_FUNC) &_sits_bayes_smoother, 6},
     {"_sits_kernel_smoother", (DL_FUNC) &_sits_kernel_smoother, 5},
     {"_sits_bilateral_smoother", (DL_FUNC) &_sits_bilateral_smoother, 5},
