@@ -5,7 +5,13 @@
 #' @param cube          input data cube
 #' @param output_dir    data directory where output data is written
 #' @param name          name of the output data cube
-#' @param list_metrics  number of metrics to be generate
+#' @param metrics       a \code{character} or \code{list} of metrics. If the
+#'                      input is a \code{character} vector, the following
+#'                      specification must be obeyed: "X1_metrics_name", where
+#'                      "X1" is the name of the band contained in the cube.
+#'                      Otherwise, a named \code{list} must be provided, where
+#'                      in the name is contained the band and the values in
+#'                      character vector form with the name of each metric.
 #' @param impute_fn     imputing function to be applied to replace NA
 #' @param memsize       size of memory
 #' @param multicores    number of cores
@@ -27,10 +33,10 @@
 #' )
 #'
 #' cbers_022024_no_clds <- sits_metrics_generate(
-#'     cube = cbers_022024,
-#'     output_dir = tempdir(),
-#'     name = "cbers_022024_no_cld",
-#'     list_metrics = list("B13" = c("max", "min")),
+#'    cube = cbers_022024,
+#'    output_dir = tempdir(),
+#'    name = "cbers_022024_no_cld",
+#'    metrics = list("B13" = c("max", "min")),
 #'    impute_fn = sits_impute_linear(),
 #'    memsize = 8,
 #'    multicores = 2
@@ -39,11 +45,25 @@
 sits_metrics_generate <- function(cube,
                                   output_dir,
                                   name,
-                                  list_metrics = list("EVI" = c("min"),
-                                                      "NDVI" = "min"),
+                                  metrics = list("EVI" = "min",
+                                                 "NDVI" = "min"),
                                   impute_fn = sits_impute_linear(),
                                   memsize = 8,
                                   multicores = 2) {
+
+    # require sitsfeats package
+    if (!requireNamespace("sitsfeats", quietly = TRUE)) {
+        stop(paste("Please install package sitsfeats from github:",
+                   "delvtools::install_github('oldlipe/sitsfeats')"),
+             call. = FALSE
+        )
+    }
+
+    # precondition - verifying if the metrics are list or vector
+    assertthat::assert_that(inherits(metrics, c("list", "character")),
+                            msg = paste("sits_metrics_generate: the 'metrics'",
+                                        "parameter must be a character vector",
+                                        "or a list."))
 
     # precondition - is there cloud information available?
     cloud_band <- .sits_config_cloud_band(cube)
@@ -54,6 +74,10 @@ sits_metrics_generate <- function(cube,
     assertthat::assert_that(assertthat::is.dir(output_dir),
                             msg = "invalid data directory"
     )
+
+    # transform a vector of character into a list metrics
+    if (inherits(metrics, "character"))
+        list_metrics <- .sits_transform_vector_metrics(metrics)
 
     cube_metrics <- purrr::map(seq_len(nrow(cube)), function(row) {
         # total number of instances

@@ -23,6 +23,35 @@
     return(params)
 }
 
+#' @title Transforms a character vector of a metrics into a list metrics
+#' @name .sits_transform_vector_metrics
+#' @keywords internal
+#'
+#' @param metrics a \code{character} vector of metrics.
+#' @return A named \code{list} of metrics, where name is band and the values the
+#' metrics name.
+.sits_transform_vector_metrics <- function(metrics) {
+
+    # extract bands name
+    subset_split <- strsplit(metrics, "_")
+    subset_colums <- sapply(subset_split, function(x){x[[1]]})
+
+    # create a list of metrics, where the index is each band
+    list_metrics <- lapply(unique(subset_colums), function(x){
+        index_column <- which(subset_colums %in% x)
+
+        metrics_name <- sapply(index_column, function(i){
+            paste(subset_split[[i]][-1], collapse = "_")
+        })
+
+        metrics_name
+    })
+
+    names(list_metrics) <- unique(subset_colums)
+
+    list_metrics
+}
+
 #' @title Read a part of a raster file and return a matrix
 #' @name .sits_raster_api_read_extent
 #' @keywords internal

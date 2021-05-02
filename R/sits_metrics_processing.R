@@ -115,41 +115,67 @@
 #' @return Filtered matrix.
 .sits_raster_metrics <- function(values, metric, multicores) {
     # TODO: criar uma lista de função
+
+    # basics metrics
     if ("min" %in% metric)
-        metric_function <- min_ts
+        metric_function <- sitsfeats::min_ts
     if ("max" %in% metric)
-        metric_function <- max_ts
+        metric_function <- sitsfeats::max_ts
     if ("sum" %in% metric)
-        metric_function <- sum_ts
+        metric_function <- sitsfeats::sum_ts
     if ("mean" %in% metric)
-        metric_function <- mean_ts
+        metric_function <- sitsfeats::mean_ts
+    if ("median" %in% metric)
+        metric_function <- sitsfeats::median_ts
     if ("std" %in% metric)
-        metric_function <- std_ts
+        metric_function <- sitsfeats::std_ts
     if ("skew" %in% metric)
-        metric_function <- skew_ts
+        metric_function <- sitsfeats::skew_ts
     if ("kurt" %in% metric)
-        metric_function <- kurt_ts
+        metric_function <- sitsfeats::kurt_ts
     if ("amplitude" %in% metric)
-        metric_function <- amplitude_ts
+        metric_function <- sitsfeats::amplitude_ts
     if ("fslope" %in% metric)
-        metric_function <- fslope_ts
+        metric_function <- sitsfeats::fslope_ts
     if ("abs_sum" %in% metric)
-        metric_function <- abs_sum_ts
+        metric_function <- sitsfeats::abs_sum_ts
     if ("amd" %in% metric)
-        metric_function <- amd_ts
+        metric_function <- sitsfeats::amd_ts
     if ("mse" %in% metric)
-        metric_function <- mse_ts
+        metric_function <- sitsfeats::mse_ts
     if ("fqr" %in% metric)
-        metric_function <- fqr_ts
+        metric_function <- sitsfeats::fqr_ts
     if ("sqr" %in% metric)
-        metric_function <- sqr_ts
+        metric_function <- sitsfeats::sqr_ts
     if ("tqr" %in% metric)
-        metric_function <- tqr_ts
+        metric_function <- sitsfeats::tqr_ts
     if ("iqr" %in% metric)
-        metric_function <- iqr_ts
+        metric_function <- sitsfeats::iqr_ts
+
+    # polar metrics
+    if ("area_q1" %in% metric)
+        metric_function <- sitsfeats::area_q1
+    if ("area_q2" %in% metric)
+        metric_function <- sitsfeats::area_q2
+    if ("area_q3" %in% metric)
+        metric_function <- sitsfeats::area_q3
+    if ("area_q4" %in% metric)
+        metric_function <- sitsfeats::area_q4
+    if ("polar_balance" %in% metric)
+        metric_function <- sitsfeats::polar_balance
+    if ("angle" %in% metric)
+        metric_function <- sitsfeats::angle
+    if ("area_ts" %in% metric)
+        metric_function <- sitsfeats::area_ts
+    if ("ecc_metric" %in% metric)
+        metric_function <- sitsfeats::ecc_metric
+    if ("gyration_radius" %in% metric)
+        metric_function <- sitsfeats::gyration_radius
+    if ("csi" %in% metric)
+        metric_function <- sitsfeats::csi
 
     #auxiliary function to scale a block of data
-    metrics <- function(chunk , f) {
+    metrics <- function(chunk, f) {
 
         values <- f(chunk)
         names(values) <- metric

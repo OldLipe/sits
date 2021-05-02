@@ -8,7 +8,7 @@ sits_metrics_generate(
   cube,
   output_dir,
   name,
-  list_metrics = list(EVI = c("min"), NDVI = "min"),
+  metrics = list(EVI = "min", NDVI = "min"),
   impute_fn = sits_impute_linear(),
   memsize = 8,
   multicores = 2
@@ -21,7 +21,13 @@ sits_metrics_generate(
 
 \item{name}{name of the output data cube}
 
-\item{list_metrics}{number of metrics to be generate}
+\item{metrics}{a \code{character} or \code{list} of metrics. If the
+input is a \code{character} vector, the following
+specification must be obeyed: "X1_metrics_name", where
+"X1" is the name of the band contained in the cube.
+Otherwise, a named \code{list} must be provided, where
+in the name is contained the band and the values in
+character vector form with the name of each metric.}
 
 \item{impute_fn}{imputing function to be applied to replace NA}
 
@@ -50,10 +56,10 @@ cbers_022024 <- sits_cube(
 )
 
 cbers_022024_no_clds <- sits_metrics_generate(
-    cube = cbers_022024,
-    output_dir = tempdir(),
-    name = "cbers_022024_no_cld",
-    list_metrics = list("B13" = c("max", "min")),
+   cube = cbers_022024,
+   output_dir = tempdir(),
+   name = "cbers_022024_no_cld",
+   metrics = list("B13" = c("max", "min")),
    impute_fn = sits_impute_linear(),
    memsize = 8,
    multicores = 2
