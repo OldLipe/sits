@@ -243,9 +243,9 @@ sits_metrics_generate <- function(cube,
                 filename = filename,
                 overwrite = TRUE,
                 wopt = list(
-                    gdal = c("COMPRESS = LZW"),
+                    gdal = c("COMPRESS=LZW", "BIGTIFF=YES"),
                     filetype = "GTiff",
-                    datatype = "INT2S"
+                    datatype = "FLT4S"
                 )
             ))
 
