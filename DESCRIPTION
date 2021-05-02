@@ -83,6 +83,7 @@ Suggests:
     Rcpp,
     RcppArmadillo,
     signal,
+    sitsfeats,
     stars,
     stringr,
     testthat,
@@ -131,7 +132,7 @@ Collate:
     'sits_log.R'
     'sits_machine_learning.R'
     'sits_metrics_generate.R'
-    'sits_metrics_helper.R'
+    'sits_metrics_utils.R'
     'sits_metrics_processing.R'
     'sits_merge.R'
     'sits_parallel.R'
