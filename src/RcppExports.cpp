@@ -41,6 +41,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// median_calc
+arma::vec median_calc(const arma::mat& mtx);
+RcppExport SEXP _sits_median_calc(SEXP mtxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mtx(mtxSEXP);
+    rcpp_result_gen = Rcpp::wrap(median_calc(mtx));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sum_ts
 arma::vec sum_ts(const arma::mat& mtx);
 RcppExport SEXP _sits_sum_ts(SEXP mtxSEXP) {
@@ -281,6 +292,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_sits_apply_transition_matrix", (DL_FUNC) &_sits_apply_transition_matrix, 3},
     {"_sits_max_ts", (DL_FUNC) &_sits_max_ts, 1},
     {"_sits_min_ts", (DL_FUNC) &_sits_min_ts, 1},
+    {"_sits_median_calc", (DL_FUNC) &_sits_median_calc, 1},
     {"_sits_sum_ts", (DL_FUNC) &_sits_sum_ts, 1},
     {"_sits_mean_ts", (DL_FUNC) &_sits_mean_ts, 1},
     {"_sits_std_ts", (DL_FUNC) &_sits_std_ts, 1},

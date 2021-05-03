@@ -129,10 +129,6 @@
         metric_function <- sitsfeats::median_ts
     if ("std" %in% metric)
         metric_function <- sitsfeats::std_ts
-    if ("skew" %in% metric)
-        metric_function <- sitsfeats::skew_ts
-    if ("kurt" %in% metric)
-        metric_function <- sitsfeats::kurt_ts
     if ("amplitude" %in% metric)
         metric_function <- sitsfeats::amplitude_ts
     if ("fslope" %in% metric)

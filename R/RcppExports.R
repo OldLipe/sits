@@ -13,6 +13,10 @@ min_ts <- function(mtx) {
     .Call(`_sits_min_ts`, mtx)
 }
 
+median_calc <- function(mtx) {
+    .Call(`_sits_median_calc`, mtx)
+}
+
 sum_ts <- function(mtx) {
     .Call(`_sits_sum_ts`, mtx)
 }
