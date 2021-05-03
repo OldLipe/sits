@@ -210,6 +210,9 @@ sits_metrics_generate <- function(cube,
             start_date <- info_band[1, ]$date
             end_date <- info_band[num_layers, ]$date
 
+            # remove underline from band name
+            metric <- gsub("_", "", metric)
+
             # define the output filename
             filename <- paste0(
                 output_dir, "/",
