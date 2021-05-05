@@ -211,7 +211,7 @@ sits_metrics_generate <- function(cube,
             end_date <- info_band[num_layers, ]$date
 
             # remove underline from band name
-            metric <- gsub("_", "", metric)
+            metric_name <- gsub("_", "", metric)
 
             # define the output filename
             filename <- paste0(
@@ -220,7 +220,7 @@ sits_metrics_generate <- function(cube,
                 cube$sensor, "_",
                 cube$tile, "_",
                 start_date, "_", end_date, "_",
-                bnd, toupper(metric), ".tif"
+                bnd, toupper(metric_name), ".tif"
             )
 
             # create a raster object
