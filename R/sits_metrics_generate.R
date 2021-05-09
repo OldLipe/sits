@@ -106,8 +106,10 @@ sits_metrics_generate <- function(cube,
         bands <- bands[bands != cloud_band]
 
         # transform bands name
-        bands <- .sits_config_bands_convert(satellite = cube[row,]$satellite,
-                                            sensor = cube[row,]$sensor,
+        satellite <- toupper(cube[row,]$satellite)
+        sensor <- toupper(cube[row,]$sensor)
+        bands <- .sits_config_bands_convert(satellite = satellite,
+                                            sensor = sensor,
                                             bands_files = bands)
 
         bands <- as.vector(.transform_bands_to_metrics(bands, list_metrics))
