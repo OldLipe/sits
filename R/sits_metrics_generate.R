@@ -216,8 +216,8 @@ sits_metrics_generate <- function(cube,
             # define the output filename
             filename <- paste0(
                 output_dir, "/",
-                cube$satellite, "_",
-                cube$sensor, "_",
+                toupper(cube$satellite), "_",
+                toupper(cube$sensor), "_",
                 cube$tile, "_",
                 start_date, "_", end_date, "_",
                 bnd, toupper(metric_name), ".tif"
