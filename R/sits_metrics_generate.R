@@ -76,6 +76,7 @@ sits_metrics_generate <- function(cube,
     )
 
     # transform a vector of character into a list metrics
+    list_metrics <- metrics
     if (inherits(metrics, "character"))
         list_metrics <- .sits_transform_vector_metrics(metrics)
 
