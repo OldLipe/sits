@@ -108,6 +108,7 @@ sits_metrics_generate <- function(cube,
 
     return(cube_metrics)
 }
+
 #' @title Compare sits bands with metrics bands
 #' @name .transform_bands_to_metrics
 #' @keywords internal
@@ -128,6 +129,7 @@ sits_metrics_generate <- function(cube,
 
     bands
 }
+
 #' @title Create the images metrics
 #' @name .sits_create_metrics_bands
 #' @keywords internal
