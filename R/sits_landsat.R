@@ -209,6 +209,7 @@
     bands <- items[["bands"]]
 
     # get an example image
+    # TODO: change to: .sits_raster_api_params_file(file_info$path[1])
     img_usgs <- .sits_raster_api_open_rast(file_info[1,]$path)
 
     # get and format image crs

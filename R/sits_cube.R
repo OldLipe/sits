@@ -19,6 +19,7 @@
 #'  https://www.digitalearthafrica.org/}
 #'  \item{"AWS": }{Amazon Web Services (AWS)}
 #'  \item{"USGS": }{United States Geological Survey (USGS)}
+#'  \item{"MSPC": }{Microsoft Planetary Computer (MSPC)}
 #'  \item{"LOCAL": }{Defines a cube from on a set of local files.}
 #'  \item{"PROBS": }{Defines a cube to from a set of classified image files}.
 #'  \item{"SATVEG": }{Defines a cube to use the SATVEG web service.}
@@ -577,6 +578,85 @@ sits_cube.usgs_cube <- function(source = "USGS", ...,
 
         # add the information for each tile
         cube_t <- .sits_usgs_tile_cube(
+            name = name,
+            items = items,
+            collection = collection,
+            file_info = stack
+        )
+
+        class(cube_t) <- c("raster_cube", class(cube_t))
+        return(cube_t)
+    })
+    cube <- dplyr::bind_rows(tiles)
+
+    return(cube)
+}
+
+#' @rdname sits_cube
+#'
+#' @export
+#'
+sits_cube.mspc_cube <- function(source = "MSPC", ...,
+                                name = "mspc_cube",
+                                url = NULL,
+                                collection = "landsat-8-c2-l2",
+                                tiles = NULL,
+                                bands = NULL,
+                                bbox = NULL,
+                                start_date = NULL,
+                                end_date = NULL) {
+
+    # require package
+    if (!requireNamespace("rstac", quietly = TRUE)) {
+        stop(paste("Please install package rstac from CRAN:",
+                   "install.packages('rstac')"), call. = FALSE
+        )
+    }
+
+    # precondition - is AWS access available?
+    aws_access_ok <- .sits_aws_check_access(source)
+    if (!aws_access_ok)
+        return(NULL)
+
+    # precondition - is the url correct?
+    if (purrr::is_null(url)) {
+        # TODO: criar uma unica função que o parametro seja o provedor
+        url <- .sits_config_mspc_stac()
+    }
+
+    # test if USGS STAC is accessible
+    if (!(.sits_config_cube_access(url, "MSPC")))
+        return(NULL)
+
+    # precondition - is the collection name valid?
+    assertthat::assert_that(
+        collection == "landsat-8-c2-l2",
+        msg = "sits_cube: USGS supports only `landsat-8-c2-l2` collection."
+    )
+
+    # retrieve item information
+    items_info <- .sits_mspc_items(
+        url = url,
+        collection = collection,
+        tiles = tiles,
+        roi = bbox,
+        start_date = start_date,
+        end_date  = end_date,
+        bands = bands,
+        ...
+    )
+
+    # creating a group of items per tile
+    items_group <- .sits_stac_group(items_info,
+                                    fields = c("properties", "tile"))
+
+    tiles <- purrr::map(items_group, function(items) {
+
+        # retrieve the information from STAC
+        stack <- .sits_stac_items_info(items, items$bands)
+
+        # add the information for each tile
+        cube_t <- .sits_mspc_tile_cube(
             name = name,
             items = items,
             collection = collection,
