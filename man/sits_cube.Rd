@@ -6,6 +6,7 @@
 \alias{sits_cube.deafrica_cube}
 \alias{sits_cube.aws_cube}
 \alias{sits_cube.usgs_cube}
+\alias{sits_cube.mspc_cube}
 \alias{sits_cube.local_cube}
 \alias{sits_cube.probs_cube}
 \alias{sits_cube.satveg_cube}
@@ -59,6 +60,19 @@ sits_cube(source, ...)
   name = "usgs_cube",
   url = NULL,
   collection = "landsat-c2l2-sr",
+  tiles = NULL,
+  bands = NULL,
+  bbox = NULL,
+  start_date = NULL,
+  end_date = NULL
+)
+
+\method{sits_cube}{mspc_cube}(
+  source = "MSPC",
+  ...,
+  name = "mspc_cube",
+  url = NULL,
+  collection = "landsat-8-c2-l2",
   tiles = NULL,
   bands = NULL,
   bbox = NULL,
@@ -160,6 +174,7 @@ Currently, users can create data cube from the following sources:
  https://www.digitalearthafrica.org/}
  \item{"AWS": }{Amazon Web Services (AWS)}
  \item{"USGS": }{United States Geological Survey (USGS)}
+ \item{"MSPC": }{Microsoft Planetary Computer (MSPC)}
  \item{"LOCAL": }{Defines a cube from on a set of local files.}
  \item{"PROBS": }{Defines a cube to from a set of classified image files}.
  \item{"SATVEG": }{Defines a cube to use the SATVEG web service.}
@@ -293,6 +308,7 @@ Sys.setenv(
     "AWS_ACCESS_KEY_ID" = <your_aws_access_key>,
     "AWS_SECRET_ACCESS_KEY" = <your_aws_secret_access_key>
 )
+
 
 l8_cube <- sits_cube(source = "USGS",
                      name = "L8_CUBE_140048_140045_18_2019",
