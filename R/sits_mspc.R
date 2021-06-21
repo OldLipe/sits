@@ -47,15 +47,6 @@
     items_info <- rstac_query %>%
         rstac::post_request()
 
-    # if specified, a filter per tile
-    if (!is.null(tiles)) {
-        if (collection == "landsat-8-c2-l2") {
-            sep_tile <- .sits_usgs_format_tiles(tiles)
-            items_info <- .sits_mspc_search_tiles_landsat(items_info, sep_tile)
-        } else
-            items_info <- .sits_mspc_search_tiles_sentinel(items_info, sep_tile)
-    }
-
     # checks if the collection returned any items
     assertthat::assert_that(
         !(rstac::items_length(items_info) == 0),
@@ -70,8 +61,17 @@
         pgr_fetch <- TRUE
 
     # fetching all the metadata and updating to upper case instruments
-    items_info <- rstac::items_fetch(items_info,
-                                     progress = pgr_fetch)
+    # items_info <- rstac::items_fetch(items_info,
+    #                                  progress = pgr_fetch)
+
+    # if specified, a filter per tile
+    if (!is.null(tiles)) {
+        if (collection == "landsat-8-c2-l2") {
+            sep_tile <- .sits_usgs_format_tiles(tiles)
+            items_info <- .sits_mspc_search_tiles_landsat(items_info, sep_tile)
+        } else
+            items_info <- .sits_mspc_search_tiles_sentinel(items_info, sep_tile)
+    }
 
     # getting sensor name
     platform <- toupper(items_info$features[[1]]$properties$platform)
