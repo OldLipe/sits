@@ -181,8 +181,8 @@
         items$bands <- .sits_config_bands_stac_read(
             stac_provider = source,
             sensor = sensor,
-            bands = bands)
-
+            bands = bands
+        )
 
     return(items)
 }
