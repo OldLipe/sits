@@ -15,12 +15,14 @@
 #' @param end_date   a \code{character} corresponds to the final date when the
 #'                   cube will be created.
 #' @param bands      a \code{character} vector with the bands name.
+#' @param s2_resolution     Resolution of S2 images ("10m", "20m" or "60m")
+#'                          used to build cubes (only for AWS cubes)
 #' @param ...        other parameters to be passed for specific types.
 #'
 #' @return           a \code{STACItemCollection} object representing the search
 #'                   by rstac.
 .sits_mspc_items <- function(url, collection, tiles, roi,
-                             start_date, end_date, bands, ...){
+                             start_date, end_date, bands, s2_resolution, ...){
 
     # obtain the datetime parameter for STAC like parameter
     datetime <- .sits_stac_datetime(start_date, end_date)
@@ -61,21 +63,29 @@
         pgr_fetch <- TRUE
 
     # fetching all the metadata and updating to upper case instruments
-    # items_info <- rstac::items_fetch(items_info,
-    #                                  progress = pgr_fetch)
+    # items_info <- rstac::items_fetch(items_info, progress = pgr_fetch)
+    items_info <- rstac::items_sign(
+        items_info, sign_fn = rstac::sign_planetary_computer)
 
     # if specified, a filter per tile
     if (!is.null(tiles)) {
         if (collection == "landsat-8-c2-l2") {
             sep_tile <- .sits_usgs_format_tiles(tiles)
             items_info <- .sits_mspc_search_tiles_landsat(items_info, sep_tile)
-        } else
-            items_info <- .sits_mspc_search_tiles_sentinel(items_info, sep_tile)
+            # TODO: remove this line
+            sensor <- "OLI"
+        } else {
+            items_info <- .sits_mspc_search_tiles_sentinel(
+                .sits_mspc_filter_bands(items_info, bands, s2_resolution),
+                tiles
+            )
+            sensor <- "MSI"
+        }
     }
 
     # getting sensor name
-    platform <- toupper(items_info$features[[1]]$properties$platform)
-    sensor <- .sits_config_sensors(platform)
+    # platform <- toupper(items_info$features[[1]]$properties$platform)
+    # sensor <- .sits_config_sensors(platform)
 
     # getting bands name
     items_info <- .sits_stac_bands(items = items_info,
@@ -96,7 +106,6 @@
     })
 
     return(items_info)
-
 }
 
 #' @title Search items tiles in landsat collection
@@ -170,6 +179,49 @@
     )
 
     return(items)
+}
+
+#' @title Filter bands in sentinel collection
+#' @name .sits_mspc_filter_bands
+#' @keywords internal
+#'
+#' @param items a \code{STACItemCollection} object returned by rstac package.
+#'  grouped.
+#' @param bands      a \code{character} vector with the bands name.
+#' @param s2_resolution     Resolution of S2 images ("10m", "20m" or "60m")
+#'                          used to build cubes (only for AWS cubes)
+#'
+#' @return      a \code{STACItemCollection} object representing the search
+#'              by rstac with filtered bands.
+.sits_mspc_filter_bands <- function(items, bands, s2_resolution) {
+
+    bands_mspc <- .sits_config_s2_bands(s2_resolution)
+
+    if (s2_resolution == 20) {
+        # filter by bands in 20m to put _20m as a postfix
+        bands_mspc <- bands_mspc[bands_mspc %in% c("B02", "B03", "B04", "SCL")]
+        bands <- ifelse(bands %in% bands_mspc, paste0(bands, "_20m"), bands)
+    } else if (s2_resolution == 60) {
+
+        # filter by bands in 60m to put _60m as a postfix
+        bands_mspc <- bands_mspc[!bands_mspc %in%  c("B01", "B09")]
+        bands <- ifelse(bands %in% bands_mspc, paste0(bands, "_60m"), bands)
+    }
+
+    # fix cloud band name
+    bands <- gsub("SCL_", "SCL-", bands)
+
+    items$features <- purrr::map(items$features, function(item){
+        filtered_bands <- names(item$assets)[names(item$assets) %in% bands]
+        item$assets <- item$assets[names(item$assets) %in% filtered_bands]
+
+        # remove ext from bands names
+        names(item$assets) <- gsub(
+            "(_[0-9]{2}m)|(-[0-9]{2}m)", "", names(item$assets)
+        )
+        item
+    })
+    items
 }
 
 #' @title Get the STAC information corresponding to a tile.

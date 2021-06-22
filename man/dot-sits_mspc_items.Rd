@@ -4,7 +4,17 @@
 \alias{.sits_mspc_items}
 \title{Get information from items}
 \usage{
-.sits_mspc_items(url, collection, tiles, roi, start_date, end_date, bands, ...)
+.sits_mspc_items(
+  url,
+  collection,
+  tiles,
+  roi,
+  start_date,
+  end_date,
+  bands,
+  s2_resolution,
+  ...
+)
 }
 \arguments{
 \item{url}{a \code{character} representing a URL for the MSPC catalog.}
@@ -26,6 +36,9 @@ when the cube will be created.}
 cube will be created.}
 
 \item{bands}{a \code{character} vector with the bands name.}
+
+\item{s2_resolution}{Resolution of S2 images ("10m", "20m" or "60m")
+used to build cubes (only for AWS cubes)}
 
 \item{...}{other parameters to be passed for specific types.}
 }

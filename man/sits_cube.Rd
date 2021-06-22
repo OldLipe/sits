@@ -77,7 +77,8 @@ sits_cube(source, ...)
   bands = NULL,
   bbox = NULL,
   start_date = NULL,
-  end_date = NULL
+  end_date = NULL,
+  s2_resolution = NULL
 )
 
 \method{sits_cube}{local_cube}(

@@ -604,7 +604,8 @@ sits_cube.mspc_cube <- function(source = "MSPC", ...,
                                 bands = NULL,
                                 bbox = NULL,
                                 start_date = NULL,
-                                end_date = NULL) {
+                                end_date = NULL,
+                                s2_resolution = NULL) {
 
     # require package
     if (!requireNamespace("rstac", quietly = TRUE)) {
@@ -630,9 +631,19 @@ sits_cube.mspc_cube <- function(source = "MSPC", ...,
 
     # precondition - is the collection name valid?
     assertthat::assert_that(
-        collection == "landsat-8-c2-l2",
-        msg = "sits_cube: USGS supports only `landsat-8-c2-l2` collection."
+        collection %in% c("landsat-8-c2-l2", "sentinel-2-l2a"),
+        msg = paste("sits_cube: USGS supports only `landsat-8-c2-l2` and",
+                    "`sentinel-2-l2a` collections.")
     )
+
+    if (collection == "sentinel-2-l2a") {
+        assertthat::assert_that(
+            s2_resolution %in% c(10, 20, 60),
+            msg = "sits_cube: s2_resolution should be one of c(10, 20, 60)")
+
+        # select bands by resolution
+        bands <- .sits_s2_check_bands(bands, s2_resolution)
+    }
 
     # retrieve item information
     items_info <- .sits_mspc_items(
@@ -643,6 +654,7 @@ sits_cube.mspc_cube <- function(source = "MSPC", ...,
         start_date = start_date,
         end_date  = end_date,
         bands = bands,
+        s2_resolution = s2_resolution,
         ...
     )
 
