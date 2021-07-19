@@ -11,10 +11,21 @@ test_that("Internal", {
 
     expect_true(sits:::.sits_config_memory_bloat() > 1)
 
-    bands <- sits:::.sits_config_satveg_bands()
+    data_dir <- system.file("extdata/raster/cbers", package = "sits")
+    cbers_cube <- sits_cube(
+        source = "LOCAL",
+        name = "022024",
+        satellite = "CBERS-4",
+        sensor = "AWFI",
+        data_dir = data_dir,
+        delim = "_",
+        parse_info = c("X1", "X2", "tile", "band", "date")
+    )
 
-    expect_true(sits:::.sits_config_minimum_values("MODIS", bands)[1] > -100000)
-    expect_true(sits:::.sits_config_maximum_values("MODIS", bands)[1] < 100000)
+    bands <- sits:::sits_bands(cbers_cube)
+
+    expect_true(sits:::.sits_config_minimum_values(cbers_cube, bands)[1] > -100000)
+    expect_true(sits:::.sits_config_maximum_values(cbers_cube, bands)[1] < 100000)
 })
 
 test_that("Show", {
