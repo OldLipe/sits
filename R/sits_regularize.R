@@ -57,6 +57,8 @@
 #'  See above
 #' @param res        A \code{numeric} with spatial resolution of the image that
 #'  will be aggregated.
+#' @param multicores A \code{numeric} with the number of cores will be used in
+#'  the regularize. By default is used 1 core.
 #' @param agg_method A \code{character} with method that will be applied by
 #'  \code{gdalcubes} for aggregation.
 #'  Options: \code{min}, \code{max}, \code{mean}, \code{median} and
@@ -68,15 +70,13 @@
 #'  By default is bilinear.
 #' @param cloud_mask A \code{logical} to use cloud band for aggregation by
 #' \code{gdalcubes}. Default is \code{TRUE}.
-#' @param dir_images TODO: add documentation that this param is depricated
-#'
+#' @param vrt_dir    A \code{character} with a directory where the vrt will be
+#'  store. By default is saved on temporary directory.
 #' @note
 #'    The "roi" parameter defines a region of interest. It can be
 #'    an sf_object, a shapefile, or a bounding box vector with
 #'    named XY values ("xmin", "xmax", "ymin", "ymax") or
 #'    named lat/long values ("lat_min", "lat_max", "long_min", "long_max")
-#'
-#' @return A \code{sits_cube} with ... TODO: add documentação aqui
 #'
 #' @export
 #'
@@ -86,17 +86,14 @@ sits_regularize <- function(cube,
                             period = NULL,
                             roi = NULL,
                             res = NULL,
+                            multicores = NULL,
                             agg_method = NULL,
                             resampling = "bilinear",
                             cloud_mask = TRUE,
-                            ...,
-                            vrt_dir = tempdir(),
-                            dir_images = NULL) {
+                            vrt_dir = tempdir()) {
 
     # set caller to show in errors
     .check_set_caller("sits_regularize")
-
-    # TODO: add deprecated if
 
     # require gdalcubes package
     if (!requireNamespace("gdalcubes", quietly = TRUE)) {
@@ -105,6 +102,17 @@ sits_regularize <- function(cube,
         )
     }
 
+    .check_num(
+        x = multicores,
+        allow_null = TRUE,
+        allow_zero = FALSE,
+        min = 1,
+        msg = "invalid 'mutticores' parameter."
+        )
+
+    if (!is.null(multicores))
+        gdalcubes::gdalcubes_options(threads = multicores)
+
     # test if provided object its a sits cube
     .check_that(
         x = inherits(cube, "raster_cube"),
@@ -112,6 +120,8 @@ sits_regularize <- function(cube,
                     "please provide a 'raster_cube' object.",
                     "See '?sits_cube' for more information.")
     )
+
+
 
     # fix slashes for windows
     output_dir <- normalizePath(output_dir)
@@ -188,6 +198,10 @@ sits_regularize <- function(cube,
         return(tile_cube)
 
     })
+
+    # reset global option
+    if (!is.null(multicores))
+        gdalcubes::gdalcubes_options(threads = 1)
 
     class(gc_cube) <- c("raster_cube", class(gc_cube))
 

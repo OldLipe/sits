@@ -11,12 +11,11 @@ sits_regularize(
   period = NULL,
   roi = NULL,
   res = NULL,
+  multicores = NULL,
   agg_method = NULL,
   resampling = "bilinear",
   cloud_mask = TRUE,
-  ...,
-  vrt_dir = tempdir(),
-  dir_images = NULL
+  vrt_dir = tempdir()
 )
 }
 \arguments{
@@ -39,6 +38,9 @@ See above}
 \item{res}{A \code{numeric} with spatial resolution of the image that
 will be aggregated.}
 
+\item{multicores}{A \code{numeric} with the number of cores will be used in
+the regularize. By default is used 1 core.}
+
 \item{agg_method}{A \code{character} with method that will be applied by
 \code{gdalcubes} for aggregation.
 Options: \code{min}, \code{max}, \code{mean}, \code{median} and
@@ -53,10 +55,8 @@ By default is bilinear.}
 \item{cloud_mask}{A \code{logical} to use cloud band for aggregation by
 \code{gdalcubes}. Default is \code{TRUE}.}
 
-\item{dir_images}{TODO: add documentation that this param is depricated}
-}
-\value{
-A \code{sits_cube} with ... TODO: add documentação aqui
+\item{vrt_dir}{A \code{character} with a directory where the vrt will be
+store. By default is saved on temporary directory.}
 }
 \description{
 Creates cubes with regular time intervals
