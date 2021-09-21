@@ -313,6 +313,48 @@ sits_cube.bdc_cube <- function(source = "BDC", ...,
 #' @rdname sits_cube
 #'
 #' @export
+sits_cube.ms_cube <- function(source = "MS", ...,
+                              name = "ms_cube",
+                              collection,
+                              bands = NULL,
+                              tiles = NULL,
+                              bbox = NULL,
+                              start_date = NULL,
+                              end_date = NULL) {
+
+    # suite of checks to verify collection parameter
+    .check_collection(source = source,
+                      collection = collection)
+
+    if (is.null(bands))
+        bands <- .source_bands(source = source,
+                               collection = collection)
+
+    # Pre-condition - checks if the bands are supported by the collection
+    .check_bands(source = source,
+                 collection = collection,
+                 bands = bands)
+
+
+    # dry run to verify if service is running
+    .source_access_test(source = source,
+                        collection = collection, ...,
+                        bands = bands)
+
+    # builds a sits data cube
+    .source_cube(source = source,
+                 collection = collection,
+                 name = name,
+                 bands = bands,
+                 tiles = tiles,
+                 bbox = bbox,
+                 start_date = start_date,
+                 end_date = end_date, ...)
+}
+
+#' @rdname sits_cube
+#'
+#' @export
 sits_cube.deafrica_cube <- function(source = "DEAFRICA", ...,
                                     name = "deafrica_cube",
                                     url = NULL,
