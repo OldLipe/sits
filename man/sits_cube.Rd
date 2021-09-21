@@ -4,6 +4,7 @@
 \alias{sits_cube}
 \alias{sits_cube.wtss_cube}
 \alias{sits_cube.bdc_cube}
+\alias{sits_cube.ms_cube}
 \alias{sits_cube.deafrica_cube}
 \alias{sits_cube.aws_cube}
 \alias{sits_cube.usgs_cube}
@@ -20,6 +21,18 @@ sits_cube(source, ...)
   source = "BDC",
   ...,
   name = "bdc_cube",
+  collection,
+  bands = NULL,
+  tiles = NULL,
+  bbox = NULL,
+  start_date = NULL,
+  end_date = NULL
+)
+
+\method{sits_cube}{ms_cube}(
+  source = "MS",
+  ...,
+  name = "ms_cube",
   collection,
   bands = NULL,
   tiles = NULL,

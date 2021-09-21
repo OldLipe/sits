@@ -261,7 +261,7 @@
 #' @keywords internal
 #' @author Rolf Simoes, \email{rolf.simoes@@inpe.br}
 #'
-#' @param  cube         input data cube
+#' @param  cube input data cube
 #'
 #' @return A data cube
 .sits_cube_fix_name <- function(cube) {
