@@ -117,13 +117,17 @@ default:
 
     OLI                     : &landsat
         bands               :
-            SITS            : &oli_bands_sits ["B1", "B2", "B3", "B4", "B5", "B5MIN", "B6", "B7", "NDVI", "NDVIMIN", "NDVISTD", "NDVIAMD", "EVI", "EVISTD", "EVIMIN", "EVIAMD","FMASK4"]
-            BDC             : ["BAND1", "BAND2", "BAND3", "BAND4", "BAND5", "BAND5MIN" , "BAND6", "BAND7", "NDVI", "NDVIMIN", "NDVISTD", "NDVIAMD", "EVI", "EVISTD", "EVIMIN", "EVIAMD","FMASK4"]
+            SITS            : &oli_bands_sits ["B1", "B2", "B2IQR", "B3", "B3MAX", "B3FQR", "B3AMPLITUDE", "B3SKEW", "B4", "B4SQR","B5", "B5MIN", "B6", "B6MIN","B7", "NDVI", "NDVIMIN", "NDVISTD", "NDVIAMD", "NDWI2", "NDWI2FSLOPE", "MNDWI", "MNDWIMEAN", "EVI", "EVISTD", "EVIMIN", "EVIAMD","FMASK4"]
+            BDC             : ["BAND1", "BAND2", "BAND2IQR", "BAND3", "BAND3MAX", "BAND3FQR", "BAND3AMPLITUDE", "BAND3SKEW", "BAND4", "BAND4SQR","BAND5", "BAND5MIN" , "BAND6","BAND6MIN", "BAND7", "NDVI", "NDVIMIN", "NDVISTD", "NDVIAMD", "NDWI2", "NDWI2FSLOPE", "MNDWI", "MNDWIMEAN", "EVI", "EVISTD", "EVIMIN", "EVIAMD","FMASK4"]
             RASTER          : *oli_bands_sits
             cloud_band      : "FMASK4"
 
         missing_value       :
             NDVI            : -9999
+            MNDWI           : -9999
+            MNDWIMEAN       : -9999
+            NDWI2           : -9999
+            NDWI2FSLOPE     : -9999
             NDVIMIN         : -9999
             NDVISTD         : -9999
             NDVIAMD         : -9999
@@ -133,16 +137,27 @@ default:
             EVIAMD          : -9999
             B1              : -9999
             B2              : -9999
+            B2IQR           : -9999
+            B3MAX           : -9999
+            B3FQR           : -9999
+            B3AMPLITUDE     : -9999
+            B3SKEW          : -9999
+            B4SQR           : -9999
             B3              : -9999
             B4              : -9999
             B5              : -9999
             B5MIN           : -9999
             B6              : -9999
+            B6MIN           : -9999
             B7              : -9999
             FMASK           : 255
 
         minimum_value       :
             NDVI            : -10000
+            MNDWI           : -10000
+            MNDWIMEAN       : -10000
+            NDWI2           : -10000
+            NDWI2FSLOPE     : -10000
             NDVIMIN         : -10000
             NDVISTD         : -10000
             NDVIAMD         : -10000
@@ -152,16 +167,27 @@ default:
             EVIAMD          : -10000
             B1              : 0
             B2              : 0
+            B2IQR           : 0
+            B3MAX           : 0
+            B3FQR           : 0
+            B3AMPLITUDE     : 0
+            B3SKEW          : 0
+            B4SQR           : 0
             B3              : 0
             B4              : 0
             B5              : 0
             B5MIN           : 0
             B6              : 0
+            B6MIN           : 0
             B7              : 0
             FMASK           : 0
 
         maximum_value       :
             NDVI            : 10000
+            MNDWI           : 10000
+            MNDWIMEAN       : 10000
+            NDWI2           : 10000
+            NDWI2FSLOPE     : 10000
             NDVIMIN         : 10000
             NDVISTD         : 10000
             NDVIAMD         : 10000
@@ -171,16 +197,27 @@ default:
             EVIAMD          : 10000
             B1              : 10000
             B2              : 10000
+            B2IQR           : 10000
+            B3MAX           : 10000
+            B3FQR           : 10000
+            B3AMPLITUDE     : 10000
+            B3SKEW          : 10000
+            B4SQR           : 10000
             B3              : 10000
             B4              : 10000
             B5              : 10000
             B5MIN           : 10000
             B6              : 10000
+            B6MIN           : 10000
             B7              : 10000
             FMASK           : 255
 
         scale_factor:
             NDVI            : 0.0001
+            MNDWI           : 0.0001
+            MNDWIMEAN       : 0.0001
+            NDWI2           : 0.0001
+            NDWI2FSLOPE     : 0.0001
             NDVIMIN         : 0.0001
             NDVISTD         : 0.0001
             NDVIAMD         : 0.0001
@@ -190,11 +227,18 @@ default:
             EVIAMD          : 0.0001
             B1              : 0.0001
             B2              : 0.0001
+            B2IQR           : 0.0001
+            B3MAX           : 0.0001
+            B3FQR           : 0.0001
+            B3AMPLITUDE     : 0.0001
+            B3SKEW          : 0.0001
+            B4SQR           : 0.0001
             B3              : 0.0001
             B4              : 0.0001
             B5              : 0.0001
             B5MIN           : 0.0001
             B6              : 0.0001
+            B6MIN           : 0.0001
             B7              : 0.0001
             FMASK           : 1
 
@@ -208,8 +252,8 @@ default:
 
     AWFI                    :
         bands               :
-            SITS            : &awfi_bands_sits ["B13", "B13MIN", "B13SQR", "B13MAX", "B14", "B15", "B15IQR", "B15MIN", "B16", "B16AMD", "NDVI", "NDVIMIN", "NDVIMSE", "NDVIAMD", "NDVISQR", "NDVIMAX", "NDVIAMPLITUDE", "EVI", "EVISUM", "EVIIQR","EVIAMD","GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
-            BDC             : ["BAND13", "BAND13MIN", "BAND13SQR", "BAND13MAX", "BAND14", "BAND15", "BAND15IQR", "BAND15MIN", "BAND16","BAND16AMD", "NDVI", "NDVIMIN","NDVIMSE", "NDVIAMD","NDVISQR", "NDVIMAX", "NDVIAMPLITUDE", "EVI", "EVISUM","EVIIQR","EVIAMD","GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
+            SITS            : &awfi_bands_sits ["B13", "B13AMD", "B13MIN", "B13SQR", "B13MAX", "B13TQR","B14", "B14AMPLITUDE", "B14FSLOPE", "B14STD", "B15", "B15SQR", "B15FQR","B15IQR", "B15MIN", "B16", "B16AMD", "B16KURT","NDVI", "NDVIABS_SUM", "NDVIMIN", "NDVIMSE", "NDVIAMD", "NDVISQR", "NDVIMAX", "NDVIAMPLITUDE", "EVI", "EVISUM", "EVIIQR","EVIAMD","GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
+            BDC             : ["BAND13", "BAND13AMD","BAND13MIN", "BAND13SQR", "BAND13MAX", "BAND13TQR", "BAND14", "BAND14AMPLITUDE", "BAND14FSLOPE", "BAND14STD", "BAND15", "BAND15SQR", "BAND15FQR", "BAND15IQR", "BAND15MIN", "BAND16","BAND16AMD", "BAND16KURT", "NDVI", "NDVIABS_SUM","NDVIMIN","NDVIMSE", "NDVIAMD","NDVISQR", "NDVIMAX", "NDVIAMPLITUDE", "EVI", "EVISUM","EVIIQR","EVIAMD","GEMI", "GNDVI", "NDWI2", "PVR", "CMASK"]
             RASTER          :  *awfi_bands_sits
             cloud_band      : "CMASK"
 
@@ -224,6 +268,7 @@ default:
             NDVIAMD         : -9999
             NDVIMAX         : -9999
             NDVIAMPLITUDE   : -9999
+            NDVIABS_SUM     : -9999
             NDVISQR         : -9999
             EVI             : -9999
             EVIIQR          : -9999
@@ -232,12 +277,20 @@ default:
             B13             : -9999
             B13MIN          : -9999
             B13SQR          : -9999
+            B13TQR          : -9999
+            B13AMD          : -9999
             B14             : -9999
+            B14AMPLITUDE    : -9999
+            B14FSLOPE       : -9999
+            B14STD          : -9999
             B15             : -9999
             B15IQR          : -9999
+            B15FQR          : -9999
+            B15SQR          : -9999
             B15MIN          : -9999
             B16             : -9999
             B16AMD          : -9999
+            B16KURT         : -9999
             CMASK           : 255
 
         minimum_value       :
@@ -251,6 +304,7 @@ default:
             NDVIAMD         : -10000
             NDVIMAX         : -10000
             NDVIAMPLITUDE   : -10000
+            NDVIABS_SUM     : -10000
             NDVISQR         : -10000
             EVI             : -10000
             EVIIQR          : -10000
@@ -259,12 +313,20 @@ default:
             B13             : 1
             B13MIN          : 1
             B13SQR          : 1
+            B13TQR          : 1
+            B13AMD          : 1
             B14             : 1
+            B14AMPLITUDE    : 1
+            B14FSLOPE       : 1
+            B14STD          : 1
             B15             : 1
             B15IQR          : 1
+            B15FQR          : 1
+            B15SQR          : 1
             B15MIN          : 1
             B16             : 1
             B16AMD          : 1
+            B16KURT         : 1
             CMASK           : 0
 
         maximum_value       :
@@ -286,12 +348,20 @@ default:
             B13             : 10000
             B13MIN          : 10000
             B13SQR          : 10000
+            B13TQR          : 10000
+            B13AMD          : 10000
             B14             : 10000
+            B14AMPLITUDE    : 10000
+            B14FSLOPE       : 10000
+            B14STD          : 10000
             B15             : 10000
             B15IQR          : 10000
+            B15FQR          : 10000
+            B15SQR          : 10000
             B15MIN          : 10000
             B16             : 10000
             B16AMD          : 10000
+            B16KURT         : 10000
             CMASK           : 4
 
         scale_factor        :
@@ -305,6 +375,7 @@ default:
             NDVIAMD         : 0.0001
             NDVIMAX         : 0.0001
             NDVIAMPLITUDE   : 0.0001
+            NDVIABS_SUM     : 0.0001
             NDVISQR         : 0.0001
             EVI             : 0.0001
             EVIIQR          : 0.0001
@@ -313,12 +384,20 @@ default:
             B13             : 0.0001
             B13MIN          : 0.0001
             B13SQR          : 0.0001
+            B13TQR          : 0.0001
+            B13AMD          : 0.0001
             B14             : 0.0001
+            B14AMPLITUDE    : 0.0001
+            B14FSLOPE       : 0.0001
+            B14STD          : 0.0001
             B15             : 0.0001
             B15IQR          : 0.0001
+            B15FQR          : 0.0001
+            B15SQR          : 0.0001
             B15MIN          : 0.0001
             B16             : 0.0001
             B16AMD          : 0.0001
+            B16KURT         : 0.0001
             CMASK           : 1
 
         resolution          :
