@@ -128,6 +128,7 @@ Collate:
     'sits_labels_summary.R'
     'sits_machine_learning.R'
     'sits_merge.R'
+    'sits_metrics.R'
     'sits_mlp.R'
     'sits_ops_bands.R'
     'sits_parallel.R'
