@@ -65,13 +65,15 @@
         msg = "original samples not saved"
     )
 
-    # precondition - are the sample bands contained in the cube bands?
     tile_bands <- sits_bands(tile)
     bands <- sits_bands(samples)
-    .check_chr_within(
-        x = bands,
-        within = tile_bands,
-        msg = "some bands in samples are not in cube"
+
+    # precondition - are the sample bands contained in the cube bands?
+    if (is.null(attr(tile, "metrics")))
+        .check_chr_within(
+            x = bands,
+            within = tile_bands,
+            msg = "some bands in samples are not in cube"
     )
 
     # retrieve the normalization stats from the model
@@ -184,6 +186,7 @@
 
         # predict the classification values
         pred_block <- ml_model(distances)
+
         # log
         .sits_debug_log(output_dir = output_dir,
                         event      = "classification block",
@@ -196,6 +199,7 @@
             msg = paste("number of rows of probability matrix is different",
                         "from number of input pixels")
         )
+
         # log
         .sits_debug_log(output_dir = output_dir,
                         event      = "before save classified block")

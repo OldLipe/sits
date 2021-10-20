@@ -23,7 +23,10 @@
                                    compose_fn) {
 
     # get the bands in the same order as the samples
-    bands <- sits_bands(samples)
+    #bands <- sits_bands(samples)
+    bands <- sits_bands(cube)
+
+    # TODO: verificar se as metricas passadas estão no cubo
 
     # preprocess the input data
     data <- .sits_raster_data_preprocess(
@@ -73,6 +76,10 @@
 
     # set caller to show in errors
     .check_set_caller(".sits_raster_data_preprocess")
+
+    metrics_list <- attr(cube, "metrics")
+    if (!is.null(metrics_list))
+        cube <- sits_select(cube, names(metrics_list))
 
     # get the file information for the cube
     file_info <- cube$file_info[[1]]
@@ -171,6 +178,16 @@
             values <- .sits_ml_normalize_matrix(values, stats, b)
         }
 
+        # apply metrics on cubes
+        if (!is.null(metrics_list[[b]])) {
+
+            values <- lapply(
+                metrics_list[[b]], .sits_raster_metrics, values, 4
+            )
+
+            values <- do.call(cbind, values)
+        }
+
         return(values)
 
     })
@@ -181,7 +198,98 @@
     data <- do.call(cbind, values_bands)
 
     return(data)
+}
 
+#' @title . . .
+#' @name .sits_raster_metrics
+#' @keywords internal
+#'
+#' @description This function filters a matrix.
+#'
+#' @param  metric    metric to be process
+#' @param  values     matrix of values.
+#' @param  multicores Number of cores.
+#' @return Filtered matrix.
+.sits_raster_metrics <- function(metric, values, multicores) {
+    # TODO: criar uma lista de função
+
+    # basics metrics
+    if ("min" %in% metric)
+        metric_function <- sitsfeats::min_ts
+    if ("max" %in% metric)
+        metric_function <- sitsfeats::max_ts
+    if ("sum" %in% metric)
+        metric_function <- sitsfeats::sum_ts
+    if ("mean" %in% metric)
+        metric_function <- sitsfeats::mean_ts
+    if ("median" %in% metric)
+        metric_function <- sitsfeats::median_ts
+    if ("std" %in% metric)
+        metric_function <- sitsfeats::std_ts
+    if ("amplitude" %in% metric)
+        metric_function <- sitsfeats::amplitude_ts
+    if ("fslope" %in% metric)
+        metric_function <- sitsfeats::fslope_ts
+    if ("abs_sum" %in% metric)
+        metric_function <- sitsfeats::abs_sum_ts
+    if ("amd" %in% metric)
+        metric_function <- sitsfeats::amd_ts
+    if ("mse" %in% metric)
+        metric_function <- sitsfeats::mse_ts
+    if ("fqr" %in% metric)
+        metric_function <- sitsfeats::fqr_ts
+    if ("sqr" %in% metric)
+        metric_function <- sitsfeats::sqr_ts
+    if ("tqr" %in% metric)
+        metric_function <- sitsfeats::tqr_ts
+    if ("iqr" %in% metric)
+        metric_function <- sitsfeats::iqr_ts
+
+    # polar metrics
+    if ("area_q1" %in% metric)
+        metric_function <- sitsfeats::area_q1
+    if ("area_q2" %in% metric)
+        metric_function <- sitsfeats::area_q2
+    if ("area_q3" %in% metric)
+        metric_function <- sitsfeats::area_q3
+    if ("area_q4" %in% metric)
+        metric_function <- sitsfeats::area_q4
+    if ("polar_balance" %in% metric)
+        metric_function <- sitsfeats::polar_balance
+    if ("angle" %in% metric)
+        metric_function <- sitsfeats::angle
+    if ("area_ts" %in% metric)
+        metric_function <- sitsfeats::area_ts
+    if ("ecc_metric" %in% metric)
+        metric_function <- sitsfeats::ecc_metric
+    if ("gyration_radius" %in% metric)
+        metric_function <- sitsfeats::gyration_radius
+    if ("csi" %in% metric)
+        metric_function <- sitsfeats::csi
+
+    #auxiliary function to scale a block of data
+    apply_metrics <- function(chunk, f) {
+
+        values <- f(chunk)
+        names(values) <- metric
+
+        return(values)
+    }
+
+    if (multicores > 1) {
+        chunks <- .sits_raster_data_split(values, multicores)
+        rows <- parallel::mclapply(chunks,
+                                   apply_metrics,
+                                   metric_function,
+                                   mc.cores = multicores
+        )
+        values <- do.call(rbind, rows)
+    }
+    else {
+        values <- apply_metrics(values, metric_function)
+    }
+
+    return(values)
 }
 
 #' @title Split a data.table or a matrix for parallel processing

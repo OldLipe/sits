@@ -240,7 +240,6 @@ sits_cube <- function(source, ...) {
 #' @rdname sits_cube
 #'
 #' @export
-#'
 sits_cube.wtss_cube <- function(source = "WTSS", ...,
                                 name = "wtss_cube",
                                 url = NULL,

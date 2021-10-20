@@ -277,10 +277,11 @@ sits_classify.raster_cube <- function(data, ml_model, ...,
         n_samples <- length(sits_timeline(samples))
         n_tile <- length(sits_timeline(tile))
 
-        .check_that(
-            x = n_samples == n_tile,
-            msg = "number of instances of samples and cube differ"
-        )
+        if (is.null(attr(tile, "metrics")))
+            .check_that(
+                x = n_samples == n_tile,
+                msg = "number of instances of samples and cube differ"
+            )
 
         # # The user can provide both interpolation and compositions functions
         # if (!purrr::is_null(interp_fn))
