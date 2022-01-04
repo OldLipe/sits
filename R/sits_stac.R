@@ -140,7 +140,7 @@
 }
 
 #' @title Add gdal file system in a href
-#' @name .stac_add_gdal_vsi
+#' @name .stac_add_gdal_fs
 #' @keywords internal
 #'
 #' @description Currently, HTTP, S3 (AWS), and google storage (gs)
