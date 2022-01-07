@@ -91,6 +91,7 @@ Collate:
     'sits_accuracy.R'
     'sits_bands.R'
     'sits_bbox.R'
+    'baggio_utils.R'
     'sits_classification.R'
     'sits_classify_ts.R'
     'sits_classify_cube.R'

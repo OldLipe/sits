@@ -131,7 +131,7 @@
     # get the resolution
     # throw an error if resolution are not the same
     # for all bands of the cube
-    res   <- .cube_resolution(cube)
+    res  <- .cube_resolution(cube)
 
     # get ncols and nrows
     # throw an error if size are not the same
