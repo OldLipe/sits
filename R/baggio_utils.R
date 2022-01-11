@@ -95,9 +95,6 @@
         # get the number of bands
         nbands <- length(.cube_bands(tile, add_cloud = TRUE))
 
-        # number of instances per classification interval
-        #ninterval <- length(.cube_timeline(tile))
-
         # number of bytes per pixel
         nbytes <- 8
 
@@ -118,8 +115,6 @@
 
         # estimated size of the data for classification
         input_data_size <- as.numeric(ninstances) * nbands_data_size
-        #output_data_size <- as.numeric(ninterval) * nbands_data_size_no_cloud
-        #class_data_size <- (input_data_size + output_data_size) * proc_bloat
         class_data_size <- (input_data_size) * proc_bloat
 
         # number of passes to read the full data sets
@@ -144,22 +139,32 @@
     return(blocks)
 }
 
-.preprocess_images <- function(cube,
-                               roi,
-                               impute_fn = sits_impute_linear(),
-                               filter_fn = NULL,
-                               normalize_fn = NULL,
-                               multicores,
-                               memsize,
-                               output_dir,
-                               bands = NULL) {
+.bg_merge_files <- function(filenames, pattern_name, output_dir) {
+
+    .raster_merge(
+        in_files = filenames,
+        out_file = paste0(output_dir, pattern_name),
+        format = "GTiff",
+        gdal_datatype = "Int16",
+        gdal_options = .config_gtiff_default_options(),
+        overwrite = TRUE
+    )
+}
+
+generate_images <- function(cube,
+                            roi,
+                            impute_fn = sits_impute_linear(),
+                            filter_fn = NULL,
+                            normalize_fn = NULL,
+                            multicores,
+                            memsize,
+                            output_dir,
+                            bands = NULL) {
 
     stopifnot("CLOUD" %in% sits_bands(cube))
 
-    # 0 - criar um subimage
     sub_image <- .sits_raster_sub_image(cube = cube, roi = roi)
 
-    # 1 - definir a quantidade de chunks
     blocks <- .bg_get_block_size(
         cube = cube,
         roi = roi,
@@ -170,7 +175,6 @@
 
     stopifnot(all(bands %in% sits_bands(cube)))
 
-    # 2 - um loop sobre as bandas
     if (is.null(bands))
         bands <- .cube_bands(cube, add_cloud = FALSE)
 
@@ -183,13 +187,11 @@
         scale_factor <- .cube_band_scale_factor(cube, band = band_cube)
         offset_value <- .cube_band_offset_value(cube = cube, band = band_cube)
 
-        # selecionar as bandas do cubo
         file_info_band <- .cube_file_info(cube)
 
         band_files <- dplyr::filter(file_info_band, band == band_cube)[["path"]]
         cld_files <- dplyr::filter(file_info_band, band == "CLOUD")[["path"]]
 
-        # 3 - um loop sobre os blocos
         .sits_parallel_start(workers = multicores, log = FALSE)
         on.exit(.sits_parallel_stop(), add = TRUE)
 
@@ -236,11 +238,10 @@
                     crs     = params$crs
                 )
 
-                # copy values
-                r_obj <- .raster_set_values(r_obj  = r_obj,
-                                            values = distances[, i])
+                r_obj <- .raster_set_values(
+                    r_obj  = r_obj, values = distances[, i]
+                )
 
-                # write the probabilities to a raster file
                 .raster_write_rast(
                     r_obj        = r_obj,
                     file         = filename_block,
@@ -255,34 +256,25 @@
 
         for (i in seq_along(sits_timeline(cube))) {
 
-            files <- list.files(path = output_dir,
-                                pattern = paste0("_", band_cube,
-                                                 "_", sits_timeline(cube)[[i]]),
-                                full.names = TRUE)
+            files <- list.files(
+                path = output_dir,
+                pattern = paste0("_", band_cube, "_", sits_timeline(cube)[[i]]),
+                full.names = TRUE
+            )
 
-            pattern_name <- paste(cube$satellite[[1]],
-                                  cube$sensor[[1]],
-                                  band_cube, sits_timeline(cube)[[i]], ".tif",
-                                  sep = "_")
+            pattern_name <- paste(
+                cube$satellite[[1]],
+                cube$sensor[[1]],
+                band_cube, sits_timeline(cube)[[i]], ".tif",
+                sep = "_"
+            )
 
-            merge_files(filenames = files,
-                        pattern_name = pattern_name,
-                        output_dir = output_dir)
+            .bg_merge_files(
+                filenames = files,
+                pattern_name = pattern_name,
+                output_dir = output_dir
+            )
         }
         gc()
     }
-}
-
-
-merge_files <- function(filenames, pattern_name, output_dir) {
-
-    # join predictions
-    .raster_merge(
-        in_files = filenames,
-        out_file = paste0(output_dir, pattern_name),
-        format = "GTiff",
-        gdal_datatype = "Int16",
-        gdal_options = .config_gtiff_default_options(),
-        overwrite = TRUE
-    )
 }
