@@ -1,3 +1,4 @@
+#' TODO: document
 .bg_raster_preprocess <- function(cube,
                                   file,
                                   file_cld,
@@ -80,6 +81,7 @@
     return(values)
 }
 
+#' TODO: document
 .bg_get_block_size <- function(cube, roi, sub_image, memsize, multicores) {
 
     sub_image <-  .sits_raster_sub_image(cube = cube, roi = roi)
@@ -139,6 +141,7 @@
     return(blocks)
 }
 
+#' TODO: document
 .bg_merge_files <- function(filenames, pattern_name, output_dir) {
 
     .raster_merge(
@@ -151,6 +154,7 @@
     )
 }
 
+#' TODO: document
 generate_images <- function(cube,
                             roi,
                             impute_fn = sits_impute_linear(),
