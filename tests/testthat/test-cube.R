@@ -59,30 +59,29 @@ test_that("Backwards compatibility", {
 
     expect_null(raster_cube)
 
-    msg <- capture_messages(sits_cube(
-        source = "LOCAL",
-        origin = "BDC",
-        collection = "MOD13Q1-6",
-        data_dir = data_dir,
-        delim = "_",
-        parse_info = c("X1", "X2", "tile", "band", "date")
-    )
+    expect_message(
+        object = sits_cube(
+            source = "LOCAL",
+            origin = "BDC",
+            collection = "MOD13Q1-6",
+            data_dir = data_dir,
+            delim = "_",
+            parse_info = c("X1", "X2", "tile", "band", "date")
+        ),
+        regexp = "LOCAL value is deprecated"
     )
 
-    expect_true(grepl("LOCAL value is deprecated", msg))
-
-    msg <- capture_messages(
-        raster_cube <- sits_cube(
+    expect_message(
+        object = sits_cube(
             source = "BDC",
             collection = "MOD13Q1-6",
             band = c("NDVI", "EVI"),
             data_dir = data_dir,
             delim = "_",
             parse_info = c("X1", "X2", "tile", "band", "date")
-        )
+        ),
+        regexp = "please use bands instead of band as parameter"
     )
-    expect_true(grepl("please use bands instead of band as parameter",
-                      msg))
 })
 
 test_that("Creating a raster stack cube and selecting bands", {
