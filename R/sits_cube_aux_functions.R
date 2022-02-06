@@ -509,16 +509,16 @@
        .file_info_xres(tile)
     })
 
-    if (length(unique(unlist(res_cube_x))) != 1)
-        return(FALSE)
+    # if (length(unique(unlist(res_cube_x))) != 1)
+    #     return(FALSE)
 
     # check if the resolutions are unique
     res_cube_y <- slider::slide(cube, function(tile){
         .file_info_yres(tile)
     })
 
-    if (length(unique(unlist(res_cube_y))) != 1)
-        return(FALSE)
+    # if (length(unique(unlist(res_cube_y))) != 1)
+    #     return(FALSE)
 
     # check if timelines are unique
     timelines <- slider::slide(cube, function(tile){
@@ -638,17 +638,17 @@
     xres <- .file_info_xres(cube)
     yres <- .file_info_yres(cube)
 
-    # post-condition
-    .check_num(xres, min = 0, allow_zero = FALSE,
-               len_min = 1, len_max = 1,
-               msg = "invalid xres value")
+    # # post-condition
+    # .check_num(xres, min = 0, allow_zero = FALSE,
+    #            len_min = 1, len_max = 1,
+    #            msg = "invalid xres value")
+    #
+    # # post-condition
+    # .check_num(yres, min = 0, allow_zero = FALSE,
+    #            len_min = 1, len_max = 1,
+    #            msg = "invalid yres value")
 
-    # post-condition
-    .check_num(yres, min = 0, allow_zero = FALSE,
-               len_min = 1, len_max = 1,
-               msg = "invalid yres value")
-
-    res <- c(xres = xres, yres = yres)
+    res <- c(xres = xres[[1]], yres = yres[[1]])
 
     return(res)
 }
