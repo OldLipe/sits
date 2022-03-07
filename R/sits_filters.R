@@ -53,14 +53,23 @@ sits_sgolay <- function(data = NULL, order = 3, length = 5, scaling = 1) {
     filter_fun <- function(data) {
         if (inherits(data, "matrix")) {
             return(t(apply(data, 1, .sits_signal_sgolayfilt, p = order,
-                         n = length, ts = scaling)))
+                           n = length, ts = scaling)))
         } else {
             return(.sits_signal_sgolayfilt(data, p = order,
                                            n = length, ts = scaling))
         }
     }
 
-    result <- .sits_factory_function(data, filter_fun)
+    filter_call <- function(data) {
+
+        if (inherits(data, "sits")) {
+            .apply_across(data, fn = filter_fun)
+        } else
+            filter_fun(data)
+    }
+
+
+    result <- .sits_factory_function(data, filter_call)
 
     return(result)
 }
@@ -103,7 +112,15 @@ sits_whittaker <- function(data = NULL, lambda = 0.5) {
         }
     }
 
-    result <- .sits_factory_function(data, filter_fun)
+    filter_call <- function(data) {
+
+        if (inherits(data, "sits")) {
+            .apply_across(data, fn = filter_fun)
+        } else
+            filter_fun(data)
+    }
+
+    result <- .sits_factory_function(data, filter_call)
 
     return(result)
 }
@@ -290,4 +307,3 @@ sits_filter <- function(data, filter = sits_whittaker()) {
     # else Xsvd$v[, Positive, drop = FALSE] %*% ((1/Xsvd$d[Positive]) * t(Xsvd$u[, Positive, drop = FALSE]))
     Xsvd$v %*% (1/Xsvd$d * t(Xsvd$u))
 }
-
