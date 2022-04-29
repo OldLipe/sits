@@ -67,10 +67,14 @@ sits_tuning_random <- function(samples,
             msg = "invalid 'validation_split' parameter"
         )
     }
+
     # check 'ml_functions' parameter
-    ml_function <- substitute(ml_method, env = environment())
-    if (is.call(ml_function)) ml_function <- ml_function[[1]]
-    ml_function <- eval(ml_function, envir = asNamespace("sits"))
+    if (is.function(ml_method)) {
+        ml_method <- substitute(ml_method, env = environment())
+        if (is.call(ml_method)) ml_method <- ml_method[[1]]
+    }
+
+    ml_function <- eval(ml_method, envir = asNamespace("sits"))
 
     # check 'multicores' parameter
     .check_num(
