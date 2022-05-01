@@ -10,11 +10,11 @@
 #' @param  type              Method to measure uncertainty. See details.
 #' @param  ...               Parameters for specific functions.
 #' @param  multicores        Number of cores to run the function.
+#' @param  memsize           Maximum overall memory (in GB) to run the
+#'                           function.
 #' @param  window_size       Size of the neighborhood.
 #' @param  window_fn         Function used with the window filter. For now,
 #'                           only the mean is available.
-#' @param  memsize           Maximum overall memory (in GB) to run the
-#'                           function.
 #' @param  output_dir        Output directory for image files.
 #' @param  version           Version of resulting image.
 #'                           (in the case of multiple tests)
@@ -22,51 +22,17 @@
 #'
 #' @description Calculate the uncertainty cube based on the probabilities
 #' produced by the classifier. Takes a probability cube as input.
-#' The uncertainty measure is relevant in the context of active leaning,
+#' The uncertainity measure is relevant in the context of active leaning,
 #' and helps the increase the quantity and quality of training samples by
 #' providing information about the confidence of the model.
+#' The supported types of uncertainty are 'entropy', 'least', and 'margin'.
+#' "entropy" is the difference between all predictions expressed as entropy,
+#' "least" is the difference between 100% and most confident prediction, and
+#' "margin" is the difference between the two most confident predictions.
 #'
-#' The supported types of uncertainty n_are \code{entropy}, \code{least}, and
-#' \code{margin}:
-#'  \itemize{
-#'  \item{\code{entropy}: }{difference between all predictions
-#'    expressed as entropy.}
-#'  \item{\code{least}: }{difference between 100% and most
-#'    confident prediction.}
-#'  \item{\code{margin}: }{difference between the two most
-#'    confident predictions.}
-#'  }
-#'
-#' @examples
-#' if (sits_active_tests()) {
-#' data_dir <- system.file("extdata/raster/mod13q1", package = "sits")
-#' out_dir <- tempdir()
-#' cube <- sits_cube(
-#'     source = "BDC",
-#'     collection = "MOD13Q1-6",
-#'     data_dir = data_dir,
-#'     delim = "_",
-#'     parse_info = c("X1", "X2", "tile", "band", "date")
-#' )
-#' samples_2bands <- sits_select(
-#'     sits::samples_modis_4bands,
-#'     bands = c("NDVI")
-#' )
-#' rfor_model <- sits_train(samples_2bands,
-#'                         ml_method = sits_rfor(verbose = FALSE)
-#' )
-#' probs_cube <- sits_classify(
-#'     cube,
-#'     ml_model = rfor_model,
-#'     output_dir = tempdir(),
-#'     memsize = 4, multicores = 1
-#' )
-#' cube <- sits_uncertainty(probs_cube,
-#'                          type = "entropy",
-#'                          output_dir = out_dir)
-#'
-#'}
-#'
+#' @note
+#' Please refer to the sits documentation available in
+#' <https://e-sensing.github.io/sitsbook/> for detailed examples.
 #' @export
 sits_uncertainty <- function(cube, type = "least", ...,
                              multicores = 2,
@@ -339,7 +305,7 @@ sits_uncertainty.entropy <- function(cube, type = "entropy", ...,
     # bind rows
     result_cube <- dplyr::bind_rows(result_cube)
 
-    class(result_cube) <- union(class(result_cube), class(cube))
+    class(result_cube) <- c("uncertainty_cube", class(cube))
 
     return(result_cube)
 }

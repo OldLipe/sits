@@ -38,24 +38,10 @@ test_that("Plot Time Series and Images", {
     size_x <- bbox[["xmax"]] - bbox[["xmin"]]
     size_y <- bbox[["ymax"]] - bbox[["ymin"]]
 
-    roi <- c(
-        xmin = floor(bbox[["xmin"]] + size_x / 4),
-        xmax = floor(bbox[["xmax"]] - size_x / 4),
-        ymin = floor(bbox[["ymin"]] + size_y / 4),
-        ymax = floor(bbox[["ymax"]] - size_y / 4)
-    )
-
-    r_obj <- plot(sinop,
-                  red = "NDVI", blue = "NDVI", green = "NDVI",
-                  roi = roi
-    )
-
-    expect_equal(terra::nlyr(r_obj), 3)
-    expect_equal(terra::ncol(r_obj), 128)
 
     r_obj <- plot(sinop, band = "NDVI")
 
-    expect_equal(terra::nlyr(r_obj), 1)
+    expect_equal(terra::nlyr(r_obj), 3)
     expect_equal(terra::ncol(r_obj), 254)
 
     sinop_probs <- suppressMessages(
@@ -79,7 +65,7 @@ test_that("Plot Time Series and Images", {
                                      output_dir = tempdir()
     )
 
-    p_uncert <- plot(sinop_uncert, n_breaks = 11, breaks = "pretty")
+    p_uncert <- plot(sinop_uncert)
 
     expect_equal(p_uncert$adj, 0.5)
     expect_equal(p_uncert$lend, "round")
@@ -139,7 +125,7 @@ test_that("Plot torch model", {
     testthat::skip_on_cran()
 
     samples_ndvi <- sits_select(samples_modis_4bands,
-                                     bands = c("NDVI")
+                                bands = c("NDVI")
     )
     model <- sits_train(
         samples_ndvi,
