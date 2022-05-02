@@ -60,7 +60,7 @@ sits_view.sits <- function(x, ...,
                            palette = "Harmonic") {
 
     # precondition
-    .check_require_packages("leaflet")
+    .check_require_packages(c("leaflet", "sf"))
 
     # first select unique locations
     x <- dplyr::distinct(x,

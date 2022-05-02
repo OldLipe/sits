@@ -46,7 +46,7 @@ test_that("Bbox", {
   expect_true(bbox["xmin"] < -60.0)
 })
 
-test_that("Merge", {
+test_that("Merge samples", {
   point_ndvi <- sits_select(point_mt_6bands, bands = "NDVI")
   point_evi <- sits_select(point_mt_6bands, bands = "EVI")
   result <- sits_merge(point_ndvi, point_evi)
@@ -56,6 +56,27 @@ test_that("Merge", {
 
   result2 <- sits_merge(point_ndvi, point_ndvi)
   expect_true(all(sits_bands(result2) %in% c("NDVI.1", "NDVI.2")))
+})
+
+test_that("Merge cubes", {
+  data_dir <- system.file("extdata/raster/mod13q1", package = "sits")
+  sinop_1 <- sits_cube(
+    source = "BDC",
+    collection = "MOD13Q1-6",
+    data_dir = data_dir,
+    delim = "_",
+    parse_info = c("X1", "X2", "tile", "band", "date")
+  )
+
+  sinop_2 <- sinop_1
+
+  merged_cubes <- sits_merge(sinop_1, sinop_2)
+
+  expect_equal(
+    object = sits_bands(merged_cubes),
+    expected =  c("NDVI.1", "NDVI.2")
+  )
+
 })
 
 test_that("Prune", {
