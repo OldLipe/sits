@@ -105,8 +105,9 @@ sits_tuning <- function(samples,
         )
     }
     # check 'ml_functions' parameter
-    ml_function <- substitute(ml_method, env = environment())
-    if (is.call(ml_function)) ml_function <- ml_function[[1]]
+    if (is.function(ml_method))
+        ml_function <- substitute(ml_method, env = environment())
+    if (is.call(ml_method)) ml_function <- ml_method[[1]]
     ml_function <- eval(ml_function, envir = asNamespace("sits"))
     # check 'params' parameter
     .check_lst(
