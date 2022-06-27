@@ -282,7 +282,15 @@ sits_smooth.bayes <- function(cube, type = "bayes", ...,
             b <- .raster_open_rast(in_file)
 
             # crop adding overlaps
-            chunk <- .raster_crop(r_obj = b, block = block)
+            temp_chunk_file <- tempfile(tmpdir = output_dir,
+                                        pattern = "chunk_temp")
+            chunk <- .raster_crop(r_obj = b,
+                                  block = block,
+                                  filename = temp_chunk_file,
+                                  datatype = .raster_data_type(
+                                      .config_get("probs_cube_data_type")
+                                  ),
+                                  gdal = .config_gtiff_default_options())
 
             # process it
             raster_out <- .do_bayes(chunk = chunk)
@@ -296,7 +304,17 @@ sits_smooth.bayes <- function(cube, type = "bayes", ...,
             )
 
             # crop removing overlaps
-            raster_out <- .raster_crop(raster_out, block = blk_no_overlap)
+            temp_chunk_file_no <- tempfile(tmpdir = output_dir,
+                                           pattern = "chunk_temp_no")
+            raster_out <- .raster_crop(raster_out,
+                                       block = blk_no_overlap,
+                                       filename = temp_chunk_file_no,
+                                       datatype = .raster_data_type(
+                                           .config_get("probs_cube_data_type")
+                                       ),
+                                       gdal = .config_gtiff_default_options())
+            on.exit(unlink(c(temp_chunk_file, temp_chunk_file_no)))
+
             block_file <- .smth_filename(
                 tile = tile_new,
                 output_dir = output_dir,
