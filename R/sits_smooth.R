@@ -290,7 +290,8 @@ sits_smooth.bayes <- function(cube, type = "bayes", ...,
                                   datatype = .raster_data_type(
                                       .config_get("probs_cube_data_type")
                                   ),
-                                  gdal = .config_gtiff_default_options())
+                                  gdal = .config_gtiff_default_options(),
+                                  filetype = "GTiff")
 
             # process it
             raster_out <- .do_bayes(chunk = chunk)
@@ -312,7 +313,9 @@ sits_smooth.bayes <- function(cube, type = "bayes", ...,
                                        datatype = .raster_data_type(
                                            .config_get("probs_cube_data_type")
                                        ),
-                                       gdal = .config_gtiff_default_options())
+                                       gdal = .config_gtiff_default_options(),
+                                       filetype = "GTiff"
+                                       )
             on.exit(unlink(c(temp_chunk_file, temp_chunk_file_no)))
 
             block_file <- .smth_filename(
