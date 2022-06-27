@@ -61,9 +61,9 @@ Imports:
     terra (>= 1.5-17),
     tibble (>= 3.1),
     tidyr (>= 1.2.0),
-    torch (>= 0.7.0),
     utils
 Suggests:
+    torch (>= 0.7.0),
     caret,
     dendextend,
     dtwclust,
