@@ -283,7 +283,8 @@ sits_smooth.bayes <- function(cube, type = "bayes", ...,
 
             # crop adding overlaps
             temp_chunk_file <- tempfile(tmpdir = output_dir,
-                                        pattern = "chunk_temp")
+                                        pattern = "chunk_temp",
+                                        fileext = ".tif")
             chunk <- .raster_crop(r_obj = b,
                                   block = block,
                                   filename = temp_chunk_file,
