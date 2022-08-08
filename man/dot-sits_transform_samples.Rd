@@ -17,7 +17,7 @@ This parameter only works for 'csv' or data.frame'
 samples. Default is 4326.}
 }
 \value{
-A tibble with tranformed points.
+A tibble with transformed points.
 }
 \description{
 Transforming samples points to wgs84 and replace the longitude
