@@ -83,6 +83,9 @@ class_cube_data_type    : "INT1U"
 # minimum number of files for sits local cube to be run on parallel
 local_min_files_for_parallel : 20
 
+# minimum number of samples to divide into chunks
+min_samples_per_chunk : 2000
+
 # valid raster data types
 valid_raster_data_types : ["INT1U", "INT2U", "INT2S", "INT4U",
                           "INT4S", "FLT4S", "FLT8S"]
