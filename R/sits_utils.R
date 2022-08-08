@@ -155,7 +155,7 @@ sits_run_examples <- function() {
 #'                        This parameter only works for 'csv' or data.frame'
 #'                        samples. Default is 4326.
 #'
-#' @return A tibble with tranformed points.
+#' @return A tibble with transformed points.
 .sits_transform_samples <- function(samples, crs) {
 
     .check_chr_within(
