@@ -21,7 +21,7 @@ test_that("Reading a LAT/LONG from RASTER", {
 
     samples <- tibble::tibble(longitude = -55.66738, latitude = -11.76990)
 
-    point_ndvi <- sits_get_data(raster_cube, samples)
+    point_ndvi <- sits_get_data(raster_cube, samples, multicores = 1)
 
     expect_equal(names(point_ndvi)[1], "longitude")
     expect_true(ncol(sits_time_series(point_ndvi)) == 2)
@@ -420,4 +420,60 @@ test_that("Reading metadata from CSV file", {
         "id", "longitude", "latitude",
         "start_date", "end_date", "label"
     )))
+})
+
+test_that("Reading a LAT/LONG from CLASSIFIED CUBE", {
+
+    samples_ndvi <- sits_select(samples_modis_4bands, bands = c("NDVI"))
+    # train a random forest model
+    rf_model <- sits_train(samples_ndvi, ml_method = sits_rfor)
+
+    # Example of classification of a data cube
+    # create a data cube from local files
+    data_dir <- system.file("extdata/raster/mod13q1", package = "sits")
+    cube <- sits_cube(
+        source = "BDC",
+        collection = "MOD13Q1-6",
+        data_dir = data_dir,
+        delim = "_",
+        parse_info = c("X1", "X2", "tile", "band", "date")
+    )
+    # classify a data cube
+    probs_cube <- sits_classify(
+        data = cube,
+        ml_model = rf_model,
+        output_dir = tempdir()
+    )
+
+    # label the probability cube
+    label_cube <- sits_label_classification(
+        cube = probs_cube,
+        output_dir = tempdir()
+    )
+
+    samples_ndvi_labels <- dplyr::mutate(
+        samples_ndvi,
+        start_date = as.Date("2013-09-14"),
+        end_date = as.Date("2014-08-29"),
+    )
+    pts_labels <- sits_get_data(
+        cube = label_cube,
+        samples = samples_ndvi_labels
+    )
+
+    expect_equal(object = nrow(pts_labels), expected = 5)
+    expect_true(
+        all(colnames(pts_labels) %in% c("longitude", "latitude",
+                                    "start_date", "end_date",
+                                    "label", "cube", "predicted"))
+    )
+    expect_true(
+        all(class(pts_labels) %in% c("predicted", "sits",
+                                 "tbl_df", "tbl", "data.frame"))
+    )
+
+    unlink(
+        c(label_cube[["file_info"]][[1]][["path"]],
+          probs_cube[["file_info"]][[1]][["path"]])
+    )
 })
