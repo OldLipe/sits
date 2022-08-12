@@ -458,7 +458,8 @@ test_that("Reading a LAT/LONG from CLASSIFIED CUBE", {
     )
     pts_labels <- sits_get_data(
         cube = label_cube,
-        samples = samples_ndvi_labels
+        samples = samples_ndvi_labels,
+        multicores = 1
     )
 
     expect_equal(object = nrow(pts_labels), expected = 5)
