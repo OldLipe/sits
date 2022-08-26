@@ -412,11 +412,11 @@
     )
 
     if (!is.na(crs[["code"]])) {
-        return(c(crs = paste(crs[["authority"]], crs[["code"]], sep = ":")))
+        return(paste(crs[["authority"]], crs[["code"]], sep = ":"))
     }
 
     suppressWarnings(
-        c(crs = as.character(terra::crs(x = r_obj)))
+        as.character(terra::crs(x = r_obj))
     )
 }
 
