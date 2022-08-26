@@ -178,6 +178,9 @@
         unlink(path_db)
     }
 
+    # can be "proj:epsg" or "proj:wkt2"
+    crs_type <- .gc_detect_crs_type(.cube_crs(cube))
+
     file_info <- dplyr::select(
         cube, .data[["file_info"]],
         .data[["crs"]]
@@ -192,7 +195,7 @@
             href = .data[["path"]],
             datetime = as.character(.data[["date"]]),
             band = .data[["band"]],
-            `proj:epsg` = gsub("^EPSG:", "", .data[["crs"]])
+            !!crs_type := gsub("^EPSG:", "", .data[["crs"]])
         )
 
     features <- dplyr::mutate(file_info, id = .data[["fid"]]) %>%
@@ -204,7 +207,7 @@
             xmax = feat$features[[1]][["xmax"]][[1]],
             ymin = feat$features[[1]][["ymin"]][[1]],
             ymax = feat$features[[1]][["ymax"]][[1]],
-            crs = as.numeric(feat$features[[1]][["proj:epsg"]][[1]])
+            crs = feat$features[[1]][[crs_type]][[1]]
         )
 
         feat$features[[1]] <- dplyr::mutate(feat$features[[1]],
@@ -222,7 +225,7 @@
             tidyr::nest(assets = c(.data[["href"]], .data[["band"]])) %>%
             tidyr::nest(properties = c(
                 .data[["datetime"]],
-                .data[["proj:epsg"]]
+                .data[[!!crs_type]]
             )) %>%
             tidyr::nest(bbox = c(
                 .data[["xmin"]], .data[["ymin"]],
@@ -732,6 +735,23 @@
     return(local_cube)
 }
 
+#' @title Detect the type of cube crs
+#'
+#' @name .gc_detect_crs_type
+#' @keywords internal
+#'
+#' @param cube_crs A vector of characters with cube crs.
+#'
+#' @return A character with the type of crs: "proj:wkt2" or "proj:epsg"
+.gc_detect_crs_type <- function(cube_crs) {
+
+    if (all(is.numeric(cube_crs))
+        || all(grepl(pattern = "^EPSG", x = cube_crs))) {
+        return("proj:epsg")
+    }
+    return("proj:wkt2")
+}
+
 #' @title Finds the missing tiles in a regularized cube
 #'
 #' @name .gc_missing_tiles
@@ -743,7 +763,6 @@
 #' @param period   Period of timeline regularization.
 #'
 #' @return         Tiles that are missing from the regularized cube.
-#'
 .gc_missing_tiles <- function(cube, local_cube, timeline) {
 
     # do a cross product on tiles and bands

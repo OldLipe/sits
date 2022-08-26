@@ -53,6 +53,26 @@
 
 #' @keywords internal
 #' @export
+.raster_ext_as_sf.terra <- function(r_obj) {
+    suppressWarnings(
+        sf::st_as_sf(terra::as.polygons(
+            x = terra::ext(r_obj),
+            crs = terra::crs(r_obj)
+        ))
+    )
+}
+
+#' @keywords internal
+#' @export
+.raster_file_blocksize.terra <- function(r_obj) {
+        block_size <- c(terra::fileBlocksize(r_obj))
+        names(block_size) <- c("block_nrows", "block_ncols")
+
+        return(block_size)
+}
+
+#' @keywords internal
+#' @export
 .raster_rast.terra <- function(r_obj, nlayers = 1, ...) {
     suppressWarnings(
         terra::rast(x = r_obj, nlyrs = nlayers, ...)
@@ -392,11 +412,11 @@
     )
 
     if (!is.na(crs[["code"]])) {
-        return(c(crs = paste(crs[["authority"]], crs[["code"]], sep = ":")))
+        return(paste(crs[["authority"]], crs[["code"]], sep = ":"))
     }
 
     suppressWarnings(
-        c(crs = as.character(terra::crs(x = r_obj)))
+        as.character(terra::crs(x = r_obj))
     )
 }
 
