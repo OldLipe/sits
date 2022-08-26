@@ -77,16 +77,16 @@
 
     # pre-conditions
     .check_that(nrow(tile) == 1,
-        msg = "tile must have only one row."
+                msg = "tile must have only one row."
     )
 
     .check_null(period,
-        msg = "the parameter 'period' must be provided."
+                msg = "the parameter 'period' must be provided."
     )
 
     .check_num(res,
-        allow_null = TRUE, len_max = 1,
-        msg = "the parameter 'res' is invalid."
+               allow_null = TRUE, len_max = 1,
+               msg = "the parameter 'res' is invalid."
     )
 
     # get bbox roi
@@ -211,10 +211,10 @@
         )
 
         feat$features[[1]] <- dplyr::mutate(feat$features[[1]],
-            xmin = bbox[["xmin"]],
-            xmax = bbox[["xmax"]],
-            ymin = bbox[["ymin"]],
-            ymax = bbox[["ymax"]]
+                                            xmin = bbox[["xmin"]],
+                                            xmax = bbox[["xmax"]],
+                                            ymin = bbox[["ymin"]],
+                                            ymax = bbox[["ymax"]]
         )
 
         feat
@@ -333,9 +333,9 @@
 
     # pre-condition
     .check_chr(period,
-        allow_empty = FALSE,
-        len_min = 1, len_max = 1,
-        msg = "invalid 'period' parameter"
+               allow_empty = FALSE,
+               len_min = 1, len_max = 1,
+               msg = "invalid 'period' parameter"
     )
 
     # start date - maximum of all minimums
@@ -438,8 +438,8 @@
 
     # post-condition
     .check_length(img_paths,
-        len_min = 1,
-        msg = "no image was created"
+                  len_min = 1,
+                  msg = "no image was created"
     )
 
     return(img_paths)
@@ -509,7 +509,7 @@
 
     # precondition - is the period valid?
     .check_na(lubridate::duration(period),
-        msg = "invalid period specified"
+              msg = "invalid period specified"
     )
 
     # precondition - is the resolution valid?
