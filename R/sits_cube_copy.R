@@ -91,7 +91,7 @@ sits_cube_copy <- function(cube,
     gdal_params <- .gdal_format_params(asset = asset, roi = roi, res = res)
     # Create output file
     out_file <- .file_path(
-        .tile_satellite(asset), .tile_sensor(asset),
+        .tile_satellite(asset),
         .tile_name(asset), .tile_bands(asset),
         .tile_start_date(asset), output_dir = output_dir, ext = "tif"
     )
