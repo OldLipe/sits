@@ -495,6 +495,12 @@
     # each process will start two threads
     multicores <- max(1, round(multicores / 2))
 
+    # append gdalcubes path
+    path_db <- tempfile(pattern = "gc", fileext = ".db")
+
+    # create an image collection
+    .gc_create_database_stac(cube = cube, path_db = path_db)
+
     # start processes
     .sits_parallel_start(workers = multicores, log = FALSE)
     on.exit(.sits_parallel_stop())
@@ -554,12 +560,6 @@
                 local_msg = paste0("no tile '", tile_name, "' found"),
                 msg = "invalid tile"
             )
-
-            # append gdalcubes path
-            path_db <- tempfile(pattern = "gc", fileext = ".db")
-
-            # create an image collection
-            .gc_create_database_stac(cube = tile, path_db = path_db)
 
             # create a gdalcubes::cube_view
             cube_view <- .gc_create_cube_view(
