@@ -10,6 +10,7 @@ sits_cube_copy(
   res = NULL,
   output_dir = getwd(),
   multicores = 2,
+  keep_filename = FALSE,
   progress = TRUE
 )
 }
@@ -24,6 +25,9 @@ spatial resolution of the images. Default is NULL.}
 \item{output_dir}{Output directory where images will be saved.}
 
 \item{multicores}{Number of workers for parallel downloading.}
+
+\item{keep_filename}{Keep the original file name? Default is FALSE. sits will
+create a package pattern file name.}
 
 \item{progress}{Show progress bar?}
 }

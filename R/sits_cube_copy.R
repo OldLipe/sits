@@ -5,13 +5,15 @@
 #' the images and a resolution (\code{res}) to resample the
 #' bands.
 #'
-#' @param cube       A sits cube
-#' @param roi        A Region of interest. See details below.
-#' @param res        An integer value corresponds to the output
-#'                   spatial resolution of the images. Default is NULL.
-#' @param output_dir Output directory where images will be saved.
-#' @param multicores Number of workers for parallel downloading.
-#' @param progress   Show progress bar?
+#' @param cube          A sits cube
+#' @param roi           A Region of interest. See details below.
+#' @param res           An integer value corresponds to the output
+#'                      spatial resolution of the images. Default is NULL.
+#' @param output_dir    Output directory where images will be saved.
+#' @param keep_filename Keep the original file name? Default is FALSE. sits will
+#' create a package pattern file name.
+#' @param multicores    Number of workers for parallel downloading.
+#' @param progress      Show progress bar?
 #'
 #' @return a sits cube with updated metadata.
 #'
@@ -51,6 +53,7 @@ sits_cube_copy <- function(cube,
                            res = NULL,
                            output_dir = getwd(),
                            multicores = 2,
+                           keep_filename = FALSE,
                            progress = TRUE) {
 
     # Pre-conditions
@@ -74,7 +77,7 @@ sits_cube_copy <- function(cube,
     cube_assets <- .jobs_map_parallel_dfr(cube_assets, function(asset) {
         local_asset <- .download_asset(
             asset = asset, res = res, roi = roi, output_dir = output_dir,
-            progress = progress
+            keep_filename = keep_filename, progress = progress
         )
         # Return local tile
         local_asset
@@ -83,18 +86,25 @@ sits_cube_copy <- function(cube,
     .cube_merge_tiles(cube_assets)
 }
 
-.download_asset <- function(asset, res, roi, output_dir, progress) {
+.download_asset <- function(asset, res, roi, output_dir, keep_filename, progress) {
     # Get all paths and expand
     file <- path.expand(.tile_path(asset))
     # Create a list of user parameters as gdal format
     gdal_params <- .gdal_format_params(asset = asset, roi = roi, res = res)
-    # Create output file
 
+    # Create output file
     out_file <- .file_path(
-        .tile_satellite(asset), .remove_slash(.tile_sensor(asset)),
-        .tile_name(asset), .tile_bands(asset),
-        .tile_start_date(asset), output_dir = output_dir, ext = "tif"
+        .file_sans_ext(file),
+        output_dir = output_dir, ext = "tif"
     )
+    if (!keep_filename) {
+        out_file <- .file_path(
+            .tile_satellite(asset), .remove_slash(.tile_sensor(asset)),
+            .tile_name(asset), .tile_bands(asset),
+            .tile_start_date(asset), output_dir = output_dir, ext = "tif"
+        )
+    }
+
     # Resume feature
     if (.raster_is_valid(out_file)) {
         # # Callback final tile classification
