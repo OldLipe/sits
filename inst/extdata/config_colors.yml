@@ -30,7 +30,6 @@ colors:
         # Forest: color 16 of "Greens-18"
         Forest                      : &forest "#006A2B"
         Evergreen_Broadleaf_Forests : &ebf    "#1E8742"
-"
         # Dense Woodlands and similar:  color 12 of "Greens-18"
 
         Woodlands                   : &woodlands "#3BA558"
