@@ -32,7 +32,6 @@ sits_smooth(
   type = "bayes",
   ...,
   window_size = 9,
-  neigh_fraction = 0.5,
   smoothness = 20,
   covar = FALSE,
   multicores = 2,
@@ -48,6 +47,15 @@ sits_smooth(
   window_size = 5,
   sigma = 8,
   tau = 0.1,
+  multicores = 2,
+  memsize = 4,
+  output_dir = getwd(),
+  version = "v1"
+)
+
+sits_smooth_variance(
+  cube,
+  window_size = 5,
   multicores = 2,
   memsize = 4,
   output_dir = getwd(),
@@ -72,9 +80,6 @@ smoothing.}
 \item{type}{Type of smoothing}
 
 \item{...}{Parameters for specific functions}
-
-\item{neigh_fraction}{Fraction of neighbors with highest probability
-to be used in Bayesian inference.}
 
 \item{smoothness}{Estimated variance of logit of class probabilities
 (Bayesian smoothing parameter). It can be either
