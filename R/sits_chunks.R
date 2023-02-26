@@ -140,13 +140,25 @@ NULL
     # Return cropped chunks
     cropped
 }
+
 #' @title Filter chunks that intersects a given roi
 #' @noRd
 #' @param chunks  A data frame with chunks
 #' @param roi  Region of interest
 #' @returns  A tibble with filtered chunks
 .chunks_filter_spatial <- function(chunks, roi) {
+    # TODO: implement a switch and remove .chunks_filter_spatial_samples function
     chunks[.intersects(.bbox_as_sf(.bbox_from_tbl(chunks)), .roi_as_sf(roi)), ]
+}
+
+#' @title Filter chunks that intersects a given samples
+#' @noRd
+#' @param chunks  A data frame with chunks
+#' @param roi  Region of interest
+#' @returns  A tibble with filtered chunks
+.chunks_filter_spatial_samples <- function(chunks, samples) {
+    chunks[.intersects(.bbox_as_sf(.bbox_from_tbl(chunks)),
+                       .point_as_sf(samples, as_crs = 4326)), ]
 }
 
 #' @title Chunk accessors
