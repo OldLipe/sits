@@ -368,7 +368,7 @@
         new_path <- gsub("^://", "", httr::build_url(url_parsed))
         new_path
     })
-
+    # TODO: fix timezone bug (same bug solved in rstac)
     file_info[["token_expires"]] <- strptime(
         x = res_content[["msft:expiry"]],
         format = "%Y-%m-%dT%H:%M:%SZ"

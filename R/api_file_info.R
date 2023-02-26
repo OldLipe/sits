@@ -226,10 +226,8 @@ NULL
         value = band
     )
 
-
     # Read values from all files in file_info
     values <- .raster_read_rast(files = files, block = block)
-
 
     #
     # Log here
