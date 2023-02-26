@@ -1,5 +1,5 @@
 #' @title Transform a shapefile into a samples file
-#' @name .shp_get_samples
+#' @name .samples_from_shp
 #' @author Gilberto Camara
 #' @keywords internal
 #' @noRd
@@ -8,18 +8,20 @@
 #' @param shp_attr        Shapefile attribute that describes the label.
 #' @param start_date      Start date for the data set.
 #' @param end_date        End date for the data set.
-#' @param .n_shp_pol      Number of samples per polygon to be read.
-#' @param .shp_id         ID attribute for polygons shapefile.
+#' @param n_sam_pol       Number of samples per polygon to be read.
+#' @param pol_avg         Summarize samples for each polygon?
+#' @param pol_id          ID attribute for polygons shapefile.
 #'                        (for POLYGON or MULTIPOLYGON shapefile).
 #' @return                A tibble with samples to be retrieved.
 #'
-.shp_get_samples <- function(shp_file,
-                             label,
-                             shp_attr,
-                             start_date,
-                             end_date,
-                             n_shp_pol,
-                             shp_id) {
+.samples_from_shp <- function(shp_file,
+                              label,
+                              shp_attr,
+                              start_date,
+                              end_date,
+                              n_sam_pol,
+                              pol_avg,
+                              pol_id) {
 
     # pre-condition - check the shape file and its attribute
     sf_shape <- .shp_check_validity(
@@ -32,8 +34,9 @@
         sf_object   = sf_shape,
         label_attr  = shp_attr,
         label       = label,
-        n_sam_pol   = n_shp_pol,
-        pol_id      = shp_id
+        n_sam_pol   = n_sam_pol,
+        pol_avg     = pol_avg,
+        pol_id      = pol_id
     )
 
     samples <- dplyr::mutate(samples,

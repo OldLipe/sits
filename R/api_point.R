@@ -123,6 +123,14 @@ NULL
     point
 }
 
+#' TODO: check this function
+.point_coords <- function(x) {
+    if (!.has_point(x)) {
+        return(NULL)
+    }
+    sf::st_coordinates(x)
+}
+
 #' @title Convert a \code{point} into a \code{sf} point object.
 #' @returns \code{.point_as_sf()}: \code{sf}.
 #' @noRd
