@@ -3,22 +3,17 @@
 \name{sits_get_data}
 \alias{sits_get_data}
 \alias{sits_get_data.default}
-\alias{sits_get_data.csv}
-\alias{sits_get_data.shp}
-\alias{sits_get_data.sf}
-\alias{sits_get_data.sits}
-\alias{sits_get_data.data.frame}
 \title{Get time series from data cubes and cloud services}
 \usage{
 sits_get_data(
   cube,
   samples,
   ...,
-  start_date = as.Date(sits_timeline(cube)[1]),
-  end_date = as.Date(sits_timeline(cube)[length(sits_timeline(cube))]),
+  start_date = NULL,
+  end_date = NULL,
   label = "NoClass",
-  bands = sits_bands(cube),
-  crs = 4326,
+  bands = NULL,
+  crs = NULL,
   impute_fn = sits_impute_linear(),
   label_attr = NULL,
   n_sam_pol = 30,
@@ -29,81 +24,7 @@ sits_get_data(
   progress = FALSE
 )
 
-\method{sits_get_data}{default}(cube, samples, ...)
-
-\method{sits_get_data}{csv}(
-  cube,
-  samples,
-  ...,
-  bands = sits_bands(cube),
-  crs = 4326,
-  impute_fn = sits_impute_linear(),
-  multicores = 2,
-  output_dir = getwd(),
-  progress = FALSE
-)
-
-\method{sits_get_data}{shp}(
-  cube,
-  samples,
-  ...,
-  label = "NoClass",
-  start_date = as.Date(sits_timeline(cube)[1]),
-  end_date = as.Date(sits_timeline(cube)[length(sits_timeline(cube))]),
-  bands = sits_bands(cube),
-  impute_fn = sits_impute_linear(),
-  label_attr = NULL,
-  n_sam_pol = 30,
-  pol_avg = FALSE,
-  pol_id = NULL,
-  multicores = 2,
-  output_dir = ".",
-  progress = FALSE
-)
-
-\method{sits_get_data}{sf}(
-  cube,
-  samples,
-  ...,
-  bands = sits_bands(cube),
-  start_date = as.Date(sits_timeline(cube)[1]),
-  end_date = as.Date(sits_timeline(cube)[length(sits_timeline(cube))]),
-  impute_fn = sits_impute_linear(),
-  label = "NoClass",
-  label_attr = NULL,
-  n_sam_pol = 30,
-  pol_avg = FALSE,
-  pol_id = NULL,
-  multicores = 2,
-  output_dir = ".",
-  progress = FALSE
-)
-
-\method{sits_get_data}{sits}(
-  cube,
-  samples,
-  ...,
-  bands = sits_bands(cube),
-  impute_fn = sits_impute_linear(),
-  multicores = 2,
-  output_dir = ".",
-  progress = FALSE
-)
-
-\method{sits_get_data}{data.frame}(
-  cube,
-  samples,
-  ...,
-  start_date = as.Date(sits_timeline(cube)[1]),
-  end_date = as.Date(sits_timeline(cube)[length(sits_timeline(cube))]),
-  label = "NoClass",
-  bands = sits_bands(cube),
-  crs = 4326,
-  impute_fn = sits_impute_linear(),
-  multicores = 2,
-  output_dir = ".",
-  progress = FALSE
-)
+sits_get_data.default(cube, samples, ...)
 }
 \arguments{
 \item{cube}{Data cube from where data is to be retrieved.}
