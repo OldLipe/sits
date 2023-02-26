@@ -24,7 +24,8 @@ sits_smooth(
   memsize = 4,
   multicores = 2,
   output_dir = getwd(),
-  version = "v1"
+  version = "v1",
+  progress = TRUE
 )
 
 \method{sits_smooth}{bayes}(
@@ -37,7 +38,8 @@ sits_smooth(
   multicores = 2,
   memsize = 4,
   output_dir = getwd(),
-  version = "v1"
+  version = "v1",
+  progress = TRUE
 )
 
 \method{sits_smooth}{bilateral}(
@@ -50,7 +52,8 @@ sits_smooth(
   multicores = 2,
   memsize = 4,
   output_dir = getwd(),
-  version = "v1"
+  version = "v1",
+  progress = TRUE
 )
 
 sits_smooth_variance(
