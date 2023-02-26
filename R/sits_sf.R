@@ -63,7 +63,7 @@ sits_as_sf.raster_cube <- function(data, ..., as_crs = NULL) {
     return(data)
 }
 #' @title Transform an sf object into a samples file
-#' @name .sf_get_samples
+#' @name .samples_from_sf
 #' @author Gilberto Camara
 #' @keywords internal
 #' @noRd
@@ -77,7 +77,7 @@ sits_as_sf.raster_cube <- function(data, ..., as_crs = NULL) {
 #'                        (for POLYGON or MULTIPOLYGON shapefile).
 #' @return                A tibble with information the samples to be retrieved.
 #'
-.sf_get_samples <- function(sf_object,
+.samples_from_sf <- function(sf_object,
                             label,
                             label_attr,
                             start_date,
@@ -94,9 +94,8 @@ sits_as_sf.raster_cube <- function(data, ..., as_crs = NULL) {
         pol_id      = pol_id
     )
 
-    samples <- dplyr::mutate(samples,
-                             start_date = as.Date(start_date),
-                             end_date = as.Date(end_date)
+    samples <- dplyr::mutate(
+        samples, start_date = as.Date(start_date), end_date = as.Date(end_date)
     )
 
     class(samples) <- c("sits", class(samples))
@@ -111,17 +110,19 @@ sits_as_sf.raster_cube <- function(data, ..., as_crs = NULL) {
 #' @description reads a shapefile and retrieves a sits tibble
 #' containing a set of lat/long points for data retrieval
 #'
-#' @param sf_object       sf object .
-#' @param label_attr      Attribute in sf object used as a polygon label.
-#' @param label           Label to be assigned to points.
-#' @param n_sam_pol       Number of samples per polygon to be read
-#'                        (for POLYGON or MULTIPOLYGON shapes).
-#' @param  pol_id         ID attribute for polygons.
-#' @return                A sits tibble with points to to be read.
+#' @param sf_object  sf object .
+#' @param label_attr Attribute in sf object used as a polygon label.
+#' @param label      Label to be assigned to points.
+#' @param n_sam_pol  Number of samples per polygon to be read
+#'                   (for POLYGON or MULTIPOLYGON shapes).
+#' @param pol_avg    Summarize samples for each polygon?
+#' @param pol_id     ID attribute for polygons.
+#' @return           A sits tibble with points to to be read.
 .sf_to_tibble <- function(sf_object,
                           label_attr,
                           label,
                           n_sam_pol,
+                          pol_avg,
                           pol_id) {
 
     # get the geometry type
@@ -144,6 +145,7 @@ sits_as_sf.raster_cube <- function(data, ..., as_crs = NULL) {
         label_attr,
         label,
         n_sam_pol,
+        pol_avg,
         pol_id
     )
 
@@ -197,6 +199,7 @@ sits_as_sf.raster_cube <- function(data, ..., as_crs = NULL) {
 #' @param label_attr      Attribute in the shapefile used as a polygon label
 #' @param label           Label to be assigned to points
 #' @param n_sam_pol       Number of samples per polygon to be read
+#' @param pol_avg        Summarize samples for each polygon?
 #' @param pol_id          ID attribute for polygons shapefile.
 #' @return A tibble with latitude/longitude points from POLYGON geometry
 #'
@@ -204,6 +207,7 @@ sits_as_sf.raster_cube <- function(data, ..., as_crs = NULL) {
                                   label_attr,
                                   label,
                                   n_sam_pol,
+                                  pol_avg,
                                   pol_id) {
 
     # get the db file
@@ -228,7 +232,6 @@ sits_as_sf.raster_cube <- function(data, ..., as_crs = NULL) {
     points.tb <- seq_len(nrow(sf_object)) %>%
         purrr::map_dfr(function(i) {
             # retrieve the class from the shape attribute
-
             if ("label" %in% colnames(sf_df)) {
                 label <- as.character(
                     unlist(sf_df[i, "label"], use.names = FALSE)
@@ -239,12 +242,19 @@ sits_as_sf.raster_cube <- function(data, ..., as_crs = NULL) {
                     unlist(sf_df[i, label_attr], use.names = FALSE)
                 )
             }
+
+            # retrieve polygon id
+            polygon_id <- NULL
             if (!purrr::is_null(pol_id) && pol_id %in% colnames(sf_df)) {
                 polygon_id <- unname(as.character(sf_df[i, pol_id]))
             }
 
             # obtain a set of samples based on polygons
-            points <- list(sf::st_sample(sf_object[i, ], size = n_sam_pol))
+            if (pol_avg) {
+                points <- sf::st_centroid(sf_object[i, ])
+            } else {
+                points <- list(sf::st_sample(sf_object[i, ], size = n_sam_pol))
+            }
             # get one time series per sample
             pts.tb <- points %>%
                 purrr::pmap_dfr(function(p) {
@@ -255,14 +265,17 @@ sits_as_sf.raster_cube <- function(data, ..., as_crs = NULL) {
                         label = label
                     )
 
-                    if (!purrr::is_null(pol_id) &&
-                        pol_id %in% colnames(sf_df)) {
+                    if (!is.null(polygon_id)) {
                         row <- tibble::add_column(
-                            row,
-                            polygon_id = polygon_id
+                            row, polygon_id = sf::st_geometry(sf_object[i, ])
                         )
                     }
 
+                    if (pol_avg) {
+                        row <- tibble::add_column(
+                            row, poly_geom = sf::st_geometry(sf_object[i, ])
+                        )
+                    }
                     return(row)
                 })
             return(pts.tb)
