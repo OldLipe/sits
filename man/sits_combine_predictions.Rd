@@ -20,6 +20,7 @@ sits_combine_predictions(
   cubes,
   type = "average",
   ...,
+  weights = NULL,
   multicores = 2,
   memsize = 4,
   output_dir = getwd(),
@@ -53,6 +54,8 @@ function.}
 
 \item{version}{Version of resulting image.
 (in the case of multiple tests)}
+
+\item{weights}{Weights for averaging}
 
 \item{uncert_cubes}{Uncertainty cubes to be used as local weights.}
 }
