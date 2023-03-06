@@ -28,13 +28,13 @@
         multicores = multicores
     )
     # Update block parameter
-    block_size <- .jobs_optimal_block(
-        job_memsize = job_memsize,
-        block = block_size,
-        image_size = .tile_size(.tile(cube)),
-        memsize = memsize,
-        multicores = multicores
-    )
+    # block_size <- .jobs_optimal_block(
+    #     job_memsize = job_memsize,
+    #     block = block_size,
+    #     image_size = .tile_size(.tile(cube)),
+    #     memsize = memsize,
+    #     multicores = multicores
+    # )
     # Prepare parallel processing
     .sits_parallel_start(workers = multicores, log = FALSE)
     on.exit(.sits_parallel_stop(), add = TRUE)
