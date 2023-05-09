@@ -27,6 +27,7 @@
 #' @param  version         Version of result.
 #' @param  verbose         Print processing information?
 #' @param  progress        Show progress bar?
+#' @param  labels          labels
 #' @return List of the classified raster layers.
 .classify_tile  <- function(tile,
                             band,
@@ -38,7 +39,8 @@
                             output_dir,
                             version,
                             verbose,
-                            progress) {
+                            progress,
+                            labels) {
 
     # Output file
     out_file <- .file_derived_name(
@@ -185,7 +187,7 @@
     }, progress = progress)
     # Merge blocks into a new probs_cube tile
     probs_tile <- .tile_probs_merge_blocks(
-        file = out_file, band = band, labels = .ml_labels(ml_model),
+        file = out_file, band = band, labels = labels,
         base_tile = tile, block_files = block_files,
         multicores = .jobs_multicores(), update_bbox = update_bbox
     )
