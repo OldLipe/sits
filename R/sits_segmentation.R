@@ -167,18 +167,20 @@ st_segmentation <- function(samples = NULL, index = NULL, gridx = 12,gridy=12, .
 
             prediction <- predict(model,
                                   ,newdata = values)
-            browser()
             cluster <- as.factor(prediction$unit.classif)
             dt <- data.table::data.table(cluster)
-            dt[, id := .I]
+            #dt[, id := .I]
+            dt[, "id"] <- seq_len(nrow(dt))
             df <- data.table::dcast.data.table(dt, id ~ cluster, fun.aggregate = length)
             df$id <- NULL
-            matrix(nrow = nrow(df), ncol = ncol(df))
             df <- as.matrix(df)
-            df <- matrix(as.double(df),nrow = nrow(df), ncol = ncol(df))
             colnames(df) <- levels(cluster)
-            return(df)
 
+            template <- matrix(0, nrow = nrow(df), ncol = gridx*gridy)
+            colnames(template) <- seq_len(gridx*gridy)
+            matching_cols <- match(colnames(df), colnames(template))
+            template[, matching_cols] <- df
+            return(template)
         }
         # Set model class
         predict_fun <- sits:::.set_class(

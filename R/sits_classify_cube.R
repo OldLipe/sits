@@ -55,7 +55,7 @@
         }
         probs_tile <- .tile_probs_from_file(
             file = out_file, band = band, base_tile = tile,
-            labels = .ml_labels(ml_model), update_bbox = TRUE
+            labels = labels, update_bbox = TRUE
         )
         return(probs_tile)
     }
