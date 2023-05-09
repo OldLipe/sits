@@ -36,6 +36,7 @@
 #'                           classifications).
 #' @param  verbose           Print information about processing time?
 #' @param  progress          Show progress bar?
+#' @param  labels            labels
 #'
 #' @return                   Predicted data (classified time series)
 #'                           or a data cube with probabilities for each class.
@@ -151,7 +152,8 @@ sits_classify.raster_cube <- function(data,
                                       output_dir = getwd(),
                                       version = "v1",
                                       verbose = TRUE,
-                                      progress = TRUE) {
+                                      progress = TRUE,
+                                      labels) {
     # preconditions
     .check_is_raster_cube(data)
     .check_is_regular(data)
@@ -226,7 +228,8 @@ sits_classify.raster_cube <- function(data,
             output_dir = output_dir,
             version = version,
             verbose = verbose,
-            progress = progress
+            progress = progress,
+            labels = labels
         )
         return(probs_tile)
     })
