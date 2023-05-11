@@ -200,7 +200,6 @@
 
     # do parallel requests
     tiles <- .sits_parallel_map(seq_len(nrow(data)), function(i) {
-
         # get tile name
         tile <- data[["tile"]][[i]]
         # get fids
@@ -269,6 +268,13 @@
                 item = item,
                 collection = collection, ...
             )
+
+            # add cloud cover statistics
+            boa_offset <- .source_item_get_boa_offset(
+                source = source,
+                item = item,
+                collection = collection, ...
+            )
             # post-conditions
             .check_na(date, msg = "invalid date value")
             .check_length(date,
@@ -313,34 +319,42 @@
             }
 
             # prepare result
-            assets_info <- tidyr::unnest(
-                tibble::tibble(
-                    tile = tile,
-                    fid = fid,
-                    date = date,
-                    band = bands,
-                    asset_info = asset_info,
-                    path = paths,
-                    cloud_cover = cloud_cover
-                ),
-                cols = c("band", "asset_info", "path", "cloud_cover")
+            fi <- tibble::tibble(
+                tile = tile,
+                fid = fid,
+                date = date,
+                band = bands,
+                asset_info = asset_info,
+                path = paths,
+                cloud_cover = cloud_cover,
+                boa_offset = boa_offset
             )
+            fi_cols <- c("band", "asset_info", "path")
+
+            if (!is.null(cloud_cover)) {
+                fi_cols <- c(fi_cols, "cloud_cover")
+            }
+            if (!is.null(boa_offset)) {
+                fi_cols <- c(fi_cols, "boa_offset")
+            }
+            assets_info <- tidyr::unnest(fi, cols = fi_cols)
             return(assets_info)
         })
-
+        if ("boa_offset" %in% colnames(items_info) &&
+            any(is.na(items_info[, "boa_offset"]))) {
+            items_info[is.na(items_info[, "boa_offset"]), "boa_offset"] <- FALSE
+        }
         return(items_info)
     }, progress = progress)
 
     # bind cube rows
     cube <- dplyr::bind_rows(tiles)
-
     # post-condition
     .check_that(
         x = nrow(cube) > 0,
         local_msg = "could not retrieve cube metadata",
         msg = "empty cube metadata"
     )
-
     # review known malformed paths
     review_date <- .try(
         .conf(
@@ -443,10 +457,17 @@
 #' @keywords internal
 #' @noRd
 #' @export
-.source_item_get_cloud_cover.stac_cube <- function(source, ...,
-                                                   item,
+.source_item_get_cloud_cover.stac_cube <- function(source, ..., item,
                                                    collection = NULL) {
     item[["properties"]][["eo:cloud_cover"]]
+}
+
+#' @keywords internal
+#' @noRd
+#' @export
+.source_item_get_boa_offset.stac_cube <- function(source, ..., item,
+                                                  collection = NULL) {
+    item[["properties"]][["sentinel:boa_offset_applied"]]
 }
 
 #' @keywords internal

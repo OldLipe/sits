@@ -872,6 +872,18 @@ NULL
 
 #' @rdname .source_cube
 #' @noRd
+#' @description \code{.source_item_get_boa_offset()} retrieves the bottom of
+#' atmosphere offset value
+#' @return \code{.source_item_get_boa_offset()} returns a \code{logical} vector
+#' containing if the features is processed with baseline 4.0.
+#'
+.source_item_get_boa_offset <- function(source, ..., item, collection = NULL) {
+    source <- .source_new(source)
+    UseMethod(".source_item_get_boa_offset", source)
+}
+
+#' @rdname .source_cube
+#' @noRd
 #' @description \code{.source_item_get_bands()} retrieves the bands present
 #' in an item.
 #'
