@@ -296,3 +296,85 @@ sits_slic <- function(data = NULL,
         return(v_obj)
     }
 }
+
+sits_som_seg <- function(data = NULL,
+                         grid_xdim = 10,
+                         grid_ydim = 10,
+                         alpha = 1.0,
+                         rlen = 100,
+                         distance = "euclidean",
+                         som_radius = 2,
+                         mode = "online",
+                         verbose = FALSE) {
+    # grid_xdim is OK?
+    .check_int_parameter(grid_xdim, min = 1, max = 500)
+    # grid_ydim is OK?
+    .check_int_parameter(grid_ydim, min = 1, max = 500)
+    # alpha is OK?
+    .check_num_parameter(alpha, min = 1, max = 500)
+    # rlen is OK?
+    .check_int_parameter(rlen, min = 1, max = 10000)
+    # distance is OK?
+    #.check_chr_within(distance, within = c("sumofsquares", "euclidian",
+    #                                       "manhattan", "tanimoto"))
+    # som_radius is OK?
+    .check_int_parameter(som_radius, min = 1, max = 100)
+    # mode is OK?
+    #.check_chr_within(mode, within = c("online", "pbatch"))
+
+    function(data, block, bbox) {
+        # Create a template rast
+        v_temp <- .raster_new_rast(
+            nrows = block[["nrows"]], ncols = block[["ncols"]],
+            xmin = bbox[["xmin"]], xmax = bbox[["xmax"]],
+            ymin = bbox[["ymin"]], ymax = bbox[["ymax"]],
+            nlayers = 1, crs = bbox[["crs"]]
+        )
+        # Get raster dimensions
+        mat <- as.integer(
+            c(.raster_nrows(v_temp), .raster_ncols(v_temp))
+        )
+        # Create SOM grid
+        som_grid <- kohonen::somgrid(grid_xdim, grid_ydim, "rectangular")
+        # Train data
+        train_data <- data[sample(
+            x = seq_len(nrow(data)), size = ceiling(nrow(data) * 0.1)
+        ),]
+        # Train SOM model
+        model <- kohonen::som(
+            X = train_data,
+            grid = som_grid,
+            alpha = alpha,
+            rlen = rlen,
+            dist.fcts = distance,
+            mode = mode
+        )
+        # Predict data
+        prediction <- predict(model, newdata = data)
+        # Transform into a matrix
+        prediction <- matrix(
+            data = prediction$unit.classif,
+            ncol = block$ncols,
+            nrow = block$nrows,
+            byrow = TRUE
+        )
+        # Set values and NA value in template raster
+        v_obj <- .raster_set_values(v_temp, prediction)
+        v_obj <- .raster_set_na(v_obj, -1)
+        # Polygonize raster and convert to sf object
+        v_obj <- .raster_polygonize(v_obj, dissolve = TRUE)
+        # TODO: use vector API
+        v_obj <- sf::st_as_sf(v_obj)
+        if (nrow(v_obj) == 0) {
+            return(v_obj)
+        }
+        # Get valid centers
+        valid_centers <- sf::st_coordinates(sf::st_centroid(v_obj))
+        colnames(valid_centers) <- c("x", "y")
+        # Bind valid centers with segments table
+        v_obj <- cbind(v_obj, valid_centers)
+        v_obj <- suppressWarnings(sf::st_collection_extract(v_obj, "POLYGON"))
+        # Return the segment object
+        return(v_obj)
+    }
+}
