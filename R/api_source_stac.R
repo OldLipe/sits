@@ -236,7 +236,7 @@
             )
     }
     # prepare parallel requests
-    .parallel_start(workers = multicores)
+    .parallel_start(workers = 1)
     on.exit(.parallel_stop(), add = TRUE)
 
     # do parallel requests
@@ -475,6 +475,7 @@
         lubridate::as_date(item[[c("properties", "datetime")]])
     )
 }
+
 #' @title Get href from STAC item
 #' @keywords internal
 #' @noRd

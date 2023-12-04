@@ -243,7 +243,7 @@
     stac_query <- rstac::ext_filter(
         stac_query,
         `sar:frequency_band` == "C" &&
-        `sar:instrument_mode` == "IW"
+            `sar:instrument_mode` == "IW"
     )
 
     # mpc does not support %in% operator, so we have to
@@ -381,6 +381,108 @@
                                                          collection = NULL) {
     rstac::items_reap(items, field = c("properties", "s2:mgrs_tile"))
 }
+
+#' @keywords internal
+#' @noRd
+#' @export
+`.source_items_new.mpc_cube_modis11a1` <- function(source,
+                                                   collection,
+                                                   stac_query, ...,
+                                                   tiles = NULL,
+                                                   platform = NULL) {
+    # set caller to show in errors
+    .check_set_caller(".source_items_new.mpc_cube_modis11a1")
+
+    if (!is.null(platform)) {
+        platform <- .stac_format_platform(
+            source = source,
+            collection = collection,
+            platform = platform
+        )
+
+        stac_query <- rstac::ext_query(
+            q = stac_query, "platform" == platform
+        )
+    }
+
+    # mpc does not support %in% operator, so we have to
+    if (!is.null(tiles)) {
+        items_list <- lapply(tiles, function(tile) {
+            stac_query <- rstac::ext_query(
+                q = stac_query, "s2:mgrs_tile" == tile
+            )
+            # making the request
+            items_info <- rstac::post_request(q = stac_query, ...)
+            .check_stac_items(items_info)
+            # fetching all the metadata
+            suppressWarnings(
+                rstac::items_fetch(items = items_info, progress = FALSE)
+            )
+        })
+
+        # getting the first item info
+        items_info <- items_list[[1]]
+        # joining the items
+        items_info$features <- do.call(
+            c,
+            args = lapply(items_list, `[[`, "features")
+        )
+    } else {
+        items_info <- rstac::post_request(q = stac_query, ...)
+        .check_stac_items(items_info)
+        # fetching all the metadata
+        items_info <- suppressWarnings(
+            rstac::items_fetch(items = items_info, progress = FALSE)
+        )
+    }
+
+    # assign href
+    access_key <- Sys.getenv("MPC_TOKEN")
+    if (!nzchar(access_key)) {
+        access_key <- NULL
+    }
+    items_info <- suppressWarnings(
+        rstac::items_sign(
+            items_info,
+            sign_fn = rstac::sign_planetary_computer(
+                httr::add_headers("Ocp-Apim-Subscription-Key" = access_key)
+            )
+        )
+    )
+    return(items_info)
+}
+#' @title Organizes items for MPC Sentinel-2 collections
+#' @param source     Name of the STAC provider.
+#' @param items      \code{STACItemcollection} object from rstac package.
+#' @param ...        Other parameters to be passed for specific types.
+#' @param collection Collection to be searched in the data source.
+#' @return A list of items.
+#' @keywords internal
+#' @noRd
+#' @export
+`.source_items_tile.mpc_cube_modis11a1` <- function(source,
+                                                    items, ...,
+                                                    collection = NULL) {
+    rstac::items_reap(items, field = c("properties", "modis:tile-id"))
+}
+
+#' @title Get date from STAC item
+#' @keywords internal
+#' @noRd
+#' @param source     Data source
+#' @param item       STAC item
+#' @param ...        Additional parameters.
+#' @param collection Image collection
+#' @return List of dates
+#' @export
+.source_item_get_date.mpc_cube <- function(source,
+                                                       item, ...,
+                                                       collection = NULL) {
+    suppressWarnings(
+        lubridate::as_date(item[[c("properties", "start_datetime")]])
+    )
+}
+
 #' @title Create an items object in MPC Landsat collection
 #' @keywords internal
 #' @noRd

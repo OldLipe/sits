@@ -1259,6 +1259,31 @@ sources:
                 metadata_search: "feature"
                 ext_tolerance: 0
                 grid_system : "MGRS"
+            MODIS11A1       : &mspc_msi
+                bands       :
+                    LSTDay  : &mspc_modis_1km
+                        missing_value : 0
+                        minimum_value : 1
+                        maximum_value : 65534
+                        scale_factor  : 0.02
+                        offset_value  : 0
+                        resolution    :  1000
+                        band_name     : "LST_Day_1km"
+                        data_type     : "INT2U"
+                    LSTNight:
+                        <<: *mspc_modis_1km
+                        band_name     : "LST_Night_1km"
+                satellite   : "TERRA"
+                sensor      : "MODIS"
+                platforms   :
+                    TERRA: "TERRA"
+                    AQUA : "AQUA"
+                collection_name: "modis-11A1-061"
+                open_data: true
+                open_data_token: false
+                metadata_search: "tile"
+                ext_tolerance: 0
+                grid_system : "YYYY"
     HLS                     :
         s3_class            : ["hls_cube", "stac_cube", "eo_cube",
                                "raster_cube"]

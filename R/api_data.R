@@ -538,7 +538,7 @@
         multicores <- length(chunks_samples)
     }
     # Prepare parallelization
-    .parallel_start(workers = multicores)
+    .parallel_start(workers = 1)
     on.exit(.parallel_stop(), add = TRUE)
     # Get the samples in parallel using tile-band combination
     samples_tiles_bands <- .parallel_map(chunks_samples, function(chunk) {
@@ -648,9 +648,6 @@
     }
     # create time series
     ts_tbl <- ts_tbl |>
-        dplyr::reframe(
-            dplyr::across(dplyr::all_of(bands), stats::na.omit)
-        ) |>
         dplyr::arrange(.data[["Index"]]) |>
         dplyr::ungroup() |>
         tidyr::nest(time_series = !!c("Index", bands)) |>
