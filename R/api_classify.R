@@ -653,7 +653,7 @@
         # Classify
         values <- ml_model(values)
         # Return classification
-        values <- tibble::tibble(data.frame(values))
+        values <- tibble::as_tibble(values)
         # Clean GPU memory
         .ml_gpu_clean(ml_model)
         return(values)
