@@ -238,11 +238,11 @@
     data <- dplyr::summarise(
         data,
         dplyr::across(.cols = dplyr::all_of(labels),
-                      .names = "{.col}_mean", mean)
+                      .names = "{.col}_median", median)
     )
     # Summarize probabilities
     data <- data |>
-        dplyr::rename_with(~ gsub("_mean$", "", .x)) |>
+        dplyr::rename_with(~ gsub("_median$", "", .x)) |>
         dplyr::rowwise() |>
         dplyr::mutate(
             sum = sum(
