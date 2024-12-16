@@ -235,14 +235,33 @@
     # Select just probability labels
     labels <- setdiff(colnames(data), c("polygon_id", "from", "to", "class"))
     # Calculate metrics
-    data <- dplyr::summarise(
-        data,
-        dplyr::across(.cols = dplyr::all_of(labels),
-                      .names = "{.col}_median", median)
-    )
-    # Summarize probabilities
     data <- data |>
-        dplyr::rename_with(~ gsub("_median$", "", .x)) |>
+    dplyr::rowwise() |>
+        dplyr::filter(!anyNA(dplyr::c_across(dplyr::all_of(labels)))) |>
+        dplyr::mutate(majority = labels[which.max(
+            dplyr::c_across(dplyr::all_of(labels)))])
+
+    # Summarize probabilities
+    data <- data |> dplyr::group_by(.data[["polygon_id"]]) |>
+        dplyr::count(sum = .data[["majority"]]) |>
+        tidyr::pivot_wider(id_cols = "polygon_id", names_from = "sum", values_from = "n")
+
+    data_cols <- setdiff("polygon_id", colnames(data))
+    if (length(setdiff(data_cols, labels)) > 0) {
+        miss_cols <- setdiff(data_cols, labels)
+        miss_vars <- lapply(seq_len(length(miss_cols)), function(x) {
+            rep(0, nrow(data))
+        })
+        names(miss_vars) <- miss_cols
+        miss_vars <- tibble::as_tibble(miss_vars)
+        data <- tibble::add_column(data, miss_vars)
+    }
+
+    data <- data |>
+        dplyr::ungroup() |>
+        dplyr::mutate(dplyr::across(.cols = dplyr::all_of(labels),  function(x) {
+            ifelse(is.na(x), 0, x)
+        })) |>
         dplyr::rowwise() |>
         dplyr::mutate(
             sum = sum(
