@@ -17,6 +17,18 @@ C_bayts_detect_changes <- function(p_res, start_detection, end_detection, thresh
     .Call(`_sits_C_bayts_detect_changes`, p_res, start_detection, end_detection, threshold, chi)
 }
 
+C_cesbio_calc_rcr <- function(values, xa, xb) {
+    .Call(`_sits_C_cesbio_calc_rcr`, values, xa, xb)
+}
+
+C_cesbio_detect_shadow <- function(rcr, shadow_value) {
+    .Call(`_sits_C_cesbio_detect_shadow`, rcr, shadow_value)
+}
+
+C_cesbio_detect_neigh <- function(rcr, neigh_value) {
+    .Call(`_sits_C_cesbio_detect_neigh`, rcr, neigh_value)
+}
+
 weighted_probs <- function(data_lst, weights) {
     .Call(`_sits_weighted_probs`, data_lst, weights)
 }

@@ -919,7 +919,7 @@
 #' @param dissolve should the polygons be dissolved?
 #' @return A set of polygons
 .raster_extract_polygons <- function(r_obj, dissolve = TRUE, ...) {
-    terra::as.polygons(r_obj, dissolve = TRUE, ...)
+    terra::as.polygons(r_obj, aggregate = FALSE, ...)
 }
 
 #' @title Determine the file params to write in the metadata

@@ -146,7 +146,7 @@
         values <- .classify_data_read(
             tile = tile,
             block = block,
-            bands = .dc_bands(dc_method),
+            bands = "VV",
             base_bands = NULL,
             ml_model = dc_method,
             impute_fn = impute_fn,
@@ -164,7 +164,9 @@
         values <- dc_method(
             values = values,
             tile = tile,
-            prep_data = prep_data
+            prep_data = prep_data,
+            bbox = bbox,
+            block = block
         )
         # Are the results consistent with the data input?
         .check_processed_values(

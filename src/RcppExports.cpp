@@ -68,6 +68,43 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// C_cesbio_calc_rcr
+arma::mat C_cesbio_calc_rcr(const arma::mat& values, const arma::uword xa, const arma::uword xb);
+RcppExport SEXP _sits_C_cesbio_calc_rcr(SEXP valuesSEXP, SEXP xaSEXP, SEXP xbSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type values(valuesSEXP);
+    Rcpp::traits::input_parameter< const arma::uword >::type xa(xaSEXP);
+    Rcpp::traits::input_parameter< const arma::uword >::type xb(xbSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_cesbio_calc_rcr(values, xa, xb));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_cesbio_detect_shadow
+arma::mat C_cesbio_detect_shadow(const arma::mat& rcr, const double shadow_value);
+RcppExport SEXP _sits_C_cesbio_detect_shadow(SEXP rcrSEXP, SEXP shadow_valueSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type rcr(rcrSEXP);
+    Rcpp::traits::input_parameter< const double >::type shadow_value(shadow_valueSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_cesbio_detect_shadow(rcr, shadow_value));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_cesbio_detect_neigh
+arma::mat C_cesbio_detect_neigh(const arma::mat& rcr, const double neigh_value);
+RcppExport SEXP _sits_C_cesbio_detect_neigh(SEXP rcrSEXP, SEXP neigh_valueSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type rcr(rcrSEXP);
+    Rcpp::traits::input_parameter< const double >::type neigh_value(neigh_valueSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_cesbio_detect_neigh(rcr, neigh_value));
+    return rcpp_result_gen;
+END_RCPP
+}
 // weighted_probs
 NumericMatrix weighted_probs(const List& data_lst, const NumericVector& weights);
 RcppExport SEXP _sits_weighted_probs(SEXP data_lstSEXP, SEXP weightsSEXP) {
@@ -753,6 +790,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_sits_C_bayts_calc_sub", (DL_FUNC) &_sits_C_bayts_calc_sub, 2},
     {"_sits_C_bayts_calc_nf", (DL_FUNC) &_sits_C_bayts_calc_nf, 6},
     {"_sits_C_bayts_detect_changes", (DL_FUNC) &_sits_C_bayts_detect_changes, 5},
+    {"_sits_C_cesbio_calc_rcr", (DL_FUNC) &_sits_C_cesbio_calc_rcr, 3},
+    {"_sits_C_cesbio_detect_shadow", (DL_FUNC) &_sits_C_cesbio_detect_shadow, 2},
+    {"_sits_C_cesbio_detect_neigh", (DL_FUNC) &_sits_C_cesbio_detect_neigh, 2},
     {"_sits_weighted_probs", (DL_FUNC) &_sits_weighted_probs, 2},
     {"_sits_weighted_uncert_probs", (DL_FUNC) &_sits_weighted_uncert_probs, 2},
     {"_sits_dtw_distance", (DL_FUNC) &_sits_dtw_distance, 2},

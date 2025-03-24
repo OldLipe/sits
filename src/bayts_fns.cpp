@@ -48,7 +48,7 @@ arma::mat C_bayts_calc_nf(arma::mat& ts,
                          const arma::mat& quantile_values,
                          const arma::vec& bwf) {
 
-    // Using the first element as dummy value
+    // Using the first column as dummy value
     arma::mat p_res(ts.n_rows, n_times + 1, arma::fill::value(0.5));
     // For each pixel
     for (arma::uword i = 0; i < ts.n_rows; i++) {

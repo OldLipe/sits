@@ -135,13 +135,13 @@ sits_detect_change.raster_cube <- function(data,
         multicores = multicores
     )
     # Update block parameter
-    block <- .jobs_optimal_block(
-        job_block_memsize = job_block_memsize,
-        block = block,
-        image_size = .tile_size(.tile(data)),
-        memsize = memsize,
-        multicores = multicores
-    )
+    # block <- .jobs_optimal_block(
+    #     job_block_memsize = job_block_memsize,
+    #     block = block,
+    #     image_size = .tile_size(.tile(data)),
+    #     memsize = memsize,
+    #     multicores = multicores
+    # )
     # Prepare parallel processing
     .parallel_start(
         workers = multicores, log = verbose,
