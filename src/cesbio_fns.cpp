@@ -20,7 +20,7 @@ arma::mat C_cesbio_calc_rcr(const arma::mat& values,
     arma::uword db = xb - 1;
     arma::uword da = xa - 1;
     // Aux variables
-    double res_mean, mean_a, mean_b = 0;
+    double mean_a, mean_b = 0;
     // Index date
     arma::uword i_idx = 0;
     arma::uvec valid_idxa;

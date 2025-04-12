@@ -208,6 +208,7 @@ Collate:
     'sits_bands.R'
     'sits_bayts.R'
     'sits_bbox.R'
+    'sits_cesbio.R'
     'sits_classify.R'
     'sits_colors.R'
     'sits_combine_predictions.R'

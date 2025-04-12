@@ -12,7 +12,6 @@ sits_cesbio <- function(samples = NULL,
 
         detect_change_fun <- function(values, ...) {
             dots <- list(...)
-            browser()
             # Extract tile
             tile <- dots[["tile"]]
             bbox <- dots[["bbox"]]
@@ -30,7 +29,7 @@ sits_cesbio <- function(samples = NULL,
                 start_detection <- min(filt_idxs) - 1
                 end_detection <- max(filt_idxs)
             }
-
+            # TODO: transform to db
             # Calculate the radar change ratio
             values <- C_cesbio_calc_rcr(
                 values = values,
@@ -50,23 +49,23 @@ sits_cesbio <- function(samples = NULL,
                 neigh_value = neigh_value
             )
 
-            # Get date that corresponds to the index value
-            shadow_values <- tile_tl[shadow_values]
             # Polygonize values
-            shadow_values <- .detect_change_as_polygon(
+            browser()
+            shadow_values <- .dc_as_polygon(
                 values = shadow_values,
                 block = block,
                 bbox = bbox
             )
-
             # Get date that corresponds to the index value
-            neigh_values <- tile_tl[.as_chr(neigh_values)]
+            #shadow_values <- tile_tl[shadow_values]
             # Polygonize values
-            neigh_values <- .detect_change_as_polygon(
+            neigh_values <- .dc_as_polygon(
                 values = neigh_values,
                 block = block,
                 bbox = bbox
             )
+            # Get date that corresponds to the index value
+            #neigh_values <- tile_tl[.as_chr(neigh_values)]
 
         }
         # Set model class
@@ -82,3 +81,56 @@ sits_cesbio <- function(samples = NULL,
     return(result)
 
 }
+
+#' @title Detect change as a polygon
+#' @name .dc_as_polygon
+#' @author Felipe Carvalho, \email{felipe.carvalho@@inpe.br}
+#' @author Felipe Carlos, \email{efelipecarlos@@gmail.com}
+#' @keywords internal
+#' @noRd
+#' @param values     Matrix of values for a raster (time series)
+#' @param block      Data block that is being processed
+#' @param bbox       Bounding box of the block
+#' @return           Vector object with polygons
+.dc_as_polygon <- function(values, block, bbox) {
+    # Create a template raster
+    template_raster <- .raster_new_rast(
+        nrows = block[["nrows"]], ncols = block[["ncols"]],
+        xmin = bbox[["xmin"]], xmax = bbox[["xmax"]],
+        ymin = bbox[["ymin"]], ymax = bbox[["ymax"]],
+        nlayers = 1, crs = bbox[["crs"]]
+    )
+    # Set values and NA value in template raster
+    values <- .raster_set_values(template_raster, values)
+    values <- .raster_set_na(values, 0)
+    names(values) <- "date"
+    # Extract polygons raster and convert to sf object
+    values <- .raster_as_polygon(values)
+    if (nrow(values) == 0) {
+        return(values)
+    }
+    # Get only polygons segments
+    values <- suppressWarnings(sf::st_collection_extract(values, "POLYGON"))
+    # Return the segment object
+    return(values)
+}
+
+.raster_as_polygon <- function(rast, ...) {
+    tem_rast <- tempfile(fileext = ".tif")
+    .raster_write_rast(
+        r_obj = rast,
+        file = tem_rast,
+        overwrite = FALSE,
+        data_type = "INT1U"
+    )
+
+    temp_vect <- tempfile(fileext = ".gpkg")
+    gdalraster::polygonize(
+        raster_file = tem_rast,
+        out_dsn = temp_vect,
+        out_layer = "pol",
+        out_fmt = "gpkg"
+    )
+    sf::st_read(temp_vect)
+}
+
