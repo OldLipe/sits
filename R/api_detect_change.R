@@ -179,16 +179,6 @@
             key = "model",
             value = .dc_class(dc_method)
         )
-        # Get date that corresponds to the index value
-        values <- tile_tl[.as_chr(values)]
-        # Polygonize values
-        values <- .detect_change_as_polygon(
-            values = values,
-            block = block,
-            bbox = bbox
-        )
-        # Remove non-detection values
-        values <- values[values[["date"]] != "0", ]
         # Log
         .debug_log(
             event = "start_block_data_save",
@@ -197,7 +187,7 @@
         )
         # Prepare and save results as vector
         .vector_write_vec(
-            v_obj = values,
+            v_obj = sf::st_as_sf(values),
             file_path = block_file
         )
         # Log
