@@ -70,8 +70,10 @@
 #' }
 #'
 .intersects <- function(x, y) {
-    as_crs <- sf::st_crs(x)
-    y <- sf::st_transform(y, crs = as_crs)
+    if (sf::st_crs(y) != sf::st_crs(x)) {
+        as_crs <- sf::st_crs(x)
+        y <- sf::st_transform(y, crs = as_crs)
+    }
     apply(suppressMessages(sf::st_intersects(x, y, sparse = FALSE)), 1, any)
 }
 #' @title Spatial within
