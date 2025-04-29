@@ -9,7 +9,6 @@ sits_cesbio <- function(samples = NULL,
     train_fun <- function(samples) {
         # Create a stats tibble
         # TODO: verify  if  data has only one polarization
-
         detect_change_fun <- function(values, ...) {
             dots <- list(...)
             # Extract tile
@@ -36,28 +35,25 @@ sits_cesbio <- function(samples = NULL,
                 xa     = xa,
                 xb     = xb
             )
-
             # Filter the shadow pixels
             shadow_values <- C_cesbio_detect_shadow(
                 rcr = values,
                 shadow_value = shadow_value
             )
-
-            # Filter the neigh pixels
-            neigh_values <- C_cesbio_detect_neigh(
-                rcr = values,
-                neigh_value = neigh_value
-            )
-
             # Polygonize values
-            browser()
             shadow_values <- .dc_as_polygon(
                 values = shadow_values,
                 block = block,
                 bbox = bbox
             )
             # Get date that corresponds to the index value
-            #shadow_values <- tile_tl[shadow_values]
+            shadow_values[["date"]] <- tile_tl[unlist(shadow_values[["date"]])]
+
+            # Filter the neigh pixels
+            neigh_values <- C_cesbio_detect_neigh(
+                rcr = values,
+                neigh_value = neigh_value
+            )
             # Polygonize values
             neigh_values <- .dc_as_polygon(
                 values = neigh_values,
@@ -65,8 +61,14 @@ sits_cesbio <- function(samples = NULL,
                 bbox = bbox
             )
             # Get date that corresponds to the index value
-            #neigh_values <- tile_tl[.as_chr(neigh_values)]
+            neigh_values[["date"]] <- tile_tl[unlist(neigh_values[["date"]])]
 
+            neight_inter <- terra::is.related(
+                x = neigh_values, y =  shadow_values, relation = "intersects"
+            )
+            neigh_values <- neigh_values[neight_inter, ]
+            shadow_values <- rbind(shadow_values, neigh_values)
+            shadow_values
         }
         # Set model class
         predict_fun <- .set_class(
@@ -109,28 +111,13 @@ sits_cesbio <- function(samples = NULL,
     if (nrow(values) == 0) {
         return(values)
     }
-    # Get only polygons segments
-    values <- suppressWarnings(sf::st_collection_extract(values, "POLYGON"))
     # Return the segment object
     return(values)
 }
 
 .raster_as_polygon <- function(rast, ...) {
-    tem_rast <- tempfile(fileext = ".tif")
-    .raster_write_rast(
-        r_obj = rast,
-        file = tem_rast,
-        overwrite = FALSE,
-        data_type = "INT1U"
-    )
-
-    temp_vect <- tempfile(fileext = ".gpkg")
-    gdalraster::polygonize(
-        raster_file = tem_rast,
-        out_dsn = temp_vect,
-        out_layer = "pol",
-        out_fmt = "gpkg"
-    )
-    sf::st_read(temp_vect)
+    rast <- terra::as.polygons(rast)
+    rast <- sf::st_as_sf(rast)
+    rast <- sf::st_cast(rast, "POLYGON")
+    terra::vect(rast)
 }
-
