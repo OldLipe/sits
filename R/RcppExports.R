@@ -41,6 +41,14 @@ dtw_distance <- function(ts1, ts2) {
     .Call(`_sits_dtw_distance`, ts1, ts2)
 }
 
+C_calc_probcusum <- function(ts, warmup_period, threshold) {
+    .Call(`_sits_C_calc_probcusum`, ts, warmup_period, threshold)
+}
+
+C_cusum <- function(ts, warmup_period, threshold, n_times, n_bands) {
+    .Call(`_sits_C_cusum`, ts, warmup_period, threshold, n_times, n_bands)
+}
+
 C_kernel_median <- function(x, ncols, nrows, band, window_size) {
     .Call(`_sits_C_kernel_median`, x, ncols, nrows, band, window_size)
 }

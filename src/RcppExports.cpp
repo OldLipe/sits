@@ -141,6 +141,34 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// C_calc_probcusum
+arma::rowvec C_calc_probcusum(const arma::rowvec& ts, const arma::uword& warmup_period, const double& threshold);
+RcppExport SEXP _sits_C_calc_probcusum(SEXP tsSEXP, SEXP warmup_periodSEXP, SEXP thresholdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type ts(tsSEXP);
+    Rcpp::traits::input_parameter< const arma::uword& >::type warmup_period(warmup_periodSEXP);
+    Rcpp::traits::input_parameter< const double& >::type threshold(thresholdSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_calc_probcusum(ts, warmup_period, threshold));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_cusum
+arma::mat C_cusum(const arma::mat& ts, const arma::uword& warmup_period, const double& threshold, const arma::uword& n_times, const arma::uword& n_bands);
+RcppExport SEXP _sits_C_cusum(SEXP tsSEXP, SEXP warmup_periodSEXP, SEXP thresholdSEXP, SEXP n_timesSEXP, SEXP n_bandsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type ts(tsSEXP);
+    Rcpp::traits::input_parameter< const arma::uword& >::type warmup_period(warmup_periodSEXP);
+    Rcpp::traits::input_parameter< const double& >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< const arma::uword& >::type n_times(n_timesSEXP);
+    Rcpp::traits::input_parameter< const arma::uword& >::type n_bands(n_bandsSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_cusum(ts, warmup_period, threshold, n_times, n_bands));
+    return rcpp_result_gen;
+END_RCPP
+}
 // C_kernel_median
 NumericVector C_kernel_median(const NumericMatrix& x, int ncols, int nrows, int band, int window_size);
 RcppExport SEXP _sits_C_kernel_median(SEXP xSEXP, SEXP ncolsSEXP, SEXP nrowsSEXP, SEXP bandSEXP, SEXP window_sizeSEXP) {
@@ -796,6 +824,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_sits_weighted_probs", (DL_FUNC) &_sits_weighted_probs, 2},
     {"_sits_weighted_uncert_probs", (DL_FUNC) &_sits_weighted_uncert_probs, 2},
     {"_sits_dtw_distance", (DL_FUNC) &_sits_dtw_distance, 2},
+    {"_sits_C_calc_probcusum", (DL_FUNC) &_sits_C_calc_probcusum, 3},
+    {"_sits_C_cusum", (DL_FUNC) &_sits_C_cusum, 5},
     {"_sits_C_kernel_median", (DL_FUNC) &_sits_C_kernel_median, 5},
     {"_sits_C_kernel_mean", (DL_FUNC) &_sits_C_kernel_mean, 5},
     {"_sits_C_kernel_sd", (DL_FUNC) &_sits_C_kernel_sd, 5},

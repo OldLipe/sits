@@ -20,15 +20,16 @@ arma::vec C_bayts_calc_pbayes(const arma::vec& prior, const arma::vec& post) {
     return (prior % post) / ((prior % post) + ((1 - prior) % (1 - post)));
 }
 
+double C_bayts_calc_pbayes(const double& prior, const double& post) {
+    double res = (prior * post) / ((prior * post) + ((1 - prior) * (1 - post)));
+    return (std::floor(res * 1000000000000000.0) / 1000000000000000.0);
+}
+
 // [[Rcpp::export]]
 arma::rowvec C_bayts_calc_sub(const arma::mat& x, const arma::mat& y) {
     return x - y;
 }
 
-double C_bayts_calc_pbayes(const double& prior, const double& post) {
-    double res = (prior * post) / ((prior * post) + ((1 - prior) * (1 - post)));
-    return (std::floor(res * 1000000000000000.0) / 1000000000000000.0);
-}
 
 arma::vec C_vec_select_cols(const arma::vec& m,
                             const arma::uvec idx) {
@@ -42,11 +43,11 @@ arma::vec C_vec_select_cols(const arma::vec& m,
 
 // [[Rcpp::export]]
 arma::mat C_bayts_calc_nf(arma::mat& ts,
-                         const arma::mat& mean,
-                         const arma::mat& sd,
-                         const arma::uword& n_times,
-                         const arma::mat& quantile_values,
-                         const arma::vec& bwf) {
+                          const arma::mat& mean,
+                          const arma::mat& sd,
+                          const arma::uword& n_times,
+                          const arma::mat& quantile_values,
+                          const arma::vec& bwf) {
 
     // Using the first column as dummy value
     arma::mat p_res(ts.n_rows, n_times + 1, arma::fill::value(0.5));
@@ -163,10 +164,10 @@ bool essentiallyEqual(float a, float b, float epsilon)
 
 // [[Rcpp::export]]
 arma::mat C_bayts_detect_changes(const arma::mat& p_res,
-                                const arma::uword& start_detection,
-                                const arma::uword& end_detection,
-                                const double& threshold = 0.5,
-                                const double& chi = 0.9) {
+                                 const arma::uword& start_detection,
+                                 const arma::uword& end_detection,
+                                 const double& threshold = 0.5,
+                                 const double& chi = 0.9) {
     arma::mat res(
             p_res.n_rows, 1, arma::fill::value(arma::datum::nan)
     );
@@ -178,7 +179,7 @@ arma::mat C_bayts_detect_changes(const arma::mat& p_res,
 
     // for each pixel
     for (arma::uword i = 0; i < p_res.n_rows; i++) {
-        // Filter non NA values
+        // Filter out NA values
         arma::uvec valid_values = arma::find_finite(
             p_res.submat(i, 0, i, p_res.n_cols - 1)
         );
