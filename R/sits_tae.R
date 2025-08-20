@@ -217,11 +217,18 @@ sits_tae <- function(samples = NULL,
                     dim_layers_decoder
                 )
             },
-            forward = function(x) {
-                x <- x |>
-                    self$spatial_encoder() |>
-                    self$temporal_attention_encoder() |>
-                    self$decoder()
+            forward = function(x, heads = FALSE) {
+                out <- self$spatial_encoder(x)
+                if (heads) {
+                    out <- self$temporal_attention_encoder(out)
+                    heads <- out[[2]]
+                    out <- out[[1]]
+                    return(heads)
+                } else {
+                    out <- self$temporal_attention_encoder(out)
+                    out <- out[[1]]
+                }
+                self$decoder(out)
                 # softmax is done after classification - removed from here
             }
         )

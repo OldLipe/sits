@@ -90,7 +90,7 @@
         values <- self$spatial_encoder(values)
         # output is a 2D shape[(batch_size * n_times), dim_enc]
         # reshape the output
-        # from a 2D shape [(batch_size * n_times), n_bands]
+        # from a 2D shape [(batch_size * n_times), dim_enc]
         # to a 3D shape [batch_size, n_times, dim_enc]
         values <- values$view(c(batch_size, n_times, dim_enc))
         values
@@ -351,12 +351,12 @@
         # attention_probs - 3D shape [(batch_size * n_heads) x 1 x seq_len]
         # values - 3D shape [(batch_size * num_heads) x seq_len x hidden:128]
         # result has 3D shape [(batch_size * num_heads) x 1 x hidden:128]
-        attention_output <- torch::torch_matmul(attention_probs, values)
+        attention_res <- torch::torch_matmul(attention_probs, values)
 
         # squeeze attention output
         # input shape 3D [(batch_size * n_heads) x 1 x hidden:128]
         # output shape 2D [(batch_size * n_heads) x hidden:128]
-        attention_output <- torch::torch_squeeze(attention_output)
+        attention_output <- torch::torch_squeeze(attention_res)
 
         # reshape attention output to 3D shape
         # input shape is 2D [(batch_size * n_heads) x hidden:128]
@@ -376,7 +376,7 @@
         # input shape is 2D [batch_size x (n_heads:4 * dim_encoder:128)]
         # output shape is 2D [batch_size x dim_encoder:128]
         o_hat <- self$mlp(attention_output)
-        o_hat
+        list(o_hat, attention_res)
     }
 )
 #' @title Torch module for temporal attention encoder
@@ -481,7 +481,6 @@
         batch_size <- values[["shape"]][[1L]]
         # seq_len is the size of the timeline
         seq_len <- values[["shape"]][[2L]]
-
         # normalize the input layer
         # [batch_size x seq_len x in_channels:128]
         values <- self$in_layer_norm(values)
@@ -502,9 +501,10 @@
         # calculate multi-head attention
         # output is 3D shape [n_heads x  batch_size x d_model:256]
         values <- self$attention_heads(values)
+        heads <- values[[2]]
         # permute dimensions of the output
         # result is 3D shape [batch_size x n_heads x d_model:256]
-        values <- values$permute(c(2L, 1L, 3L))$contiguous()
+        values <- values[[1]]$permute(c(2L, 1L, 3L))$contiguous()
         # reshape the output
         values <- values$view(c(batch_size, -1L))
 
@@ -514,7 +514,7 @@
         values <- self$dropout(values)
         # normalize output layer
         values <- self$out_layer_norm(values)
-        values
+        list(values, heads)
     }
 )
 #' @title Torch module for calculating attention from query, keys and values
@@ -585,7 +585,7 @@
         # values has 3D shape [(num_heads * batch_size) x seq_len x split_value]
         # output has a 3D shape [(num_heads * batch_size) x 1 x split_value]
         values <- torch::torch_matmul(attn, values)
-        values
+        list(values, attn)
     }
 )
 #' @title Torch module for calculating multi-head attention
@@ -626,7 +626,6 @@
         self$n_heads <- n_heads
         self$d_k <- d_k
         self$d_in <- d_in
-
         # create a base vector for queries
         # shape [n_heads x d_k]
         self$Q <- torch::nn_parameter(
@@ -661,7 +660,6 @@
         # input values tensor is 3D [batch_size x seq_len x d_model:256]
         batch_size <- values$shape[[1L]]
         seq_len <- values$shape[[2L]]
-
         # calculate the query tensor
         # concatenate a sequence of tensors to match input batch_size
         tensors <- purrr::map(seq_len(batch_size), function(i) {
@@ -678,23 +676,29 @@
         # keys tensor has 3D shape [batch_size x seq_len x d_model:256]
         # output tensor has 3D shape [batch_size x seq_len x (n_heads * d_k)]
         keys <- self$fc_k(values)
+
         # reshape the keys vector to 4D shape
         # [batch_size, seq_len, n_heads, d_k]
         keys <- keys$view(c(batch_size, seq_len, n_heads, d_k))
+
         # permute shape of keys tensor
         # from 4D shape [batch_size, seq_len, n_heads, d_k]
         # to 4D shape [n_heads, batch_size, seq_len, d_k]
         keys <- keys$permute(c(3L, 1L, 2L, 4L))$contiguous()
+
         # Reshape keys tensor to 3D [(n_heads * batch_size) x  seq_len x d_k]
         keys <- keys$view(c(-1L, seq_len, d_k))
+
         # split the values tensor by attention heads
         dim_encoder <- values$shape[length(values$shape)]
         split_value <- dim_encoder %/% n_heads
+
         # reshape the values tensor by splitting
         # from 3D shape[batch_size x seq_len x dim_encoder:256]
         # to a 4D shape
         # [n_heads x batch_size x seq_len x (dim_encoder %/% n_heads)]
         values <- torch::torch_stack(values$split(split_value, dim = -1L))
+
         # reshape the values tensor
         # from 4D shape
         # [n_heads x batch_size x seq_len x (dim_encoder %/% n_heads)]
@@ -702,14 +706,20 @@
         # [(n_heads * batch_size) x seq_len x (dim_encoder %/% n_heads)]
         values <- values$view(c(n_heads * batch_size, seq_len, -1L))
         # calculate the attention values
-        values <- self$attention(query, keys, values)
+        heads <- self$attention(query, keys, values)
+        values <- heads[[1]]
+        heads <- heads[[2]]
+        heads <- heads$view(c(n_heads, batch_size, 1, seq_len))
+        heads <- heads$squeeze(dim = 3L)
+
         # output has 3D shape
         # [(num_heads * batch_size) x seq_len x (dim_encoder %/% n_heads)]
         # d_in = 256 and n_heads = 16, d_in %/% n_heads = 16
         # reshape to 4D shape [num_heads x batch_size x 1 x d_in %/% n_heads:16]
         values <- values$view(c(n_heads, batch_size, 1L, d_in %/% n_heads))
+
         # reshape to 3D shape [num_heads:16 x  batch_size x dim_encoder:256]
         values <- values$squeeze(dim = 3L)
-        values
+        list(values, heads)
     }
 )

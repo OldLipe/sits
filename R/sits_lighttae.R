@@ -244,12 +244,18 @@ sits_lighttae <- function(samples = NULL,
                     dim_layers_decoder
                 )
             },
-            forward = function(input) {
-                out <- input |>
-                    self$spatial_encoder() |>
-                    self$temporal_encoder() |>
-                    self$decoder()
-                out
+            forward = function(input, heads = FALSE) {
+                out <- self$spatial_encoder(input)
+                if (heads) {
+                    out <- self$temporal_encoder(out)
+                    heads <- out[[2]]
+                    out <- out[[1]]
+                    return(heads)
+                } else {
+                    out <- self$temporal_encoder(out)
+                    out <- out[[1]]
+                }
+                self$decoder(out)
                 # softmax is done externally
                 # by .ml_normalize.torch_model function
             }
