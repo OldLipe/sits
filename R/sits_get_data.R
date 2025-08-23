@@ -365,7 +365,7 @@ sits_get_data.shp <- function(cube,
 #' <longitude, latitude, start_date, end_date, label>.
 #'
 #' @note
-#' #' For sf objects, the following parameters are relevant:
+#' For sf objects, the following parameters are relevant:
 #' \itemize{
 #' \item{\code{label}: label to be assigned to the samples.
 #' Should only be used if all geometries have a single label.}

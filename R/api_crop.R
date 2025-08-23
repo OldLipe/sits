@@ -85,8 +85,9 @@
 #' @param  roi          ROI to crop
 #' @param  output_file  Output file where image will be written
 #' @param  gdal_params  Additional parameters to crop using gdal warp
+#' @param  gdal_auth    Use GDAL Auth mechanism (e.g., netrc)
 #' @return              Cropped data cube
-.crop_asset <- function(asset, roi, output_file, gdal_params = list()) {
+.crop_asset <- function(asset, roi, output_file, gdal_params = list(), gdal_auth = FALSE) {
     # Get asset path and expand it
     file <- .file_path_expand(.tile_path(asset))
     # Get band configs from tile
@@ -113,7 +114,20 @@
                 quiet = TRUE,
                 conf_opts = unlist(.conf("gdal_read_options"))
             )
-        } else {
+        }
+        # If asset uses GDAL Auth, call gdal_warp with no extra parameters.
+        # In this case, we just want to download files - we don't want to change
+        else if (gdal_auth) {
+            .gdal_warp(
+                base_files = file,
+                file = output_file,
+                params = list(),
+                quiet = TRUE,
+                conf_opts = unlist(.conf("gdal_read_options"))
+            )
+        }
+        # Otherwise, just use regular copy / download methods
+        else {
             # If ``warp`` is not required, just use regular file copy
             # Remove vsi driver path
             file_base <- .file_remove_vsi(file)

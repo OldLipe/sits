@@ -347,6 +347,7 @@ sits_cube.vector_cube <- function(source,
 #'                     (default = "_")
 #' @param multicores   Number of workers for parallel processing
 #'                     (integer, min = 1, max = 2048).
+#' @param memsize      Memory available (in GB)
 #' @param progress     Logical: show a progress bar?
 #' @return A \code{tibble} describing the contents of a data cube.
 #'
@@ -505,6 +506,7 @@ sits_cube.results_cube <- function(source,
                                    version = "v1",
                                    delim = "_",
                                    multicores = 2L,
+                                   memsize = 2L,
                                    progress = TRUE) {
     # set caller to show in errors
     .check_set_caller("sits_cube_results_cube")
@@ -534,6 +536,7 @@ sits_cube.results_cube <- function(source,
         version = version,
         delim = delim,
         multicores = multicores,
+        memsize = memsize,
         progress = progress, ...
     )
 }

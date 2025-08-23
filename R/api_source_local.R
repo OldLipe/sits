@@ -119,6 +119,7 @@
                                 bands,
                                 labels,
                                 multicores,
+                                memsize,
                                 progress, ...) {
     # set caller to show in errors
     .check_set_caller(".local_results_cube")
@@ -179,7 +180,7 @@
     )
     # check if labels match in the case of class cube
     if (inherits(cube, "class_cube")) {
-        .check_labels_class_cube(cube)
+        .check_labels_class_cube(cube, multicores, memsize)
     }
 
     cube
@@ -655,6 +656,7 @@
         .parallel_start(workers = multicores)
         on.exit(.parallel_stop(), add = TRUE)
     }
+
     # do parallel requests
     results_lst <- .parallel_map(seq_len(nrow(items)), function(i) {
         item <- items[i, ]

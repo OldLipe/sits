@@ -54,13 +54,16 @@
         }
         # Update token (for big tiffs and slow networks)
         asset <- .cube_token_generator(asset)
+        # Check if cube requires gdal auth
+        use_gdal_auth <- .cube_uses_gdal_auth(asset)
         # Crop and download
         local_asset <- .try(
             expr = .crop_asset(
                 asset       = asset,
                 roi         = roi,
                 output_file = output_file,
-                gdal_params = gdal_params
+                gdal_params = gdal_params,
+                gdal_auth   = use_gdal_auth
             ),
             .default = NULL
         )

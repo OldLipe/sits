@@ -1558,6 +1558,29 @@ NULL
 .cube_is_token_expired.default <- function(cube) {
     FALSE
 }
+#' @title Check if cube requires GDAL Auth
+#' @name .cube_uses_gdal_auth
+#' @keywords internal
+#' @noRd
+#' @param  cube input data cube
+#' @param  ...  additional parameters for httr package
+#'
+#' @return bool indicating whether the cube requires GDAL authentication.
+.cube_uses_gdal_auth <- function(cube) {
+    UseMethod(".cube_uses_gdal_auth", cube)
+}
+#' @export
+.cube_uses_gdal_auth.hls_cube <- function(cube) {
+    TRUE
+}
+#' @export
+.cube_uses_gdal_auth.cdse_cube <- function(cube) {
+    TRUE
+}
+#' @export
+.cube_uses_gdal_auth.default <- function(cube) {
+    FALSE
+}
 #' @title Split the cube by tiles and bands
 #' @name .cube_split_tiles_bands
 #' @keywords internal
@@ -1658,4 +1681,80 @@ NULL
         source = .cube_source(cube),
         collection = .cube_collection(cube)
     )
+}
+#' @title  Return unique values from cube files (useful for class cubes)
+#' @name .cube_unique_values
+#' @keywords internal
+#' @noRd
+#'
+#' @param cube         Raster cube
+#' @param multicores   Number of cores available for processing
+#' @param memsize      Memory available (in GB)
+#' @return             Cube values (without duplication)
+.cube_unique_values <- function(cube, multicores, memsize) {
+    # Get cube labels
+    labels <- unname(.cube_labels(cube))
+    # The following functions define optimal parameters for parallel processing
+    # Get block size
+    block <- .raster_file_blocksize(.raster_open_rast(.tile_path(cube)))
+    # Check minimum memory needed to process one block
+    job_block_memsize <- .jobs_block_memsize(
+        block_size = .block_size(block = block, overlap = 0L),
+        npaths = length(labels),
+        nbytes = 8L,
+        proc_bloat = .conf("processing_bloat")
+    )
+    # Update multicores parameter based on size of a single block
+    multicores <- .jobs_max_multicores(
+        job_block_memsize = job_block_memsize,
+        memsize = memsize,
+        multicores = multicores
+    )
+    # Update block parameter based on the size of memory and number of cores
+    block <- .jobs_optimal_block(
+        job_block_memsize = job_block_memsize,
+        block = block,
+        image_size = .tile_size(.tile(cube)),
+        memsize = memsize,
+        multicores = multicores
+    )
+    # Prepare parallel processing
+    if (is.null(sits_env[["cluster"]])) {
+        .parallel_start(workers = multicores)
+        on.exit(.parallel_stop(), add = TRUE)
+    }
+    # Extract unique values from all tiles
+    tile_values <- slider::slide(cube, function(tile) {
+        # Generate tile chunks
+        chunks <- .tile_chunks_create(
+            tile = tile,
+            overlap = 0L,
+            block = block
+        )
+        # Get tile path
+        tile_path <- .tile_path(tile)
+        # Get unique values of a raster
+        tile_values <- .jobs_map_parallel(chunks, function(chunk) {
+            # Get chunk block
+            chunk_block <- .block(chunk)
+            # Open raster and crop metadata
+            chunk_raster <- .raster_open_rast(tile_path)
+            chunk_raster <- .raster_crop_metadata(
+                rast = chunk_raster,
+                block = chunk_block
+            )
+            # Sample raster
+            unique(
+                .raster_values_mem(
+                    chunk_raster
+                )
+            )
+        }, progress = TRUE)
+        # Return unique values
+        unique(unlist(tile_values))
+    })
+    # Extract unique values from all tiles together
+    tile_values <- unique(unlist(tile_values))
+    # Remove NA and sort values (to keep it compatible with terra::freq)
+    sort(tile_values[!is.na(tile_values)])
 }

@@ -325,7 +325,7 @@
 #'
 #
 .torch_linear_relu_dropout <- torch::nn_module(
-    classname = "torch_linear_batch_norm_relu_dropout",
+    classname = "torch_linear_relu_dropout",
     initialize = function(input_dim,
                           output_dim,
                           dropout_rate) {
@@ -333,6 +333,43 @@
             torch::nn_linear(input_dim, output_dim),
             torch::nn_relu(),
             torch::nn_dropout(dropout_rate)
+        )
+    },
+    forward = function(x) {
+        self$block(x)
+    }
+)
+#' @title Torch module for linear MLP
+#' @name .torch_batch_norm_linear
+#'
+#' @author Felipe Souza, \email{lipecaso@@gmail.com}
+#' @author Felipe Carlos, \email{efelipecarlos@@gmail.com}
+#' @author Gilberto Camara, \email{gilberto.camara@@inpe.br}
+
+#' @keywords internal
+#' @noRd
+#' @description Defines a torch module composed of: (a) batch normalization; (b) linear transformation;
+#'
+#'
+#' @param input_dim         Input dimension of neural net.
+#' @param output_dim        Output dimension of neural net.
+#'
+#' @return A linear tensor block.
+#'
+
+# module for linear transformation with batch normalization and relu activation
+.torch_batch_norm_linear <- torch::nn_module(
+    classname = "torch_batch_norm_linear",
+    initialize = function(input_dim,
+                          output_dim) {
+        self$block <- torch::nn_sequential(
+            torch::nn_batch_norm1d(
+                num_features = input_dim
+            ),
+            torch::nn_linear(
+                in_features = input_dim,
+                out_features = output_dim
+            )
         )
     },
     forward = function(x) {
@@ -359,7 +396,7 @@
 
 # module for linear transformation with batch normalization and relu activation
 .torch_linear_batch_norm_relu <- torch::nn_module(
-    classname = "torch_linear_batch_norm_relu_dropout",
+    classname = "torch_linear_batch_norm_relu",
     initialize = function(input_dim,
                           output_dim) {
         self$block <- torch::nn_sequential(

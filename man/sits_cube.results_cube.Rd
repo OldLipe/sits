@@ -16,6 +16,7 @@
   version = "v1",
   delim = "_",
   multicores = 2L,
+  memsize = 2L,
   progress = TRUE
 )
 }
@@ -53,6 +54,8 @@ the cube.}
 
 \item{multicores}{Number of workers for parallel processing
 (integer, min = 1, max = 2048).}
+
+\item{memsize}{Memory available (in GB)}
 
 \item{progress}{Logical: show a progress bar?}
 }

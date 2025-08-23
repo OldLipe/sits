@@ -78,6 +78,14 @@
         # Scale values
         scale <- .scale(band_conf)
         values <- values / scale
+        max_value <- max(values)
+        if (max_value > .max_value(band_conf)) {
+            values[values > .max_value(band_conf)] <- .max_value(band_conf) - 1
+        }
+        min_value <- min(values)
+        if (min_value < .min_value(band_conf)) {
+            values[values < .min_value(band_conf)] <- .min_value(band_conf) + 1
+        }
         # Normalize input values
         values <- .texture_normalize(
             values = values,
