@@ -72,7 +72,7 @@ If \code{start_date} and \code{end_date} are not informed, the function
 uses these data from the cube.
 }
 \note{
-#' For sf objects, the following parameters are relevant:
+For sf objects, the following parameters are relevant:
 \itemize{
 \item{\code{label}: label to be assigned to the samples.
 Should only be used if all geometries have a single label.}

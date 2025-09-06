@@ -125,6 +125,13 @@
     values[is.na(values)] <- 0
     values
 }
+
+#' @export
+#'
+.ml_normalize.elects_model <- function(values, ml_model) {
+    values
+}
+
 #' @title Update multicores for models that do internal multiprocessing
 #' @keywords internal
 #' @noRd
