@@ -178,6 +178,8 @@
         data_type = .data_type(band_conf)
     )
     if (.has(.tile_paths(asset, bands = asset[["asset"]]))) {
+        print(.tile_paths(asset, bands = asset[["asset"]]))
+        cat(.tile_paths(asset, bands = asset[["asset"]]))
         # Merge source files into template
         out_file <- .gdal_merge_into(
             file = out_file,
