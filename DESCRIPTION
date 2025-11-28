@@ -271,6 +271,8 @@ Collate:
     'sits_stars.R'
     'sits_summary.R'
     'sits_tae.R'
+    'sits_tae-cnn.R'
+    'sits_tae-no-se.R'
     'sits_tempcnn.R'
     'sits_terra.R' 
     'sits_texture.R'
