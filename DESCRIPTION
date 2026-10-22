@@ -303,6 +303,7 @@ Collate:
     'sits_summary.R'
     'sits_tae.R'
     'sits_tempcnn.R'
+    'sits_tempcnn_base.R'
     'sits_terra.R' 
     'sits_texture.R'
     'sits_timeline.R'

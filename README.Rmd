@@ -201,6 +201,8 @@ available in `sits`:
 -   Extreme gradient boosting (`sits_xgboost()`)
 -   Multi-layer perceptrons (`sits_mlp()`)
 -   1D convolution neural networks (`sits_tempcnn()`)
+-   1D convolution neural networks with base data, e.g. DEM
+    (`sits_tempcnn_base()`)
 -   Residual neural networks (`sits_resnet()`)
 -   Temporal self-attention encoder (`sits_tae()`) 
 -   Lightweight temporal attention encoder (`sits_lighttae()`)

@@ -197,7 +197,7 @@
                                output_dir,
                                version,
                                verbose,
-                               progress) {
+                                   progress) {
     # Initial time for tile classification
     tile_start_time <- .tile_classif_start(
         tile = tile,

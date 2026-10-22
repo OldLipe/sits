@@ -306,6 +306,41 @@ test_that("Classification with MLP", {
 
     expect_true(all(file.remove(unlist(sinop_2014_probs$file_info[[1]]$path))))
 })
+test_that("Classification with TempCNN and base data", {
+    set.seed(777)
+    output_dir <- paste0(tempdir(), "/tcnn_base")
+    if (!dir.exists(output_dir)) {
+        dir.create(output_dir)
+    }
+    # cube with a digital elevation model as base data
+    base_cube <- test_base_cube(output_dir)
+    expect_true(.cube_is_base(base_cube))
+    expect_true("ELEVATION" %in% .tile_bands(.tile(base_cube)))
+
+    torch_model <- sits_train(
+        test_samples_base(samples_modis_ndvi),
+        sits_tempcnn_base(epochs = 20)
+    )
+    probs_cube <- sits_classify(
+        data = base_cube,
+        ml_model = torch_model,
+        output_dir = output_dir,
+        memsize = 8,
+        multicores = 1,
+        progress = FALSE
+    )
+    expect_true(all(file.exists(unlist(probs_cube$file_info[[1]]$path))))
+
+    rast <- .raster_open_rast(probs_cube$file_info[[1]]$path[[1]])
+    expect_true(.raster_nrows(rast) == .tile_nrows(probs_cube))
+
+    values <- .raster_get_values(rast)
+    expect_equal(ncol(values), length(sits_labels(probs_cube)))
+    expect_true(max(values) <= 10000)
+    expect_false(anyNA(values))
+
+    expect_true(all(file.remove(unlist(probs_cube$file_info[[1]]$path))))
+})
 test_that("Classification with TempCNN", {
     torch_model <- sits_train(samples_modis_ndvi, sits_tempcnn(epochs = 20))
 

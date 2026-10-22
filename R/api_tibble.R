@@ -320,6 +320,7 @@
             ))
         ) |>
         dplyr::ungroup()
-    class(result) <- c("sits", class(result))
-    result
+    # dplyr drops the class of the samples, so restore it to keep
+    # specializations such as "sits_base" (samples with base data)
+    .set_class(result, class(samples), "sits", class(result))
 }

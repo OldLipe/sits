@@ -74,6 +74,8 @@
 #'      \item{light gradient boosting: \code{\link[sits]{sits_lightgbm}};}
 #'      \item{multi-layer perceptrons: \code{\link[sits]{sits_mlp}};}
 #'      \item{temporal CNN: \code{\link[sits]{sits_tempcnn}};}
+#'      \item{temporal CNN with base data (e.g., DEM):
+#'         \code{\link[sits]{sits_tempcnn_base}};}
 #'      \item{residual network encoders: \code{\link[sits]{sits_resnet}};}
 #'      \item{LSTM with convolutional networks: \code{\link[sits]{sits_lstm_fcn}};}
 #'      \item{temporal self-attention encoders:

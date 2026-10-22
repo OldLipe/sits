@@ -3175,6 +3175,86 @@
     .check_num_parameter(min_delta, min = 0.0)
     .check_lgl_parameter(verbose)
 }
+#' @title Preconditions for temporal CNN models with base data
+#' @name .check_pre_sits_tempcnn_base
+#'
+#' @author Felipe Souza, \email{lipecaso@@gmail.com}
+#'
+#' @param samples            Time series with the training samples.
+#' @param cnn_layers         Number of 1D convolutional filters per layer
+#' @param cnn_kernels        Size of the 1D convolutional kernels.
+#' @param cnn_dropout_rates  Dropout rates for 1D convolutional filters.
+#' @param dense_layer_nodes  Number of nodes in the dense layer.
+#' @param dense_layer_dropout_rate  Dropout rate (0,1) for the dense layer.
+#' @param base_layers        Number of nodes of the base data encoder.
+#' @param base_dropout_rates Dropout rates of the base data encoder.
+#' @param fusion_layer_nodes Number of nodes in the fusion layer.
+#' @param fusion_layer_dropout_rate Dropout rate (0,1) for the fusion layer.
+#' @param epochs             Number of iterations to train the model.
+#' @param batch_size         Number of samples per gradient update.
+#' @param lr_decay_epochs    Number of epochs to reduce learning rate.
+#' @param lr_decay_rate      Decay factor for reducing learning rate.
+#' @param patience           Number of epochs without improvements until
+#'                           training stops.
+#' @param min_delta	         Minimum improvement in loss function
+#'                           to reset the patience counter.
+#' @param embedding_dim      Dimension of the embedding (encoder mode).
+#' @param verbose            Verbosity mode (TRUE/FALSE). Default is FALSE.
+#'
+#' @keywords internal
+#' @noRd
+#'
+#' @return                   Called for side effects.
+#'
+.check_pre_sits_tempcnn_base <- function(samples, cnn_layers, cnn_kernels,
+                                         cnn_dropout_rates, dense_layer_nodes,
+                                         dense_layer_dropout_rate,
+                                         base_layers, base_dropout_rates,
+                                         fusion_layer_nodes,
+                                         fusion_layer_dropout_rate,
+                                         epochs, batch_size,
+                                         lr_decay_epochs, lr_decay_rate,
+                                         patience, min_delta, embedding_dim,
+                                         verbose) {
+    # Pre-conditions of the time series encoder
+    .check_pre_sits_tempcnn(
+        samples = samples, cnn_layers = cnn_layers,
+        cnn_kernels = cnn_kernels,
+        cnn_dropout_rates = cnn_dropout_rates,
+        dense_layer_nodes = dense_layer_nodes,
+        dense_layer_dropout_rate = dense_layer_dropout_rate,
+        epochs = epochs, batch_size = batch_size,
+        lr_decay_epochs = lr_decay_epochs,
+        lr_decay_rate = lr_decay_rate,
+        patience = patience, min_delta = min_delta,
+        embedding_dim = embedding_dim,
+        verbose = verbose
+    )
+    # Samples must contain base data (e.g. DEM)
+    .check_that(
+        x = inherits(samples, "sits_base"),
+        msg = .conf("messages", "sits_tempcnn_base_samples")
+    )
+    # Pre-conditions of the base data encoder
+    .check_int_parameter(base_layers, len_max = 2L^31L - 1L)
+    .check_num_parameter(base_dropout_rates,
+        min = 0.0, max = 1.0,
+        len_min = length(base_layers),
+        len_max = length(base_layers)
+    )
+    # Pre-conditions of the fusion layer
+    .check_int_parameter(fusion_layer_nodes, len_max = 1L)
+    .check_num_parameter(fusion_layer_dropout_rate,
+        min = 0.0, max = 1.0, len_max = 1L
+    )
+    # Base bands without variation produce NaN when normalized
+    # (see C_normalize_data_inplace)
+    base_stats <- .samples_base_stats(samples)
+    .check_that(
+        x = all(base_stats[["q98"]] > base_stats[["q02"]]),
+        msg = .conf("messages", "sits_tempcnn_base_constant")
+    )
+}
 #' @title Preconditions for ResNet models
 #' @name .check_pre_sits_resnet
 #'

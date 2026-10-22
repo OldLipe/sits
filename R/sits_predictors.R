@@ -184,7 +184,9 @@ sits_pred_sample <- function(pred, frac) {
 #' @param  samples    Time series samples uses as training data.
 #'
 #' @return A list with the 2% and 98% quantiles for each band of the
-#' training data.
+#' training data. For samples with base data (e.g., a digital elevation
+#' model), the quantiles of the base bands are also returned, after those
+#' of the time series bands.
 #'
 #' @examples
 #' if (sits_run_examples()) {

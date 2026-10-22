@@ -457,6 +457,50 @@
         self$model(x)
     }
 )
+#' @title Torch module for multiple linear layers with dropout
+#' @name .torch_multi_linear_batch_norm_relu_dropout
+#' @author Felipe Souza, \email{lipecaso@@gmail.com}
+#' @keywords internal
+#' @noRd
+#' @description Defines a set of torch modules composed of:
+#' (a) linear transformation; (b) batch normalization; (c) relu activation;
+#' (d) dropout. The first layer has no batch normalization, since its input
+#' is expected to be already normalized.
+#'
+#' @param input_dim         Input dimension of neural net.
+#' @param hidden_dims       Hidden dimensions of neural net.
+#' @param dropout_rates     Dropout rates for each hidden layer.
+#'
+#' @return A linear tensor block.
+#'
+.torch_multi_linear_batch_norm_relu_dropout <- torch::nn_module(
+    classname = "torch_multi_linear_batch_norm_relu_dropout",
+    initialize = function(input_dim, hidden_dims, dropout_rates) {
+        tensors <- list()
+        # input layer
+        tensors[[1L]] <- .torch_linear_relu_dropout(
+            input_dim = input_dim,
+            output_dim = hidden_dims[[1L]],
+            dropout_rate = dropout_rates[[1L]]
+        )
+        # if hidden layers is a vector then we add those layers
+        if (length(hidden_dims) > 1L) {
+            for (i in 2L:length(hidden_dims)) {
+                tensors[[length(tensors) + 1L]] <-
+                    .torch_linear_batch_norm_relu_dropout(
+                        input_dim  = hidden_dims[[i - 1L]],
+                        output_dim = hidden_dims[[i]],
+                        dropout_rate = dropout_rates[[i]]
+                    )
+            }
+        }
+        # create a sequential module that calls the layers in the same order.
+        self$model <- torch::nn_sequential(!!!tensors)
+    },
+    forward = function(x) {
+        self$model(x)
+    }
+)
 #' @title Verify if GPU classification is available
 #' @name .torch_gpu_classification
 #' @author Gilberto Camara, \email{gilberto.camara@@inpe.br}

@@ -39,9 +39,13 @@ remove deprecated functions. The highlights below are grouped by theme.
 * Improve parallel error reporting
 * Skip NA pixels during ML inference in `.classify_tile` for better performance
 
-### New classification model
+### New classification models
 * Add `sits_lstm_fcn()`, a Long Short-Term Memory Fully Convolutional Network
   model
+* Add `sits_tempcnn_base()`, a TempCNN model with a second encoder for base
+  data (e.g., digital elevation models). The encoded time series and the
+  encoded base data are fused before classification. This is the first
+  deep learning model in `sits` that supports training with base data
 
 ### Object-based (OBIA) and vector-cube processing
 * Implement a raster-based segment classification workflow for OBIA

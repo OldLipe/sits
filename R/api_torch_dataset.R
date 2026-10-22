@@ -192,6 +192,7 @@
         self$ml_temporal_model <- ml_temporal_model
         self$impute_fn <- impute_fn
         self$n_bands <- length(self$bands)
+        self$n_base_bands <- length(self$base_bands)
         self$n_times <- length(.tile_timeline(tile))
         self$output_dir <- output_dir
         self$verbose <- verbose
@@ -270,7 +271,12 @@
             values <- self$.normalize_data(values)
         }
         # Organize either temporal or features based layout tensor
-        if (self$ml_temporal_model) {
+        if (self$n_base_bands > 0L) {
+            # Models trained with base data receive the flat predictors
+            # layout and split the time series from the base features
+            # internally (see sits_tempcnn_base)
+            values <- values$contiguous()
+        } else if (self$ml_temporal_model) {
             # The reshape + permute reproduces the layout:
             # array(values, dim = c(batch, n_times, n_bands))
             values <- values$reshape(

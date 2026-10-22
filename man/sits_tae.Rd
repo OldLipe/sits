@@ -146,6 +146,7 @@ Other machine learning:
 \code{\link[=sits_rfor]{sits_rfor()}},
 \code{\link[=sits_svm]{sits_svm()}},
 \code{\link[=sits_tempcnn]{sits_tempcnn()}},
+\code{\link[=sits_tempcnn_base]{sits_tempcnn_base()}},
 \code{\link[=sits_xgboost]{sits_xgboost()}}
 }
 \author{

@@ -279,6 +279,10 @@
 #' @param samples Data.frame with samples
 #' @return List of Q02 and Q98 for normalization
 .samples_stats <- function(samples) {
+    UseMethod(".samples_stats", samples)
+}
+#' @export
+.samples_stats.sits <- function(samples) {
     # Get all time series
     preds <- .ts(samples)
     # Select attributes
@@ -288,6 +292,40 @@
     q98 <- apply(preds, 2L, stats::quantile, probs = 0.98, na.rm = TRUE)
     # Number of observations
     ntimes <- .samples_ntimes(samples)
+    # Replicate stats
+    q02 <- rep(unname(q02), each = ntimes)
+    q98 <- rep(unname(q98), each = ntimes)
+    # Return stats object
+    list(q02 = q02, q98 = q98)
+}
+#' @export
+.samples_stats.sits_base <- function(samples) {
+    # Statistics of the time series bands
+    stats_ts <- .samples_stats.sits(samples)
+    # Statistics of the base bands
+    stats_base <- .samples_base_stats(samples)
+    # Predictors place base features after the time series ones
+    # (see .predictors.sits_base), so stats follow the same order
+    list(
+        q02 = c(stats_ts[["q02"]], stats_base[["q02"]]),
+        q98 = c(stats_ts[["q98"]], stats_base[["q98"]])
+    )
+}
+#' @title Get statistics of base data of samples
+#' @noRd
+#' @keywords internal
+#' @param samples Data.frame with samples
+#' @return List of Q02 and Q98 of base bands for normalization
+.samples_base_stats <- function(samples) {
+    # Get all base data values
+    preds <- dplyr::bind_rows(samples[["base_data"]])
+    # Select attributes
+    preds <- preds[.samples_base_bands(samples)]
+    # Compute stats
+    q02 <- purrr::map_dbl(preds, stats::quantile, probs = 0.02, na.rm = TRUE)
+    q98 <- purrr::map_dbl(preds, stats::quantile, probs = 0.98, na.rm = TRUE)
+    # Number of observations of the base data
+    ntimes <- nrow(samples[["base_data"]][[1L]])
     # Replicate stats
     q02 <- rep(unname(q02), each = ntimes)
     q98 <- rep(unname(q98), each = ntimes)

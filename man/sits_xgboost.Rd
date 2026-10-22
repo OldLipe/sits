@@ -106,7 +106,8 @@ Other machine learning:
 \code{\link[=sits_rfor]{sits_rfor()}},
 \code{\link[=sits_svm]{sits_svm()}},
 \code{\link[=sits_tae]{sits_tae()}},
-\code{\link[=sits_tempcnn]{sits_tempcnn()}}
+\code{\link[=sits_tempcnn]{sits_tempcnn()}},
+\code{\link[=sits_tempcnn_base]{sits_tempcnn_base()}}
 }
 \author{
 Gilberto Camara, \email{gilberto.camara@inpe.br}
