@@ -136,6 +136,7 @@ Other machine learning:
 \code{\link[=sits_formula_logref]{sits_formula_logref()}},
 \code{\link[=sits_lightgbm]{sits_lightgbm()}},
 \code{\link[=sits_lighttae]{sits_lighttae()}},
+\code{\link[=sits_lighttae_base]{sits_lighttae_base()}},
 \code{\link[=sits_lstm_fcn]{sits_lstm_fcn()}},
 \code{\link[=sits_resnet]{sits_resnet()}},
 \code{\link[=sits_rfor]{sits_rfor()}},

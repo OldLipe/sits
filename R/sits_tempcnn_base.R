@@ -140,9 +140,11 @@
 #'         multicores = 2
 #'     )
 #'     # create a TempCNN model with a base data encoder
+#'     # this example has few samples, so batch_size is reduced to ensure
+#'     # that gradient updates are performed (luz drops incomplete batches)
 #'     torch_model <- sits_train(
 #'         samples_base,
-#'         sits_tempcnn_base(epochs = 20, verbose = TRUE)
+#'         sits_tempcnn_base(epochs = 20, batch_size = 8, verbose = TRUE)
 #'     )
 #'     # plot the model
 #'     plot(torch_model)
@@ -272,7 +274,7 @@ sits_tempcnn_base <- function(samples = NULL,
             # Validation samples must also contain base data
             .check_that(
                 x = inherits(samples_validation, "sits_base"),
-                msg = .conf("messages", "sits_tempcnn_base_samples")
+                msg = .conf("messages", "sits_train_base_samples")
             )
             .check_samples_validation(
                 samples_validation = samples_validation, labels = labels,
@@ -312,6 +314,12 @@ sits_tempcnn_base <- function(samples = NULL,
         # Create the test data
         test_x <- as.matrix(.pred_features(test_samples))
         test_y <- unname(code_labels[.pred_references(test_samples)])
+        # luz drops the last incomplete batch when training, so a batch
+        # larger than the training set yields no gradient updates at all
+        .check_that(
+            x = nrow(train_x) >= batch_size,
+            msg = .conf("messages", "sits_train_batch_size")
+        )
         # Create a torch seed (we define a new variable to allow users
         # to access this seed number from the model environment)
         torch_seed <- .torch_set_seed(seed)

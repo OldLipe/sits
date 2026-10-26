@@ -76,6 +76,8 @@
 #'      \item{temporal CNN: \code{\link[sits]{sits_tempcnn}};}
 #'      \item{temporal CNN with base data (e.g., DEM):
 #'         \code{\link[sits]{sits_tempcnn_base}};}
+#'      \item{L-TAE with base data (e.g., DEM):
+#'         \code{\link[sits]{sits_lighttae_base}};}
 #'      \item{residual network encoders: \code{\link[sits]{sits_resnet}};}
 #'      \item{LSTM with convolutional networks: \code{\link[sits]{sits_lstm_fcn}};}
 #'      \item{temporal self-attention encoders:

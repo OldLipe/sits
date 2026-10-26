@@ -177,9 +177,11 @@ if (sits_run_examples()) {
         multicores = 2
     )
     # create a TempCNN model with a base data encoder
+    # this example has few samples, so batch_size is reduced to ensure
+    # that gradient updates are performed (luz drops incomplete batches)
     torch_model <- sits_train(
         samples_base,
-        sits_tempcnn_base(epochs = 20, verbose = TRUE)
+        sits_tempcnn_base(epochs = 20, batch_size = 8, verbose = TRUE)
     )
     # plot the model
     plot(torch_model)
@@ -217,6 +219,7 @@ Other machine learning:
 \code{\link[=sits_formula_logref]{sits_formula_logref()}},
 \code{\link[=sits_lightgbm]{sits_lightgbm()}},
 \code{\link[=sits_lighttae]{sits_lighttae()}},
+\code{\link[=sits_lighttae_base]{sits_lighttae_base()}},
 \code{\link[=sits_lstm_fcn]{sits_lstm_fcn()}},
 \code{\link[=sits_mlp]{sits_mlp()}},
 \code{\link[=sits_resnet]{sits_resnet()}},

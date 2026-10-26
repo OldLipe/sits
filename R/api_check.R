@@ -3230,29 +3230,16 @@
         embedding_dim = embedding_dim,
         verbose = verbose
     )
-    # Samples must contain base data (e.g. DEM)
-    .check_that(
-        x = inherits(samples, "sits_base"),
-        msg = .conf("messages", "sits_tempcnn_base_samples")
-    )
     # Pre-conditions of the base data encoder
-    .check_int_parameter(base_layers, len_max = 2L^31L - 1L)
-    .check_num_parameter(base_dropout_rates,
-        min = 0.0, max = 1.0,
-        len_min = length(base_layers),
-        len_max = length(base_layers)
+    .check_pre_sits_base_encoder(
+        samples = samples,
+        base_layers = base_layers,
+        base_dropout_rates = base_dropout_rates
     )
     # Pre-conditions of the fusion layer
     .check_int_parameter(fusion_layer_nodes, len_max = 1L)
     .check_num_parameter(fusion_layer_dropout_rate,
         min = 0.0, max = 1.0, len_max = 1L
-    )
-    # Base bands without variation produce NaN when normalized
-    # (see C_normalize_data_inplace)
-    base_stats <- .samples_base_stats(samples)
-    .check_that(
-        x = all(base_stats[["q98"]] > base_stats[["q02"]]),
-        msg = .conf("messages", "sits_tempcnn_base_constant")
     )
 }
 #' @title Preconditions for ResNet models
@@ -3347,6 +3334,84 @@
     .check_int_parameter(patience, min = 1L)
     .check_num_parameter(min_delta, min = 0.0)
     .check_lgl_parameter(verbose)
+}
+#' @title Preconditions for L-TAE models with base data
+#' @name .check_pre_sits_lighttae_base
+#'
+#' @author Felipe Souza, \email{lipecaso@@gmail.com}
+#'
+#' @param samples            Time series with the training samples.
+#' @param base_layers        Number of nodes of the base data encoder.
+#' @param base_dropout_rates Dropout rates of the base data encoder.
+#' @param epochs             Number of iterations to train the model.
+#' @param batch_size         Number of samples per gradient update.
+#' @param lr_decay_epochs    Number of epochs to reduce learning rate.
+#' @param lr_decay_rate      Decay factor for reducing learning rate.
+#' @param patience           Number of epochs without improvements until
+#'                           training stops.
+#' @param min_delta	         Minimum improvement in loss function
+#'                           to reset the patience counter.
+#' @param embedding_dim      Dimension of the embedding (encoder mode).
+#' @param verbose            Verbosity mode (TRUE/FALSE). Default is FALSE.
+#'
+#' @keywords internal
+#' @noRd
+#'
+#' @return                   Called for side effects.
+#'
+.check_pre_sits_lighttae_base <- function(samples, base_layers,
+                                         base_dropout_rates, epochs,
+                                         batch_size, lr_decay_epochs,
+                                         lr_decay_rate, patience, min_delta,
+                                         embedding_dim, verbose) {
+    # Pre-conditions of the time series encoder
+    .check_pre_sits_lighttae(
+        samples = samples, epochs = epochs, batch_size = batch_size,
+        lr_decay_epochs = lr_decay_epochs, lr_decay_rate = lr_decay_rate,
+        patience = patience, min_delta = min_delta,
+        embedding_dim = embedding_dim, verbose = verbose
+    )
+    # Pre-conditions of the base data encoder
+    .check_pre_sits_base_encoder(
+        samples = samples,
+        base_layers = base_layers,
+        base_dropout_rates = base_dropout_rates
+    )
+}
+#' @title Preconditions shared by models with a base data encoder
+#' @name .check_pre_sits_base_encoder
+#'
+#' @author Felipe Souza, \email{lipecaso@@gmail.com}
+#'
+#' @param samples            Time series with the training samples.
+#' @param base_layers        Number of nodes of the base data encoder.
+#' @param base_dropout_rates Dropout rates of the base data encoder.
+#'
+#' @keywords internal
+#' @noRd
+#'
+#' @return                   Called for side effects.
+#'
+.check_pre_sits_base_encoder <- function(samples, base_layers,
+                                        base_dropout_rates) {
+    # Samples must contain base data (e.g. DEM)
+    .check_that(
+        x = inherits(samples, "sits_base"),
+        msg = .conf("messages", "sits_train_base_samples")
+    )
+    .check_int_parameter(base_layers, len_max = 2L^31L - 1L)
+    .check_num_parameter(base_dropout_rates,
+        min = 0.0, max = 1.0,
+        len_min = length(base_layers),
+        len_max = length(base_layers)
+    )
+    # Base bands without variation produce NaN when normalized
+    # (see C_normalize_data_inplace)
+    base_stats <- .samples_base_stats(samples)
+    .check_that(
+        x = all(base_stats[["q98"]] > base_stats[["q02"]]),
+        msg = .conf("messages", "sits_train_base_constant")
+    )
 }
 
 #' @title Preconditions for masked autoencoder

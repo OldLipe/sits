@@ -195,6 +195,20 @@ test_that("TempCNN base model", {
     expect_error(
         sits_train(samples_modis_ndvi, sits_tempcnn_base(epochs = 2))
     )
+    # a batch larger than the training set performs no gradient update,
+    # since luz drops the last incomplete batch when training
+    samples_few <- samples_base |>
+        dplyr::group_by(.data[["label"]]) |>
+        dplyr::slice_head(n = 4) |>
+        dplyr::ungroup()
+    samples_few <- .set_class(samples_few, class(samples_base))
+    expect_error(
+        sits_train(
+            samples_few,
+            sits_tempcnn_base(epochs = 2, batch_size = 64)
+        ),
+        regexp = "batch_size"
+    )
     # classify the samples back
     samples_class <- sits_classify(
         data = samples_base,
@@ -211,6 +225,38 @@ test_that("TempCNN base model", {
         ml_method = sits_tempcnn_base(epochs = 5)
     )
     expect_true(acc[["overall"]][["Accuracy"]] > 0.5)
+})
+
+test_that("LightTAE base model", {
+    set.seed(777)
+    # add base data (e.g., a digital elevation model) to the samples
+    samples_base <- test_samples_base(samples_modis_ndvi)
+
+    model <- sits_train(
+        samples_base,
+        sits_lighttae_base(epochs = 10)
+    )
+    # base bands are part of the model and of its normalization stats
+    expect_true("ELEVATION" %in% .ml_bands(model))
+    expect_equal(
+        length(.ml_stats(model)[["q02"]]),
+        length(sits_bands(samples_base)) * length(sits_timeline(samples_base))
+            + 1
+    )
+    # samples without base data are rejected
+    expect_error(
+        sits_train(samples_modis_ndvi, sits_lighttae_base(epochs = 2))
+    )
+    # classify the samples back
+    samples_class <- sits_classify(
+        data = samples_base,
+        ml_model = model,
+        progress = FALSE
+    )
+    expect_true(all(sits_show_prediction(samples_class)[["class"]] %in%
+        sits_labels(samples_base)))
+    expect_true(nrow(sits_show_prediction(samples_class)) ==
+        nrow(samples_base))
 })
 
 test_that("resnet model", {
@@ -375,6 +421,13 @@ test_that("model seed is available", {
     )
 
     expect_false(is.null(environment(tempcnn_base)[["torch_seed"]]))
+
+    # LightTAE with base data
+    lighttae_base <- sits_train(
+        test_samples_base(samples_modis_ndvi), sits_lighttae_base(epochs = 2)
+    )
+
+    expect_false(is.null(environment(lighttae_base)[["torch_seed"]]))
 })
 
 test_that("normalization new version", {
