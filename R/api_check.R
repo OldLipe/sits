@@ -3242,6 +3242,118 @@
         min = 0.0, max = 1.0, len_max = 1L
     )
 }
+#' @title Preconditions for models with two temporal encoders
+#' @name .check_pre_sits_multitemporal
+#'
+#' @author Felipe Souza, \email{lipecaso@@gmail.com}
+#'
+#' @param samples            Time series with the training samples.
+#' @param encoder1           Temporal model used as the first encoder.
+#' @param bands1             Bands read by the first encoder.
+#' @param encoder2           Temporal model used as the second encoder.
+#' @param bands2             Bands read by the second encoder.
+#' @param encoder_dim        Dimension of the features of each encoder.
+#' @param fusion_layers      Number of nodes of the fusion perceptron.
+#' @param fusion_dropout_rates Dropout rates of the fusion perceptron.
+#' @param epochs             Number of iterations to train the model.
+#' @param batch_size         Number of samples per gradient update.
+#' @param lr_decay_epochs    Number of epochs to reduce learning rate.
+#' @param lr_decay_rate      Decay factor for reducing learning rate.
+#' @param patience           Number of epochs without improvements until
+#'                           training stops.
+#' @param min_delta	         Minimum improvement in loss function
+#'                           to reset the patience counter.
+#' @param embedding_dim      Dimension of the embedding (encoder mode).
+#' @param verbose            Verbosity mode (TRUE/FALSE). Default is FALSE.
+#'
+#' @keywords internal
+#' @noRd
+#'
+#' @return                   Called for side effects.
+#'
+.check_pre_sits_multitemporal <- function(samples, encoder1, bands1,
+                                         encoder2, bands2, encoder_dim,
+                                         fusion_layers,
+                                         fusion_dropout_rates,
+                                         epochs, batch_size,
+                                         lr_decay_epochs, lr_decay_rate,
+                                         patience, min_delta, embedding_dim,
+                                         verbose) {
+    # Pre-conditions:
+    if (.has(embedding_dim)) {
+        .check_samples_pre_train(samples)
+    } else {
+        .check_samples_train(samples)
+    }
+    # Encoders must be functions created by a sits temporal model
+    .check_that(
+        x = is.function(encoder1) && is.function(encoder2),
+        msg = .conf("messages", "sits_multitemporal_encoder")
+    )
+    # Bands of each encoder must be bands of the samples
+    purrr::walk(list(bands1, bands2), function(bands) {
+        if (.has(bands)) {
+            .check_chr_parameter(bands, len_min = 1L)
+            .check_chr_within(
+                x = bands,
+                within = .samples_bands(samples),
+                msg = .conf("messages", "sits_multitemporal_bands")
+            )
+        }
+    })
+    # Dimension of the encoded features
+    .check_int_parameter(encoder_dim, min = 1L, len_min = 1L, len_max = 2L)
+    # Pre-conditions of the fusion perceptron
+    .check_int_parameter(fusion_layers, len_max = 2L^31L - 1L)
+    .check_num_parameter(fusion_dropout_rates,
+        min = 0.0, max = 1.0,
+        len_min = length(fusion_layers),
+        len_max = length(fusion_layers)
+    )
+    # Other pre-conditions:
+    .check_int_parameter(epochs)
+    .check_int_parameter(batch_size)
+    .check_int_parameter(lr_decay_epochs)
+    .check_num_parameter(lr_decay_rate, exclusive_min = 0.0, max = 1.0)
+    .check_int_parameter(patience)
+    .check_num_parameter(min_delta, min = 0.0)
+    .check_lgl_parameter(verbose)
+}
+#' @title Is the model a valid temporal encoder?
+#' @name .check_duo_temporal_encoder
+#'
+#' @author Felipe Souza, \email{lipecaso@@gmail.com}
+#'
+#' @description Builds an encoder and runs it over a dummy time series, to
+#' reject models that do not read the samples as time series (e.g.
+#' \code{sits_mlp}) before training starts.
+#'
+#' @param encoder   Model used as encoder.
+#' @param samples   Samples read by the encoder.
+#' @param dim       Dimension of the features produced by the encoder.
+#'
+#' @keywords internal
+#' @noRd
+#'
+#' @return          Called for side effects.
+#'
+.check_duo_temporal_encoder <- function(encoder, samples, dim) {
+    .check_require_packages("torch")
+    n_times <- .samples_ntimes(samples)
+    n_bands <- length(.samples_bands(samples))
+    # Build the encoder and run it over two dummy samples
+    output <- .try(
+        {
+            module <- encoder(samples, embedding_dim = dim)
+            module(torch::torch_randn(c(2L, n_times, n_bands)))
+        },
+        .default = NULL
+    )
+    .check_that(
+        x = .has(output) && identical(dim(output), c(2L, as.integer(dim))),
+        msg = .conf("messages", "sits_multitemporal_encoder")
+    )
+}
 #' @title Preconditions for ResNet models
 #' @name .check_pre_sits_resnet
 #'

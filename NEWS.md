@@ -46,6 +46,25 @@ remove deprecated functions. The highlights below are grouped by theme.
   data (e.g., digital elevation models). The encoded time series and the
   encoded base data are fused before classification. This is the first
   deep learning model in `sits` that supports training with base data
+* Add `sits_lighttae_base()`, a L-TAE model with a second encoder for base
+  data (e.g., digital elevation models), fusing the encoded features before
+  the decoder
+* Add `sits_multitemporal()`, a model with two temporal encoders, each one
+  reading a subset of the bands of the samples, fused by a multi-layer
+  perceptron. Any temporal model of `sits` can be used as an encoder
+
+### Known issues
+* On the GPU/dataloader classification path, the chunk NA mask read by the
+  classification callback can intermittently disagree with the mask computed
+  when the chunk was read (`.torch_chunks_dataset()` returns it as a plain
+  logical vector, which is collated into a tensor and read back in
+  `.callback_post_classify()`). Observed on Apple silicon: a chunk with no
+  NA pixels was fed to the model in full, but the callback read back a mask
+  with a different, run-dependent number of valid pixels. It usually raises
+  "number of items to replace is not a multiple of replacement length"; if
+  the counts happen to coincide, probabilities would be written to the wrong
+  pixels. Classification on the CPU path is not affected. Base data tests
+  therefore run on the CPU path.
 
 ### Object-based (OBIA) and vector-cube processing
 * Implement a raster-based segment classification workflow for OBIA

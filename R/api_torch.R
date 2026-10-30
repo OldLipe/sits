@@ -565,6 +565,57 @@
     !(torch::cuda_is_available()) &&
         !(torch::backends_mps_is_available())
 }
+#' @title Decide whether a set of encoders must be trained on the CPU
+#' @name .torch_cpu_train_encoders
+#' @author Felipe Souza, \email{lipecaso@@gmail.com}
+#' @keywords internal
+#' @noRd
+#' @description Some torch modules are not supported by all GPU backends
+#' (e.g., adaptive pooling with non-divisible sizes is not implemented on
+#' Apple MPS, which affects \code{\link[sits]{sits_resnet}}). This function
+#' builds each encoder and runs it on the GPU, falling back to the CPU when
+#' any of them fails, so that a model combining encoders is trained on a
+#' device that supports all of them.
+#'
+#' @param encoders    List of functions that build each encoder.
+#' @param samples     List with the samples read by each encoder.
+#' @param dims        Dimension of the features produced by each encoder.
+#'
+#' @return TRUE/FALSE
+.torch_cpu_train_encoders <- function(encoders, samples, dims) {
+    # No GPU available? Train on the CPU
+    if (.torch_cpu_train()) {
+        return(TRUE)
+    }
+    device <- if (.torch_cuda_enabled()) {
+        torch::torch_device("cuda")
+    } else {
+        torch::torch_device("mps")
+    }
+    # Run each encoder on the GPU over two dummy samples
+    runs <- purrr::map_lgl(seq_along(encoders), function(i) {
+        .try(
+            {
+                module <- encoders[[i]](
+                    samples[[i]],
+                    embedding_dim = dims[[i]]
+                )
+                module$to(device = device)
+                module(torch::torch_randn(
+                    c(
+                        2L, .samples_ntimes(samples[[i]]),
+                        length(.samples_bands(samples[[i]]))
+                    ),
+                    device = device
+                ))
+                TRUE
+            },
+            .default = FALSE
+        )
+    })
+    # Train on the CPU when any encoder does not run on the GPU
+    !all(runs)
+}
 
 #' @title Restore torch model from closure
 #' @name .torch_model_restore

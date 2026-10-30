@@ -203,6 +203,10 @@ available in `sits`:
 -   1D convolution neural networks (`sits_tempcnn()`)
 -   1D convolution neural networks with base data, e.g. DEM
     (`sits_tempcnn_base()`)
+-   Lightweight temporal attention encoder with base data
+    (`sits_lighttae_base()`)
+-   Two temporal encoders fused by a perceptron
+    (`sits_multitemporal()`)
 -   Residual neural networks (`sits_resnet()`)
 -   Temporal self-attention encoder (`sits_tae()`) 
 -   Lightweight temporal attention encoder (`sits_lighttae()`)

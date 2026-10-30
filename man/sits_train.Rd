@@ -29,6 +29,8 @@ Given a tibble with a set of time series,
         \code{\link[sits]{sits_tempcnn_base}};}
      \item{L-TAE with base data (e.g., DEM):
         \code{\link[sits]{sits_lighttae_base}};}
+     \item{two temporal encoders fused by a perceptron:
+        \code{\link[sits]{sits_multitemporal}};}
      \item{residual network encoders: \code{\link[sits]{sits_resnet}};}
      \item{LSTM with convolutional networks: \code{\link[sits]{sits_lstm_fcn}};}
      \item{temporal self-attention encoders:

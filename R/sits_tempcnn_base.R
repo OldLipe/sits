@@ -2,6 +2,7 @@
 #' @name sits_tempcnn_base
 #'
 #' @author Felipe Souza, \email{lipecaso@@gmail.com}
+#' @author Felipe Carlos, \email{efelipecarlos@@gmail.com}
 #' @author Charlotte Pelletier, \email{charlotte.pelletier@@univ-ubs.fr}
 #' @author Gilberto Camara, \email{gilberto.camara@@inpe.br}
 #' @author Rolf Simoes, \email{rolfsimoes@@gmail.com}
@@ -166,399 +167,429 @@
 #' }
 #' @family machine learning
 #' @export
-sits_tempcnn_base <- function(samples = NULL,
-                              samples_validation = NULL,
-                              cnn_layers = c(64L, 64L, 64L),
-                              cnn_kernels = c(3L, 3L, 3L),
-                              cnn_dropout_rates = c(0.20, 0.20, 0.20),
-                              dense_layer_nodes = 256L,
-                              dense_layer_dropout_rate = 0.50,
-                              base_layers = c(64L, 32L),
-                              base_dropout_rates = c(0.20, 0.20),
-                              fusion_layer_nodes = 128L,
-                              fusion_layer_dropout_rate = 0.30,
-                              epochs = 150L,
-                              batch_size = 64L,
-                              validation_split = 0.2,
-                              optimizer = torch::optim_adamw,
-                              opt_hparams = list(
-                                  lr = 5.0e-04,
-                                  eps = 1.0e-08,
-                                  weight_decay = 1.0e-06
-                              ),
-                              lr_decay_epochs = 1L,
-                              lr_decay_rate = 0.95,
-                              patience = 20L,
-                              min_delta = 0.01,
-                              seed = NULL,
-                              verbose = FALSE) {
-    # set caller for error msg
-    .check_set_caller("sits_tempcnn_base")
-    # Verifies if 'torch' and 'luz' packages is installed
-    .check_require_packages(c("torch", "luz"))
-    # documentation mode? verbose is FALSE
-    verbose <- .message_verbose(verbose)
-    # Function that trains a torch model based on samples
-    train_fun <- function(samples, embedding_dim = NULL) {
-        # Verifies if torch package is installed
-        .check_require_packages("torch")
-        # Avoid add a global variable for 'self'
-        self <- NULL
-        # Check validation_split parameter if samples_validation is not passed
-        if (is.null(samples_validation)) {
-            .check_num_parameter(
-                validation_split, exclusive_min = 0.0, max = 0.5
-            )
-        }
-        # Preconditions
-        .check_pre_sits_tempcnn_base(
-            samples = samples, cnn_layers = cnn_layers,
-            cnn_kernels = cnn_kernels,
-            cnn_dropout_rates = cnn_dropout_rates,
-            dense_layer_nodes = dense_layer_nodes,
-            dense_layer_dropout_rate = dense_layer_dropout_rate,
-            base_layers = base_layers,
-            base_dropout_rates = base_dropout_rates,
-            fusion_layer_nodes = fusion_layer_nodes,
-            fusion_layer_dropout_rate = fusion_layer_dropout_rate,
-            epochs = epochs, batch_size = batch_size,
-            lr_decay_epochs = lr_decay_epochs,
-            lr_decay_rate = lr_decay_rate,
-            patience = patience, min_delta = min_delta,
-            embedding_dim = embedding_dim,
-            verbose = verbose
-        )
-        # Other pre-conditions:
-        .check_int_parameter(seed, allow_null = TRUE)
-        .check_that(
-            x = (max(cnn_kernels) <= .samples_ntimes(samples)),
-            msg = .conf("messages", "sits_tempcnn_kernel")
-        )
-        # Get optimizer hyperparameters
-        optim_params_function <- .torch_optim_params(optimizer, opt_hparams)
-        # Extract sample metadata and normalization statistics
-        # Sample labels
-        labels <- .samples_labels(samples)
-        # Sample bands (base bands are encoded separately)
-        bands <- .samples_bands(samples, include_base = FALSE)
-        # Sample base bands
-        base_bands <- .samples_base_bands(samples)
-        # Sample timeline
-        timeline <- .samples_timeline(samples)
-        # Create numeric labels vector
-        code_labels <- seq_along(labels)
-        names(code_labels) <- labels
-        # Number of labels, bands, and number of samples (used below)
-        n_labels <- length(labels)
-        n_bands <- length(bands)
-        n_times <- .samples_ntimes(samples)
-        # Number of observations of the base data (one for DEM-like data)
-        n_base_times <- nrow(samples[["base_data"]][[1L]])
-        # Size of each block of the flat predictors layout
-        n_ts_feats <- n_bands * n_times
-        n_base_feats <- length(base_bands) * n_base_times
-        # Data normalization (covers time series and base bands)
-        ml_stats <- .samples_stats(samples)
-
-        # Organize train and the test data
-        train_samples <- .predictors(samples)
-        feats <- .pred_features_normalize(
-            pred = train_samples,
-            stats = ml_stats
-        )
-        .pred_features(train_samples) <- feats
-        # Post condition: is predictor data valid?
-        .check_predictors(pred = train_samples, samples = samples)
-        # Are there samples for validation?
-        if (!is.null(samples_validation)) {
-            # Validation samples must also contain base data
-            .check_that(
-                x = inherits(samples_validation, "sits_base"),
-                msg = .conf("messages", "sits_train_base_samples")
-            )
-            .check_samples_validation(
-                samples_validation = samples_validation, labels = labels,
-                timeline = timeline, bands = .samples_bands(samples)
-            )
-            # Test samples are extracted from validation data
-            test_samples <- .predictors(samples_validation)
-            feats <- .pred_features_normalize(
-                pred = test_samples,
-                stats = ml_stats
-            )
-            .pred_features(test_samples) <- feats
-        } else {
-            # Split the data into training and validation data sets
-            # Create partitions different splits of the input data
-            test_samples <- .pred_sample(
-                pred = train_samples, frac = validation_split
-            )
-            # Remove the lines used for validation
-            sel <- !train_samples[["sample_id"]] %in%
-                test_samples[["sample_id"]]
-            train_samples <- train_samples[sel, ]
-        }
-        # Shuffle the data
-        train_samples <- train_samples[sample(
-            nrow(train_samples), nrow(train_samples)
-        ), ]
-        test_samples <- test_samples[sample(
-            nrow(test_samples), nrow(test_samples)
-        ), ]
-
-        # Organize data for model training
-        # The model receives the flat predictors layout and splits the
-        # time series from the base features internally
-        train_x <- as.matrix(.pred_features(train_samples))
-        train_y <- unname(code_labels[.pred_references(train_samples)])
-        # Create the test data
-        test_x <- as.matrix(.pred_features(test_samples))
-        test_y <- unname(code_labels[.pred_references(test_samples)])
-        # luz drops the last incomplete batch when training, so a batch
-        # larger than the training set yields no gradient updates at all
-        .check_that(
-            x = nrow(train_x) >= batch_size,
-            msg = .conf("messages", "sits_train_batch_size")
-        )
-        # Create a torch seed (we define a new variable to allow users
-        # to access this seed number from the model environment)
-        torch_seed <- .torch_set_seed(seed)
-
-        # Define the TempCNN architecture with a base data encoder
-        tempcnn_base_model <- torch::nn_module(
-            classname = "model_tempcnn_base",
-            initialize = function(n_bands,
-                                  n_times,
-                                  n_labels,
-                                  n_ts_feats,
-                                  n_base_feats,
-                                  kernel_sizes,
-                                  hidden_dims,
-                                  dropout_rates,
-                                  dense_layer_nodes,
-                                  dense_layer_dropout_rate,
-                                  base_layers,
-                                  base_dropout_rates,
-                                  fusion_layer_nodes,
-                                  fusion_layer_dropout_rate) {
-                self$n_bands <- n_bands
-                self$n_times <- n_times
-                self$n_ts_feats <- n_ts_feats
-                self$n_base_feats <- n_base_feats
-                # first module - transform input to hidden dims
-                self$conv_bn_relu1 <- .torch_conv1D_batch_norm_relu_dropout(
-                    input_dim    = n_bands,
-                    output_dim   = hidden_dims[[1L]],
-                    kernel_size  = kernel_sizes[[1L]],
-                    padding      = as.integer(kernel_sizes[[1L]] %/% 2L),
-                    dropout_rate = dropout_rates[[1L]]
-                )
-                # second module - 1D CNN
-                self$conv_bn_relu2 <- .torch_conv1D_batch_norm_relu_dropout(
-                    input_dim    = hidden_dims[[1L]],
-                    output_dim   = hidden_dims[[2L]],
-                    kernel_size  = kernel_sizes[[2L]],
-                    padding      = as.integer(kernel_sizes[[2L]] %/% 2L),
-                    dropout_rate = dropout_rates[[2L]]
-                )
-                # third module - 1D CNN
-                self$conv_bn_relu3 <- .torch_conv1D_batch_norm_relu_dropout(
-                    input_dim    = hidden_dims[[2L]],
-                    output_dim   = hidden_dims[[3L]],
-                    kernel_size  = kernel_sizes[[3L]],
-                    padding      = as.integer(kernel_sizes[[3L]] %/% 2L),
-                    dropout_rate = dropout_rates[[3L]]
-                )
-                # flatten 3D tensor to 2D tensor
-                self$flatten <- torch::nn_flatten()
-                # create a dense tensor - time series encoding
-                self$ts_encoder <- .torch_linear_batch_norm_relu_dropout(
-                    input_dim    = hidden_dims[[3L]] * n_times,
-                    output_dim   = dense_layer_nodes,
-                    dropout_rate = dense_layer_dropout_rate
-                )
-                # base data encoder - a multi-layer perceptron
-                self$base_encoder <-
-                    .torch_multi_linear_batch_norm_relu_dropout(
-                        input_dim     = n_base_feats,
-                        hidden_dims   = base_layers,
-                        dropout_rates = base_dropout_rates
-                    )
-                # fusion of the encoded features
-                self$fusion <- .torch_linear_batch_norm_relu_dropout(
-                    input_dim    = dense_layer_nodes +
-                        base_layers[[length(base_layers)]],
-                    output_dim   = fusion_layer_nodes,
-                    dropout_rate = fusion_layer_dropout_rate
-                )
-                if (!.has(embedding_dim)) {
-                    # reduce to linear tensor with n_labels
-                    # softmax is done externally
-                    self$nn_linear <- torch::nn_linear(
-                        fusion_layer_nodes, n_labels
-                    )
-                } else {
-                    self$nn_linear <- torch::nn_linear(
-                        fusion_layer_nodes, embedding_dim
-                    )
-                }
-            },
-            forward = function(x) {
-                # input is 2D n_samples x (n_ts_feats + n_base_feats)
-                # time series features come first, base features last
-                # (see .predictors.sits_base)
-                # narrow returns views, so no data is copied here
-                x_ts <- x$narrow(
-                    dim = 2L, start = 1L, length = self$n_ts_feats
-                )
-                x_base <- x$narrow(
-                    dim = 2L, start = self$n_ts_feats + 1L,
-                    length = self$n_base_feats
-                )
-                # predictors are band-major and time-minor, so this reshape
-                # yields the (batch, n_bands, n_times) layout of nn_conv1d
-                x_ts <- x_ts$reshape(
-                    c(x_ts$shape[[1L]], self$n_bands, self$n_times)
-                )
-                # encode the time series
-                e_ts <- x_ts |>
-                    self$conv_bn_relu1() |>
-                    self$conv_bn_relu2() |>
-                    self$conv_bn_relu3() |>
-                    self$flatten() |>
-                    self$ts_encoder()
-                # encode the base data
-                e_base <- x_base$reshape(
-                    c(x_base$shape[[1L]], self$n_base_feats)
-                ) |>
-                    self$base_encoder()
-                # fuse the encoded features and classify
-                torch::torch_cat(list(e_ts, e_base), dim = 2L) |>
-                    self$fusion() |>
-                    self$nn_linear()
-            }
-        )
-        # return encoder model
-        if (.has(embedding_dim)) {
-            return(tempcnn_base_model(
-                n_bands = n_bands,
-                n_times = n_times,
-                n_labels = n_labels,
-                n_ts_feats = n_ts_feats,
-                n_base_feats = n_base_feats,
-                kernel_sizes = cnn_kernels,
-                hidden_dims = cnn_layers,
-                dropout_rates = cnn_dropout_rates,
-                dense_layer_nodes = dense_layer_nodes,
-                dense_layer_dropout_rate = dense_layer_dropout_rate,
-                base_layers = base_layers,
-                base_dropout_rates = base_dropout_rates,
-                fusion_layer_nodes = fusion_layer_nodes,
-                fusion_layer_dropout_rate = fusion_layer_dropout_rate
-            ))
-        }
-        # train with CPU or GPU?
-        cpu_train <- .torch_cpu_train()
-        # Train the model using luz
-        torch_model <-
-            luz::setup(
-                module = tempcnn_base_model,
-                loss = torch::nn_cross_entropy_loss(),
-                metrics = list(luz::luz_metric_accuracy()),
-                optimizer = optimizer
-            ) |>
-            luz::set_opt_hparams(
-                !!!optim_params_function
-            ) |>
-            luz::set_hparams(
-                n_bands = n_bands,
-                n_times = n_times,
-                n_labels = n_labels,
-                n_ts_feats = n_ts_feats,
-                n_base_feats = n_base_feats,
-                kernel_sizes = cnn_kernels,
-                hidden_dims = cnn_layers,
-                dropout_rates = cnn_dropout_rates,
-                dense_layer_nodes = dense_layer_nodes,
-                dense_layer_dropout_rate = dense_layer_dropout_rate,
-                base_layers = base_layers,
-                base_dropout_rates = base_dropout_rates,
-                fusion_layer_nodes = fusion_layer_nodes,
-                fusion_layer_dropout_rate = fusion_layer_dropout_rate
-            ) |>
-            luz::fit(
-                data = list(train_x, train_y),
-                epochs = epochs,
-                valid_data = list(test_x, test_y),
-                callbacks = list(
-                    luz::luz_callback_early_stopping(
-                        monitor = "valid_loss",
-                        patience = patience,
-                        min_delta = min_delta,
-                        mode = "min"
-                    ),
-                    luz::luz_callback_lr_scheduler(
-                        torch::lr_step,
-                        step_size = lr_decay_epochs,
-                        gamma = lr_decay_rate
-                    )
-                ),
-                accelerator = luz::accelerator(cpu = cpu_train),
-                dataloader_options = list(batch_size = batch_size),
-                verbose = verbose
-            )
-        # remove data used for training
-        force(rm(
-            train_samples, test_samples,
-            train_y, train_x, test_y, test_x
-        ))
-        gc()
-        # Serialize model
-        serialized_model <- force(.torch_serialize_model(torch_model$model))
-        # Function that predicts labels of input values
-        predict_fun <- function(values) {
-            # Verifies if torch package is installed
-            .check_require_packages("torch")
-
-            # Unserialize model
-            torch_model$model <- .torch_unserialize_model(
-                model = torch_model$model,
-                raw = serialized_model
-            )
-            # Use dataloader?
-            if (.torch_use_dataloader(values)) {
-                # Predict!
-                values <- .torch_predict_chunks(
-                    torch_model = torch_model,
-                    dataset = values[["dataset"]],
-                    callback = values[["callback"]]
-                )
-                # Prepare results
-                values <- unlist(values)
-            } else {
-                # Performs data normalization
-                values <- .pred_features_normalize(values, stats = ml_stats)
-                # CPU classification - the model splits the flat layout
-                values <- stats::predict(
-                    object = torch_model,
-                    newdata = values,
-                    accelerator = luz::accelerator(cpu = TRUE)
-                )
-                # Convert from tensor to array
-                values <- torch::as_array(values)
-                # Update the columns names to labels
-                colnames(values) <- labels
-            }
-            # Return!
-            values
-        }
-        # Set model class
-        predict_fun <- .set_class(
-            predict_fun, "torch_model", "sits_model", class(predict_fun)
-        )
-        predict_fun
+sits_tempcnn_base <- function(
+  samples = NULL,
+  samples_validation = NULL,
+  cnn_layers = c(64L, 64L, 64L),
+  cnn_kernels = c(3L, 3L, 3L),
+  cnn_dropout_rates = c(0.20, 0.20, 0.20),
+  dense_layer_nodes = 256L,
+  dense_layer_dropout_rate = 0.50,
+  base_layers = c(64L, 32L),
+  base_dropout_rates = c(0.20, 0.20),
+  fusion_layer_nodes = 128L,
+  fusion_layer_dropout_rate = 0.30,
+  epochs = 150L,
+  batch_size = 64L,
+  validation_split = 0.2,
+  optimizer = torch::optim_adamw,
+  opt_hparams = list(
+    lr = 5.0e-04,
+    eps = 1.0e-08,
+    weight_decay = 1.0e-06
+  ),
+  lr_decay_epochs = 1L,
+  lr_decay_rate = 0.95,
+  patience = 20L,
+  min_delta = 0.01,
+  seed = NULL,
+  verbose = FALSE
+) {
+  # set caller for error msg
+  .check_set_caller("sits_tempcnn_base")
+  # Verifies if 'torch' and 'luz' packages is installed
+  .check_require_packages(c("torch", "luz"))
+  # documentation mode? verbose is FALSE
+  verbose <- .message_verbose(verbose)
+  # Function that trains a torch model based on samples
+  train_fun <- function(samples, embedding_dim = NULL) {
+    # Verifies if torch package is installed
+    .check_require_packages("torch")
+    # Avoid add a global variable for 'self'
+    self <- NULL
+    # Check validation_split parameter if samples_validation is not passed
+    if (is.null(samples_validation)) {
+      .check_num_parameter(
+        validation_split,
+        exclusive_min = 0.0,
+        max = 0.5
+      )
     }
-    # If samples is informed, train a model and return a predict function
-    # Otherwise give back a train function to train model further
-    .factory_function(samples, train_fun)
+    # Preconditions
+    .check_pre_sits_tempcnn_base(
+      samples = samples,
+      cnn_layers = cnn_layers,
+      cnn_kernels = cnn_kernels,
+      cnn_dropout_rates = cnn_dropout_rates,
+      dense_layer_nodes = dense_layer_nodes,
+      dense_layer_dropout_rate = dense_layer_dropout_rate,
+      base_layers = base_layers,
+      base_dropout_rates = base_dropout_rates,
+      fusion_layer_nodes = fusion_layer_nodes,
+      fusion_layer_dropout_rate = fusion_layer_dropout_rate,
+      epochs = epochs,
+      batch_size = batch_size,
+      lr_decay_epochs = lr_decay_epochs,
+      lr_decay_rate = lr_decay_rate,
+      patience = patience,
+      min_delta = min_delta,
+      embedding_dim = embedding_dim,
+      verbose = verbose
+    )
+    # Other pre-conditions:
+    .check_int_parameter(seed, allow_null = TRUE)
+    .check_that(
+      x = (max(cnn_kernels) <= .samples_ntimes(samples)),
+      msg = .conf("messages", "sits_tempcnn_kernel")
+    )
+    # Get optimizer hyperparameters
+    optim_params_function <- .torch_optim_params(optimizer, opt_hparams)
+    # Extract sample metadata and normalization statistics
+    # Sample labels
+    labels <- .samples_labels(samples)
+    # Sample bands (base bands are encoded separately)
+    bands <- .samples_bands(samples, include_base = FALSE)
+    # Sample base bands
+    base_bands <- .samples_base_bands(samples)
+    # Sample timeline
+    timeline <- .samples_timeline(samples)
+    # Create numeric labels vector
+    code_labels <- seq_along(labels)
+    names(code_labels) <- labels
+    # Number of labels, bands, and number of samples (used below)
+    n_labels <- length(labels)
+    n_bands <- length(bands)
+    n_times <- .samples_ntimes(samples)
+    # Number of observations of the base data (one for DEM-like data)
+    n_base_times <- nrow(samples[["base_data"]][[1L]])
+    # Size of each block of the flat predictors layout
+    n_ts_feats <- n_bands * n_times
+    n_base_feats <- length(base_bands) * n_base_times
+    # Data normalization (covers time series and base bands)
+    ml_stats <- .samples_stats(samples)
+
+    # Organize train and the test data
+    train_samples <- .predictors(samples)
+    feats <- .pred_features_normalize(
+      pred = train_samples,
+      stats = ml_stats
+    )
+    .pred_features(train_samples) <- feats
+    # Post condition: is predictor data valid?
+    .check_predictors(pred = train_samples, samples = samples)
+    # Are there samples for validation?
+    if (!is.null(samples_validation)) {
+      # Validation samples must also contain base data
+      .check_that(
+        x = inherits(samples_validation, "sits_base"),
+        msg = .conf("messages", "sits_train_base_samples")
+      )
+      .check_samples_validation(
+        samples_validation = samples_validation,
+        labels = labels,
+        timeline = timeline,
+        bands = .samples_bands(samples)
+      )
+      # Test samples are extracted from validation data
+      test_samples <- .predictors(samples_validation)
+      feats <- .pred_features_normalize(
+        pred = test_samples,
+        stats = ml_stats
+      )
+      .pred_features(test_samples) <- feats
+    } else {
+      # Split the data into training and validation data sets
+      # Create partitions different splits of the input data
+      test_samples <- .pred_sample(
+        pred = train_samples,
+        frac = validation_split
+      )
+      # Remove the lines used for validation
+      sel <- !train_samples[["sample_id"]] %in%
+        test_samples[["sample_id"]]
+      train_samples <- train_samples[sel, ]
+    }
+    # Shuffle the data
+    train_samples <- train_samples[
+      sample(
+        nrow(train_samples),
+        nrow(train_samples)
+      ),
+    ]
+    test_samples <- test_samples[
+      sample(
+        nrow(test_samples),
+        nrow(test_samples)
+      ),
+    ]
+
+    # Organize data for model training
+    # The model receives the flat predictors layout and splits the
+    # time series from the base features internally
+    train_x <- as.matrix(.pred_features(train_samples))
+    train_y <- unname(code_labels[.pred_references(train_samples)])
+    # Create the test data
+    test_x <- as.matrix(.pred_features(test_samples))
+    test_y <- unname(code_labels[.pred_references(test_samples)])
+    # luz drops the last incomplete batch when training, so a batch
+    # larger than the training set yields no gradient updates at all
+    .check_that(
+      x = nrow(train_x) >= batch_size,
+      msg = .conf("messages", "sits_train_batch_size")
+    )
+    # Create a torch seed (we define a new variable to allow users
+    # to access this seed number from the model environment)
+    torch_seed <- .torch_set_seed(seed)
+
+    # Define the TempCNN architecture with a base data encoder
+    tempcnn_base_model <- torch::nn_module(
+      classname = "model_tempcnn_base",
+      initialize = function(
+        n_bands,
+        n_times,
+        n_labels,
+        n_ts_feats,
+        n_base_feats,
+        kernel_sizes,
+        hidden_dims,
+        dropout_rates,
+        dense_layer_nodes,
+        dense_layer_dropout_rate,
+        base_layers,
+        base_dropout_rates,
+        fusion_layer_nodes,
+        fusion_layer_dropout_rate
+      ) {
+        self$n_bands <- n_bands
+        self$n_times <- n_times
+        self$n_ts_feats <- n_ts_feats
+        self$n_base_feats <- n_base_feats
+        # first module - transform input to hidden dims
+        self$conv_bn_relu1 <- .torch_conv1D_batch_norm_relu_dropout(
+          input_dim = n_bands,
+          output_dim = hidden_dims[[1L]],
+          kernel_size = kernel_sizes[[1L]],
+          padding = as.integer(kernel_sizes[[1L]] %/% 2L),
+          dropout_rate = dropout_rates[[1L]]
+        )
+        # second module - 1D CNN
+        self$conv_bn_relu2 <- .torch_conv1D_batch_norm_relu_dropout(
+          input_dim = hidden_dims[[1L]],
+          output_dim = hidden_dims[[2L]],
+          kernel_size = kernel_sizes[[2L]],
+          padding = as.integer(kernel_sizes[[2L]] %/% 2L),
+          dropout_rate = dropout_rates[[2L]]
+        )
+        # third module - 1D CNN
+        self$conv_bn_relu3 <- .torch_conv1D_batch_norm_relu_dropout(
+          input_dim = hidden_dims[[2L]],
+          output_dim = hidden_dims[[3L]],
+          kernel_size = kernel_sizes[[3L]],
+          padding = as.integer(kernel_sizes[[3L]] %/% 2L),
+          dropout_rate = dropout_rates[[3L]]
+        )
+        # flatten 3D tensor to 2D tensor
+        self$flatten <- torch::nn_flatten()
+        # create a dense tensor - time series encoding
+        self$ts_encoder <- .torch_linear_batch_norm_relu_dropout(
+          input_dim = hidden_dims[[3L]] * n_times,
+          output_dim = dense_layer_nodes,
+          dropout_rate = dense_layer_dropout_rate
+        )
+        # base data encoder - a multi-layer perceptron
+        self$base_encoder <-
+          .torch_multi_linear_batch_norm_relu_dropout(
+            input_dim = n_base_feats,
+            hidden_dims = base_layers,
+            dropout_rates = base_dropout_rates
+          )
+        # fusion of the encoded features
+        self$fusion <- .torch_linear_batch_norm_relu_dropout(
+          input_dim = dense_layer_nodes +
+            base_layers[[length(base_layers)]],
+          output_dim = fusion_layer_nodes,
+          dropout_rate = fusion_layer_dropout_rate
+        )
+        if (!.has(embedding_dim)) {
+          # reduce to linear tensor with n_labels
+          # softmax is done externally
+          self$nn_linear <- torch::nn_linear(
+            fusion_layer_nodes,
+            n_labels
+          )
+        } else {
+          self$nn_linear <- torch::nn_linear(
+            fusion_layer_nodes,
+            embedding_dim
+          )
+        }
+      },
+      forward = function(x) {
+        # input is 2D n_samples x (n_ts_feats + n_base_feats)
+        # time series features come first, base features last
+        # (see .predictors.sits_base)
+        # narrow returns views, so no data is copied here
+        x_ts <- x$narrow(
+          dim = 2L,
+          start = 1L,
+          length = self$n_ts_feats
+        )
+        x_base <- x$narrow(
+          dim = 2L,
+          start = self$n_ts_feats + 1L,
+          length = self$n_base_feats
+        )
+        # predictors are band-major and time-minor, so this reshape
+        # yields the (batch, n_bands, n_times) layout of nn_conv1d
+        x_ts <- x_ts$reshape(
+          c(x_ts$shape[[1L]], self$n_bands, self$n_times)
+        )
+        # encode the time series
+        e_ts <- x_ts |>
+          self$conv_bn_relu1() |>
+          self$conv_bn_relu2() |>
+          self$conv_bn_relu3() |>
+          self$flatten() |>
+          self$ts_encoder()
+        # encode the base data
+        e_base <- x_base$reshape(
+          c(x_base$shape[[1L]], self$n_base_feats)
+        ) |>
+          self$base_encoder()
+        # fuse the encoded features and classify
+        torch::torch_cat(list(e_ts, e_base), dim = 2L) |>
+          self$fusion() |>
+          self$nn_linear()
+      }
+    )
+    # return encoder model
+    if (.has(embedding_dim)) {
+      return(tempcnn_base_model(
+        n_bands = n_bands,
+        n_times = n_times,
+        n_labels = n_labels,
+        n_ts_feats = n_ts_feats,
+        n_base_feats = n_base_feats,
+        kernel_sizes = cnn_kernels,
+        hidden_dims = cnn_layers,
+        dropout_rates = cnn_dropout_rates,
+        dense_layer_nodes = dense_layer_nodes,
+        dense_layer_dropout_rate = dense_layer_dropout_rate,
+        base_layers = base_layers,
+        base_dropout_rates = base_dropout_rates,
+        fusion_layer_nodes = fusion_layer_nodes,
+        fusion_layer_dropout_rate = fusion_layer_dropout_rate
+      ))
+    }
+    # train with CPU or GPU?
+    cpu_train <- .torch_cpu_train()
+    # Train the model using luz
+    torch_model <-
+      luz::setup(
+        module = tempcnn_base_model,
+        loss = torch::nn_cross_entropy_loss(),
+        metrics = list(luz::luz_metric_accuracy()),
+        optimizer = optimizer
+      ) |>
+      luz::set_opt_hparams(
+        !!!optim_params_function
+      ) |>
+      luz::set_hparams(
+        n_bands = n_bands,
+        n_times = n_times,
+        n_labels = n_labels,
+        n_ts_feats = n_ts_feats,
+        n_base_feats = n_base_feats,
+        kernel_sizes = cnn_kernels,
+        hidden_dims = cnn_layers,
+        dropout_rates = cnn_dropout_rates,
+        dense_layer_nodes = dense_layer_nodes,
+        dense_layer_dropout_rate = dense_layer_dropout_rate,
+        base_layers = base_layers,
+        base_dropout_rates = base_dropout_rates,
+        fusion_layer_nodes = fusion_layer_nodes,
+        fusion_layer_dropout_rate = fusion_layer_dropout_rate
+      ) |>
+      luz::fit(
+        data = list(train_x, train_y),
+        epochs = epochs,
+        valid_data = list(test_x, test_y),
+        callbacks = list(
+          luz::luz_callback_early_stopping(
+            monitor = "valid_loss",
+            patience = patience,
+            min_delta = min_delta,
+            mode = "min"
+          ),
+          luz::luz_callback_lr_scheduler(
+            torch::lr_step,
+            step_size = lr_decay_epochs,
+            gamma = lr_decay_rate
+          )
+        ),
+        accelerator = luz::accelerator(cpu = cpu_train),
+        dataloader_options = list(batch_size = batch_size),
+        verbose = verbose
+      )
+    # remove data used for training
+    force(rm(
+      train_samples,
+      test_samples,
+      train_y,
+      train_x,
+      test_y,
+      test_x
+    ))
+    gc()
+    # Serialize model
+    serialized_model <- force(.torch_serialize_model(torch_model$model))
+    # Function that predicts labels of input values
+    predict_fun <- function(values) {
+      # Verifies if torch package is installed
+      .check_require_packages("torch")
+
+      # Unserialize model
+      torch_model$model <- .torch_unserialize_model(
+        model = torch_model$model,
+        raw = serialized_model
+      )
+      # Use dataloader?
+      if (.torch_use_dataloader(values)) {
+        # Predict!
+        values <- .torch_predict_chunks(
+          torch_model = torch_model,
+          dataset = values[["dataset"]],
+          callback = values[["callback"]]
+        )
+        # Prepare results
+        values <- unlist(values)
+      } else {
+        # Performs data normalization
+        values <- .pred_features_normalize(values, stats = ml_stats)
+        # CPU classification - the model splits the flat layout
+        values <- stats::predict(
+          object = torch_model,
+          newdata = values,
+          accelerator = luz::accelerator(cpu = TRUE)
+        )
+        # Convert from tensor to array
+        values <- torch::as_array(values)
+        # Update the columns names to labels
+        colnames(values) <- labels
+      }
+      # Return!
+      values
+    }
+    # Set model class
+    predict_fun <- .set_class(
+      predict_fun,
+      "torch_model",
+      "sits_model",
+      class(predict_fun)
+    )
+    predict_fun
+  }
+  # If samples is informed, train a model and return a predict function
+  # Otherwise give back a train function to train model further
+  .factory_function(samples, train_fun)
 }

@@ -214,6 +214,7 @@ Other machine learning:
 \code{\link[=sits_lighttae]{sits_lighttae()}},
 \code{\link[=sits_lstm_fcn]{sits_lstm_fcn()}},
 \code{\link[=sits_mlp]{sits_mlp()}},
+\code{\link[=sits_multitemporal]{sits_multitemporal()}},
 \code{\link[=sits_resnet]{sits_resnet()}},
 \code{\link[=sits_rfor]{sits_rfor()}},
 \code{\link[=sits_svm]{sits_svm()}},
@@ -224,6 +225,8 @@ Other machine learning:
 }
 \author{
 Felipe Souza, \email{lipecaso@gmail.com}
+
+Felipe Carlos, \email{efelipecarlos@gmail.com}
 
 Gilberto Camara, \email{gilberto.camara@inpe.br}
 

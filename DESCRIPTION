@@ -255,6 +255,7 @@ Collate:
     'sits_cube_copy.R'
     'sits_cube_local.R'
     'sits_cube_replace_path.R'
+    'sits_multitemporal.R'
     'sits_clean.R'
     'sits_cluster.R'
     'sits_encode.R'

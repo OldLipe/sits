@@ -93,6 +93,7 @@ Other machine learning:
 \code{\link[=sits_lighttae_base]{sits_lighttae_base()}},
 \code{\link[=sits_lstm_fcn]{sits_lstm_fcn()}},
 \code{\link[=sits_mlp]{sits_mlp()}},
+\code{\link[=sits_multitemporal]{sits_multitemporal()}},
 \code{\link[=sits_resnet]{sits_resnet()}},
 \code{\link[=sits_rfor]{sits_rfor()}},
 \code{\link[=sits_tae]{sits_tae()}},
